@@ -6,6 +6,9 @@ up:
 down:
 	docker compose down
 
+restart:
+	docker compose restart
+
 # Enter the running backend container
 shell-be:
 	docker exec -it iqraa_backend sh
