@@ -1,0 +1,43 @@
+services:
+  # 1. The Database (PostgreSQL)
+  db:
+    image: postgres:16-alpine
+    container_name: iqraa_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: iqraa_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. The Cache (Redis)
+  redis:
+    image: redis:alpine
+    container_name: iqraa_redis
+    ports:
+      - "6379:6379"
+
+  # 3. The Backend (Go) - UPDATED
+  backend:
+    build: 
+      context: ./backend # Ensure Dockerfile is inside /backend folder!
+      dockerfile: Dockerfile
+    container_name: iqraa_backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Note: host=db works because the service above is named 'db'
+      DB_DSN: "host=db user=user password=password dbname=iqraa_db port=5432 sslmode=disable"
+      REDIS_ADDR: "redis:6379"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/app      # Maps local code to container
+      - /app/tmp            # IGNORE the build artifacts (Crucial for Air)
+    restart: on-failure
+
+volumes:
+  postgres_data:

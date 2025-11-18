@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS content_nodes;
+DROP TABLE IF EXISTS books;
+DROP TYPE IF EXISTS resource_type;
+DROP TYPE IF EXISTS node_type;
+DROP EXTENSION IF EXISTS "uuid-ossp";
