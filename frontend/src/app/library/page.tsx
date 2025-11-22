@@ -1,85 +1,175 @@
-"use client"; // Required for TanStack Hooks
+"use client";
 
-import { useCreateBook } from "@/lib/hooks/mutations/books";
+import { LibraryBookCard } from "@/components/library/library-book-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import {
+  Sparkles,
+  AlertCircle,
+  SearchX,
+  RefreshCw,
+  BookOpen,
+} from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useBooks } from "@/lib/hooks/queries/books";
-import Link from "next/link";
-import { useState } from "react";
 
-export default function Home() {
-  // 1. Use the Query Hook
-  const { data: books, isLoading, isError } = useBooks();
+export default function LibraryPage() {
+  const { data: books, isLoading, isError, refetch } = useBooks();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  // 2. Use the Mutation Hook
-  const { mutate, isPending } = useCreateBook();
+  // Get active category from URL (e.g. ?category=tajweed)
+  const currentCategory = searchParams.get("category");
 
-  // Local state for the form (simple example)
-  const [form, setForm] = useState({ title: "", author: "", desc: "" });
+  // --- FILTERING LOGIC (Client Side for MVP) ---
+  // In a real app with thousands of books, you'd pass this param to the API instead.
+  const filteredBooks =
+    books?.filter((book) => {
+      if (!currentCategory) return true;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Trigger the mutation
-    mutate({
-      title: form.title,
-      original_author: form.author,
-      description: form.desc,
-    });
-  };
+      // We check if the book's metadata contains the category slug
+      // Note: This assumes book.metadata is an object. If it's a string in your type, parse it first.
+      // Safe check:
+      const metadata =
+        typeof book.metadata === "string"
+          ? JSON.parse(book.metadata)
+          : book.metadata;
 
-  if (isLoading) return <div className="p-8">Loading library...</div>;
-  if (isError)
-    return <div className="p-8 text-red-500">Error loading books.</div>;
+      return metadata?.category === currentCategory;
+    }) || [];
 
-  return (
-    <main className="min-h-screen bg-slate-50 p-8">
-      <h1 className="text-4xl font-bold mb-8">Iqraa Library (Client Side)</h1>
+  const mostReadBooks = filteredBooks.slice(0, 4);
 
-      {/* Simple Add Book Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="mb-12 bg-white p-6 rounded-lg shadow border"
-      >
-        <h3 className="font-bold mb-4">Add New Book</h3>
-        <div className="flex gap-4 mb-4">
-          <input
-            placeholder="Title"
-            className="border p-2 rounded"
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-          />
-          <input
-            placeholder="Author"
-            className="border p-2 rounded"
-            onChange={(e) => setForm({ ...form, author: e.target.value })}
-          />
+  // 1. LOADING STATE
+  if (isLoading) {
+    return <LibraryLoadingSkeleton />;
+  }
+
+  // 2. ERROR STATE (Network failed, DB down, etc.)
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-6">
+          <AlertCircle className="w-8 h-8 text-red-500" />
         </div>
-        <input
-          placeholder="Description"
-          className="border p-2 rounded w-full mb-4"
-          onChange={(e) => setForm({ ...form, desc: e.target.value })}
-        />
-        <button
-          type="submit"
-          disabled={isPending}
-          className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
+        <h3 className="text-xl font-bold text-slate-900 mb-2">
+          Connection Interrupted
+        </h3>
+        <p className="text-slate-500 max-w-md mb-8 leading-relaxed">
+          We couldn't fetch the library data. This might be a temporary network
+          issue or the server is resting.
+        </p>
+        <Button
+          onClick={() => refetch()}
+          variant="outline"
+          className="gap-2 border-slate-200 hover:bg-slate-50 hover:text-slate-900"
         >
-          {isPending ? "Creating..." : "Create Book"}
-        </button>
-      </form>
+          <RefreshCw className="w-4 h-4" />
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
-      {/* The List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {books?.map((book: any) => (
-          <Link
-            href={`/books/${book.id}`}
-            key={book.id}
-            className="block group"
+  // 3. EMPTY STATE (No books found for this filter)
+  if (filteredBooks.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
+        <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 rotate-3">
+          <SearchX className="w-10 h-10 text-slate-300" />
+        </div>
+        <h3 className="text-xl font-bold text-slate-900 mb-2">
+          {currentCategory
+            ? `No books found in "${currentCategory}"`
+            : "The Library is Empty"}
+        </h3>
+        <p className="text-slate-500 max-w-md mb-8 leading-relaxed">
+          {currentCategory
+            ? "We haven't digitized any texts in this category yet. Try checking 'Tajweed' or 'Hadith'."
+            : "It looks like the shelves are bare. Try adding a book to the database."}
+        </p>
+        {currentCategory ? (
+          <Button
+            onClick={() => router.push("/library")}
+            className="bg-slate-900 text-white hover:bg-slate-800"
           >
-            <div className="bg-white rounded-xl shadow-sm border p-6 hover:border-indigo-300">
-              <h2 className="text-xl font-bold">{book.title}</h2>
-              <p className="text-gray-500">{book.original_author}</p>
+            View All Books
+          </Button>
+        ) : /* Optional: If user is admin, show 'Add Book' button here */
+        null}
+      </div>
+    );
+  }
+
+  // 4. SUCCESS STATE
+  return (
+    <div className="space-y-12 pb-20 animate-in fade-in duration-500">
+      {/* SECTION 1: MOST READ (Only show if we have enough data) */}
+      {mostReadBooks.length > 0 && (
+        <section>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-1.5 bg-linear-to-br from-purple-100 to-indigo-100 rounded-md text-indigo-600">
+              <Sparkles className="w-4 h-4" />
             </div>
-          </Link>
+            <h2 className="text-xl font-bold text-slate-900">
+              {currentCategory
+                ? `Popular in ${currentCategory}`
+                : "Trending this Week"}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {mostReadBooks.map((book) => (
+              <LibraryBookCard key={book.id} book={book} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* SECTION 2: ALL BOOKS */}
+      <section>
+        <div className="flex items-center gap-2 mb-6">
+          <div className="p-1.5 bg-slate-100 rounded-md text-slate-600">
+            <BookOpen className="w-4 h-4" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">
+            {currentCategory ? "All Titles" : "Full Collection"}
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {filteredBooks.map((book) => (
+            <LibraryBookCard key={book.id} book={book} />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// --- SKELETON LOADING STATE ---
+function LibraryLoadingSkeleton() {
+  return (
+    <div className="space-y-10">
+      {/* Header Skeleton */}
+      <div className="flex items-center gap-2 mb-4">
+        <Skeleton className="w-8 h-8 rounded-md" />
+        <Skeleton className="w-40 h-6 rounded-md" />
+      </div>
+      {/* Grid Skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="h-[300px] rounded-xl border border-slate-200 bg-white p-4 space-y-3"
+          >
+            <Skeleton className="w-full h-32 rounded-lg" />
+            <Skeleton className="w-20 h-4 rounded" />
+            <Skeleton className="w-full h-6 rounded" />
+            <Skeleton className="w-2/3 h-4 rounded" />
+          </div>
         ))}
       </div>
-    </main>
+    </div>
   );
 }

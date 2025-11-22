@@ -17,14 +17,15 @@ shell-be:
 types:
 	cd backend && tygo generate
 
+start:
+	cd frontend && yarn dev
+
 # Database Connection String (Matches your docker-compose credentials)
 DB_DSN=postgres://user:password@localhost:5432/iqraa_db?sslmode=disable
 
-# Create a new migration file (Usage: make migrate-create name=create_users)
+
 migrate-create:
-	@echo "Creating migration files for ${name}..."
-	# You might need to install golang-migrate locally for this, or just create files manually like we did above.
-	# For now, we will assume manual file creation or install the tool if you want.
+	docker run --rm -v $(PWD)/backend/migrations:/migrations migrate/migrate create -ext sql -dir /migrations -seq $(name)
 
 # Run Migrations UP (Apply changes)
 migrate-up:

@@ -8,6 +8,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
+  --font-geist-sans: var(--font-geist-sans);
+  --font-geist-mono: var(--font-geist-mono);
   --font-kufi: var(--font-kufi);
   --font-lombardia: var(--font-lombardia);
   --font-larx: var(--font-larx);

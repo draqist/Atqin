@@ -82,10 +82,6 @@ export function Navbar() {
           href="/"
           className="flex items-center gap-2 font-bold text-xl text-slate-900"
         >
-          {/* <div className="bg-emerald-100 p-1.5 rounded-lg text-emerald-700">
-            <BookOpen className="w-5 h-5" />
-          </div>
-          Iqraa */}
           <Image src={"/iqraa.svg"} alt="iqraa_logo" height={36} width={60} />
         </Link>
 

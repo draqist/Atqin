@@ -14,6 +14,7 @@ var (
 type Models struct {
 	Books BookModel
 	Nodes NodeModel
+	Resources ResourceModel
 	// We will add Nodes, Users, Resources here later
 }
 
@@ -22,5 +23,6 @@ func NewModels(db *sql.DB) Models {
 	return Models{
 		Books: BookModel{DB: db},
 		Nodes: NodeModel{DB: db},
+		Resources: ResourceModel{DB: db},
 	}
 }

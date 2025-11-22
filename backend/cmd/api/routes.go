@@ -13,7 +13,7 @@ func (app *application) routes() http.Handler { // Change return type to http.Ha
 	mux.HandleFunc("POST /v1/books", app.createBookHandler)
 	mux.HandleFunc("GET /v1/books", app.listBooksHandler)
 	mux.HandleFunc("GET /v1/books/{id}", app.showBookHandler)
-
+	mux.HandleFunc("GET /v1/books/{id}/resources", app.listBookResourcesHandler)
 	// Nodes
 	mux.HandleFunc("POST /v1/books/{id}/nodes", app.createNodeHandler)
 	mux.HandleFunc("GET /v1/books/{id}/nodes", app.listBookNodesHandler)

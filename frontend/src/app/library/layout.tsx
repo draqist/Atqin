@@ -1,0 +1,26 @@
+import { Header } from "@/components/app/header";
+import { Sidebar } from "@/components/app/sidebar";
+
+export default function LibraryLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex h-screen bg-[#F8F9FA]">
+      {" "}
+      {/* Use a very light grey background for app area */}
+      {/* Sidebar (Desktop) */}
+      <div className="hidden md:flex w-64 flex-col fixed inset-y-0 z-50">
+        <Sidebar />
+      </div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col md:pl-64">
+        <Header />
+
+        {/* Scrollable Content Area */}
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      </div>
+    </div>
+  );
+}
