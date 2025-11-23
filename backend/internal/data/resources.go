@@ -9,12 +9,14 @@ import (
 type Resource struct {
 	ID                string    `json:"id"`
 	BookID            string    `json:"book_id"`
-	Type              string    `json:"type"` // 'youtube_video', 'pdf', etc.
+	Type              string    `json:"type"`
 	Title             string    `json:"title"`
 	URL               string    `json:"url"`
 	MediaStartSeconds int       `json:"media_start_seconds"`
 	MediaEndSeconds   int       `json:"media_end_seconds"`
 	IsOfficial        bool      `json:"is_official"`
+	ParentID          *string   `json:"parent_id"`
+	SequenceIndex     int       `json:"sequence_index"`
 	CreatedAt         time.Time `json:"created_at"`
 }
 
@@ -22,13 +24,24 @@ type ResourceModel struct {
 	DB *sql.DB
 }
 
-// GetByBookID fetches all resources linked to a specific book
 func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
+	// We keep the ::text cast for UUIDs to be safe
 	query := `
-		SELECT id, book_id, type, title, url, media_start_seconds, media_end_seconds, is_official, created_at
+		SELECT 
+			id::text, 
+			book_id::text, 
+			type, 
+			title, 
+			url, 
+			media_start_seconds, 
+			media_end_seconds, 
+			is_official, 
+			parent_id::text, 
+			sequence_index, 
+			created_at
 		FROM resources
 		WHERE book_id = $1
-		ORDER BY is_official DESC, created_at DESC` // Official stuff first
+		ORDER BY is_official DESC, sequence_index ASC, created_at DESC`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -40,25 +53,43 @@ func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
 	defer rows.Close()
 
 	var resources []*Resource
+	
 	for rows.Next() {
 		var r Resource
-		// We scan into the struct. Note: standard sql doesn't handle NULL ints well usually, 
-		// but since we defined DEFAULT 0 in schema, it's safe.
-		// If you allowed NULLs in schema without defaults, we'd need sql.NullInt32
+		
+		// HELPERS FOR NULLABLE COLUMNS
+		var parentID sql.NullString 
+		var mediaStart sql.NullInt32 // Fix for potential nulls
+		var mediaEnd sql.NullInt32   // Fix for the error you saw
+
 		err := rows.Scan(
 			&r.ID,
 			&r.BookID,
 			&r.Type,
 			&r.Title,
 			&r.URL,
-			&r.MediaStartSeconds,
-			&r.MediaEndSeconds,
+			&mediaStart,      // Scan into NullInt32
+			&mediaEnd,        // Scan into NullInt32
 			&r.IsOfficial,
+			&parentID,        // Scan into NullString
+			&r.SequenceIndex,
 			&r.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
+
+		// ASSIGN VALUES IF VALID
+		if parentID.Valid {
+			r.ParentID = &parentID.String
+		}
+		if mediaStart.Valid {
+			r.MediaStartSeconds = int(mediaStart.Int32)
+		}
+		if mediaEnd.Valid {
+			r.MediaEndSeconds = int(mediaEnd.Int32)
+		}
+
 		resources = append(resources, &r)
 	}
 

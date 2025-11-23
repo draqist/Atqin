@@ -33,7 +33,7 @@ export interface ContentNode {
   sequence_index: number;
   version: number;
 }
-export type ResourceType = 'pdf' | 'youtube_video' | 'audio' | 'web_link';
+export type ResourceType = 'pdf' | 'youtube_video' | 'audio' | 'web_link' | 'playlist';
 
 export interface Resource {
   id: string;
@@ -44,4 +44,7 @@ export interface Resource {
   is_official: boolean;
   media_start_seconds?: number;
   media_end_seconds?: number;
+  parent_id: string | null;
+  sequence_index: number;
+  children?: Resource[]; // We will add this manually in the frontend
 }

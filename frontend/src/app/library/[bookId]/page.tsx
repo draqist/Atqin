@@ -14,11 +14,14 @@ import {
 } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useStructuredResources } from "@/hooks/use-structured-response";
 import { useBookResources } from "@/lib/hooks/queries/resources";
+import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
   BookOpen,
   FileText,
+  Globe,
   ListVideo,
   MoreHorizontal,
   PlayCircle,
@@ -33,63 +36,6 @@ function getYouTubeId(url: string): string | null {
   return match && match[2].length === 11 ? match[2] : null;
 }
 
-const mockResources = [
-  {
-    id: "g1",
-    type: "playlist",
-    title: "Sharh by Sheikh Ayman Suwayd",
-    count: 12,
-    items: [
-      {
-        id: "v1",
-        title: "Ep 1: The Basmalah",
-        url: "https://www.youtube.com/embed/video1",
-      },
-      {
-        id: "v2",
-        title: "Ep 2: The Introduction",
-        url: "https://www.youtube.com/embed/video2",
-      },
-      {
-        id: "v3",
-        title: "Ep 3: Rules of Noon",
-        url: "https://www.youtube.com/embed/video3",
-      },
-    ],
-  },
-  {
-    id: "g2",
-    type: "playlist",
-    title: "Commentary by Dr. Ayman",
-    count: 5,
-    items: [
-      {
-        id: "v4",
-        title: "Part 1: Origins",
-        url: "https://www.youtube.com/embed/video4",
-      },
-      {
-        id: "v5",
-        title: "Part 2: Application",
-        url: "https://www.youtube.com/embed/video5",
-      },
-    ],
-  },
-  {
-    id: "v6",
-    type: "single_video",
-    title: "Summary of Ash-Shatibiyyah (1 Hour)",
-    url: "https://www.youtube.com/embed/video6",
-    duration: "1:02:30",
-  },
-  {
-    id: "p1",
-    type: "pdf",
-    title: "Verified Tahqiq PDF",
-    url: "/files/shatibiyyah.pdf",
-  },
-];
-
 export default function StudyPage({
   params,
 }: {
@@ -99,28 +45,6 @@ export default function StudyPage({
   const bookTitle = "Matn Ash-Shatibiyyah";
   const [activeResource, setActiveResource] = useState<string | null>(null);
 
-  // Helper to render the active content in the "Stage"
-  const renderActiveContent = () => {
-    if (!activeResource) return null;
-
-    // Find the resource (flattening the search for this demo)
-    const allItems = mockResources.flatMap((r) => r.items || r);
-    const active = allItems.find((r) => r.id === activeResource);
-
-    if (!active) return null;
-
-    return (
-      <div className="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg mb-6">
-        <iframe
-          src={active.url}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
-    );
-  };
-
   const { bookId } = use(params);
 
   const {
@@ -128,6 +52,42 @@ export default function StudyPage({
     isLoading: isLoadingResources,
     isError,
   } = useBookResources(bookId);
+
+  // 2. Transform data using the hook
+  const structuredResources = useStructuredResources(resources);
+
+  // Helper to render the active content in the "Stage"
+  const renderActiveContent = () => {
+    if (!activeResource) return null;
+
+    // 1. Create a flat list of ALL playable items (Standalone + Playlist Children)
+    // We ignore the Playlist "container" itself because it doesn't have a URL to play
+    const allPlayableItems = structuredResources.flatMap((r) =>
+      r.children && r.children.length > 0 ? r.children : [r]
+    );
+
+    // 2. Find the specific video by ID
+    const active = allPlayableItems.find((r) => r.id === activeResource);
+
+    if (!active || !active.url) return null;
+
+    // 3. Helper to ensure embed URL format if it's YouTube
+    // (Simple check, or use a library like 'react-player' for robustness)
+    const embedUrl = active.url.includes("watch?v=")
+      ? active.url.replace("watch?v=", "embed/")
+      : active.url;
+
+    return (
+      <div className="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg mb-6">
+        <iframe
+          src={embedUrl}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="h-[calc(100vh-112px)] flex flex-col bg-[#F8F9FA]">
@@ -258,7 +218,7 @@ export default function StudyPage({
                 <ScrollArea className="h-full">
                   <div className="p-4 space-y-3">
                     <Accordion type="multiple" className="w-full space-y-3">
-                      {mockResources.map((resource) => {
+                      {structuredResources.map((resource) => {
                         // SCENARIO A: PLAYLISTS (Accordion)
                         if (resource.type === "playlist") {
                           return (
@@ -277,7 +237,8 @@ export default function StudyPage({
                                       {resource.title}
                                     </div>
                                     <div className="text-[10px] text-slate-500 font-medium">
-                                      {resource.count} Videos • Playlist
+                                      {resource.children?.length} Videos •
+                                      Playlist
                                     </div>
                                   </div>
                                 </div>
@@ -285,7 +246,7 @@ export default function StudyPage({
 
                               <AccordionContent className="pb-0">
                                 <div className="bg-slate-50/50 border-t border-slate-100">
-                                  {resource.items.map((item, index) => (
+                                  {resource.children?.map((item, index) => (
                                     <button
                                       key={item.id}
                                       onClick={() => setActiveResource(item.id)}
@@ -315,53 +276,101 @@ export default function StudyPage({
                         }
 
                         // SCENARIO B: SINGLE VIDEO (Simple Card)
-                        if (resource.type === "single_video") {
+                        if (resource.type === "youtube_video") {
+                          const videoId = getYouTubeId(resource.url);
+                          const thumbnailUrl = videoId
+                            ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+                            : null;
+
                           return (
                             <div
                               key={resource.id}
+                              className="group cursor-pointer flex flex-col gap-3"
                               onClick={() => setActiveResource(resource.id)}
-                              className={`group flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                                activeResource === resource.id
-                                  ? "border-emerald-200 bg-emerald-50/30 ring-1 ring-emerald-100"
-                                  : "border-slate-100 bg-white hover:border-emerald-200 hover:shadow-sm"
-                              }`}
                             >
-                              <div className="w-8 h-8 rounded bg-red-50 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <PlayCircle className="w-4 h-4" />
+                              {/* THUMBNAIL */}
+                              <div
+                                className={cn(
+                                  "relative aspect-video w-full overflow-hidden rounded-xl bg-slate-100 border border-slate-200/50 transition-all",
+                                  activeResource === resource.id
+                                    ? "ring-2 ring-emerald-500 ring-offset-2"
+                                    : "group-hover:border-emerald-500/30"
+                                )}
+                              >
+                                {thumbnailUrl ? (
+                                  <img
+                                    src={thumbnailUrl}
+                                    alt={resource.title}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300">
+                                    <PlayCircle className="w-10 h-10" />
+                                  </div>
+                                )}
+
+                                {/* Playing Indicator Overlay */}
+                                {activeResource === resource.id && (
+                                  <div className="absolute inset-0 bg-emerald-900/20 flex items-center justify-center backdrop-blur-[1px]">
+                                    <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg animate-pulse">
+                                      <PlayCircle className="w-5 h-5 fill-current" />
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                              <div>
-                                <div className="text-sm font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                                  {resource.title}
+
+                              {/* INFO */}
+                              <div className="flex items-start gap-3 px-1">
+                                <div className="mt-0.5 p-1.5 rounded-md bg-white border border-slate-100 text-slate-500 shadow-sm">
+                                  <PlayCircle className="w-3.5 h-3.5" />
                                 </div>
-                                <div className="text-[10px] text-slate-500 font-medium">
-                                  {resource.duration} • Single Video
+                                <div>
+                                  <h4
+                                    className={cn(
+                                      "text-sm font-semibold leading-tight transition-colors line-clamp-2",
+                                      activeResource === resource.id
+                                        ? "text-emerald-700"
+                                        : "text-slate-900 group-hover:text-emerald-700"
+                                    )}
+                                  >
+                                    {resource.title}
+                                  </h4>
+                                  <div className="text-[11px] text-slate-500 font-medium mt-1">
+                                    Single Video •{" "}
+                                    {resource.is_official
+                                      ? "Official"
+                                      : "Community"}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           );
                         }
 
-                        // SCENARIO C: PDF (Simple Card)
-                        if (resource.type === "pdf") {
-                          return (
-                            <div
-                              key={resource.id}
-                              className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white hover:border-orange-200 hover:bg-orange-50/10 cursor-pointer transition-all"
-                            >
-                              <div className="w-8 h-8 rounded bg-orange-50 text-orange-500 flex items-center justify-center">
-                                <FileText className="w-4 h-4" />
+                        // --- SCENARIO C: PDFs/LINKS ---
+                        return (
+                          <div
+                            key={resource.id}
+                            className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-white hover:border-emerald-200 hover:bg-emerald-50/10 cursor-pointer transition-all"
+                            onClick={() => window.open(resource.url, "_blank")}
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center border border-orange-100">
+                              {resource.type === "pdf" ? (
+                                <FileText className="w-5 h-5" />
+                              ) : (
+                                <Globe className="w-5 h-5" />
+                              )}
+                            </div>
+                            <div>
+                              <div className="text-sm font-semibold text-slate-900 line-clamp-1">
+                                {resource.title}
                               </div>
-                              <div>
-                                <div className="text-sm font-semibold text-slate-900">
-                                  {resource.title}
-                                </div>
-                                <div className="text-[10px] text-slate-500">
-                                  PDF Document
-                                </div>
+                              <div className="text-[10px] text-slate-500 capitalize">
+                                {resource.type.replace("_", " ")}
                               </div>
                             </div>
-                          );
-                        }
+                          </div>
+                        );
                       })}
                     </Accordion>
                   </div>
