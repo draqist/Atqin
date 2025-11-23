@@ -1,5 +1,6 @@
 "use client";
 
+import { QuickNote } from "@/components/editor/quick-note";
 import {
   Accordion,
   AccordionContent,
@@ -14,7 +15,10 @@ import {
 } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useActiveResource } from "@/hooks/use-active-resources";
 import { useStructuredResources } from "@/hooks/use-structured-response";
+import { getVideoThumbnail } from "@/lib/helpers";
+import { useBook } from "@/lib/hooks/queries/books";
 import { useBookResources } from "@/lib/hooks/queries/resources";
 import { cn } from "@/lib/utils";
 import {
@@ -29,12 +33,6 @@ import {
 } from "lucide-react"; // Changed icons slightly
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
-
-function getYouTubeId(url: string): string | null {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  return match && match[2].length === 11 ? match[2] : null;
-}
 
 export default function StudyPage({
   params,
@@ -52,42 +50,19 @@ export default function StudyPage({
     isLoading: isLoadingResources,
     isError,
   } = useBookResources(bookId);
+  const {
+    data: bookData,
+    isError: isErrorBook,
+    isLoading: isLoadingBook,
+  } = useBook(bookId);
 
   // 2. Transform data using the hook
   const structuredResources = useStructuredResources(resources);
 
-  // Helper to render the active content in the "Stage"
-  const renderActiveContent = () => {
-    if (!activeResource) return null;
-
-    // 1. Create a flat list of ALL playable items (Standalone + Playlist Children)
-    // We ignore the Playlist "container" itself because it doesn't have a URL to play
-    const allPlayableItems = structuredResources.flatMap((r) =>
-      r.children && r.children.length > 0 ? r.children : [r]
-    );
-
-    // 2. Find the specific video by ID
-    const active = allPlayableItems.find((r) => r.id === activeResource);
-
-    if (!active || !active.url) return null;
-
-    // 3. Helper to ensure embed URL format if it's YouTube
-    // (Simple check, or use a library like 'react-player' for robustness)
-    const embedUrl = active.url.includes("watch?v=")
-      ? active.url.replace("watch?v=", "embed/")
-      : active.url;
-
-    return (
-      <div className="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg mb-6">
-        <iframe
-          src={embedUrl}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
-    );
-  };
+  const { activeVideo, embedUrl } = useActiveResource(
+    activeResource,
+    structuredResources
+  );
 
   return (
     <div className="h-[calc(100vh-112px)] flex flex-col bg-[#F8F9FA]">
@@ -108,10 +83,10 @@ export default function StudyPage({
 
           <div className="flex flex-col">
             <h1 className="font-semibold text-slate-900 text-sm md:text-base leading-tight">
-              {bookTitle}
+              {bookData?.title}
             </h1>
             <span className="text-xs text-slate-500">
-              Introduction • Verse 1-5
+              {bookData?.description}
             </span>
           </div>
         </div>
@@ -189,8 +164,17 @@ export default function StudyPage({
             <Tabs defaultValue="media" className="h-full flex flex-col">
               {/* 1. STICKY PLAYER AREA ("The Stage") */}
               <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-                {activeResource ? (
-                  renderActiveContent()
+                {activeVideo && embedUrl ? (
+                  <div className="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg mb-6 border border-slate-900">
+                    <iframe
+                      key={embedUrl} // Forces React to re-mount on URL change
+                      src={embedUrl}
+                      className="w-full h-full"
+                      title={activeVideo.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
                 ) : (
                   <div className="w-full aspect-video bg-slate-100 rounded-lg flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 mb-4">
                     <PlayCircle className="w-8 h-8 mb-2 opacity-50" />
@@ -220,6 +204,7 @@ export default function StudyPage({
                     <Accordion type="multiple" className="w-full space-y-3">
                       {structuredResources.map((resource) => {
                         // SCENARIO A: PLAYLISTS (Accordion)
+                        const thumbnailUrl = getVideoThumbnail(resource);
                         if (resource.type === "playlist") {
                           return (
                             <AccordionItem
@@ -230,7 +215,15 @@ export default function StudyPage({
                               <AccordionTrigger className="px-4 py-3 hover:bg-slate-50 hover:no-underline data-[state=open]:bg-slate-50">
                                 <div className="flex items-center gap-3 text-left">
                                   <div className="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                    <ListVideo className="w-4 h-4" />
+                                    {thumbnailUrl ? (
+                                      <img
+                                        src={thumbnailUrl}
+                                        alt={resource.title}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                      />
+                                    ) : (
+                                      <ListVideo className="w-4 h-4" />
+                                    )}
                                   </div>
                                   <div>
                                     <div className="text-sm font-semibold text-slate-900">
@@ -277,10 +270,7 @@ export default function StudyPage({
 
                         // SCENARIO B: SINGLE VIDEO (Simple Card)
                         if (resource.type === "youtube_video") {
-                          const videoId = getYouTubeId(resource.url);
-                          const thumbnailUrl = videoId
-                            ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
-                            : null;
+                          const thumbnailUrl = getVideoThumbnail(resource);
 
                           return (
                             <div
@@ -382,8 +372,8 @@ export default function StudyPage({
                 value="notes"
                 className="flex-1 p-4 m-0 data-[state=inactive]:hidden"
               >
-                <div className="h-full flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-100 rounded-xl p-6">
-                  <div className="p-3 bg-slate-50 rounded-full text-slate-400 mb-3">
+                <div className="h-full flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-100 rounded-xl p-3">
+                  {/* <div className="p-3 bg-slate-50 rounded-full text-slate-400 mb-3">
                     <FileText className="w-6 h-6" />
                   </div>
                   <p className="text-sm text-slate-500 font-medium mb-1">
@@ -394,7 +384,8 @@ export default function StudyPage({
                   </p>
                   <Button variant="outline" size="sm" className="mt-4" disabled>
                     Add Note
-                  </Button>
+                  </Button> */}
+                  <QuickNote bookId={bookId} />
                 </div>
               </TabsContent>
             </Tabs>

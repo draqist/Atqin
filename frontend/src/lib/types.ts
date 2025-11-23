@@ -48,3 +48,13 @@ export interface Resource {
   sequence_index: number;
   children?: Resource[]; // We will add this manually in the frontend
 }
+
+export interface Note {
+  id: string;
+  book_id: string;
+  user_id: string;
+  title: string;
+  content: any; // JSON object from Tiptap
+  is_published: boolean;
+  updated_at: string;
+}
