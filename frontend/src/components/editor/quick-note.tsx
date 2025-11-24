@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useBookNote, useSaveNote } from "@/lib/hooks/queries/notes";
+import { useSaveNote } from "@/lib/hooks/mutations/notes";
+import { useBookNote } from "@/lib/hooks/queries/notes";
 import { Placeholder } from "@tiptap/extensions";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -38,7 +39,7 @@ export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm focus:outline-none min-h-[250px] p-4 text-slate-700 text-left placeholder:text-black text-sm",
+          "prose prose-sm focus:outline-none min-h-[268px] p-4 text-slate-700 text-left placeholder:text-black text-sm",
       },
     },
     onUpdate: ({ editor }) => {

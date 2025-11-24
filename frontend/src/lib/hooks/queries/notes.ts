@@ -1,5 +1,7 @@
-import { fetchBookDraft, saveBookDraft } from '@/lib/api/queries/notes';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchBookDraft } from '@/lib/api/queries/notes';
+import api from '@/lib/axios';
+import { PublicReflection } from '@/lib/types';
+import { useQuery } from '@tanstack/react-query';
 
 
 // Query: Get the note
@@ -12,15 +14,14 @@ export const useBookNote = (bookId: string) => {
   });
 };
 
-// Mutation: Save the note
-export const useSaveNote = () => {
-  const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: saveBookDraft,
-    onSuccess: (savedNote) => {
-      // Update the cache immediately with the new data
-      queryClient.setQueryData(['notes', savedNote.book_id], savedNote);
+export const usePublicReflections = (bookId: string) => {
+  return useQuery({
+    queryKey: ['reflections', bookId],
+    queryFn: async () => {
+      const { data } = await api.get<PublicReflection[]>(`/books/${bookId}/notes/public`);
+      return data;
     },
+    enabled: !!bookId,
   });
 };

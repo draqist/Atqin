@@ -11,11 +11,11 @@ export default function LibraryLayout({
       {" "}
       {/* Use a very light grey background for app area */}
       {/* Sidebar (Desktop) */}
-      <div className="hidden md:flex w-64 flex-col fixed inset-y-0 z-50">
+      <div className="hidden md:flex xl:w-64 flex-col fixed inset-y-0 z-50">
         <Sidebar />
       </div>
       {/* Main Content */}
-      <div className="flex-1 flex flex-col md:pl-64">
+      <div className="flex-1 flex flex-col pl-0 md:pl-20 lg:pl-64">
         <Header />
 
         {/* Scrollable Content Area */}

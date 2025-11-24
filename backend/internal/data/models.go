@@ -15,6 +15,9 @@ type Models struct {
 	Books BookModel
 	Nodes NodeModel
 	Resources ResourceModel
+	Notes NoteModel
+	Bookmarks BookmarkModel
+	Users UserModel
 	// We will add Nodes, Users, Resources here later
 }
 
@@ -24,5 +27,8 @@ func NewModels(db *sql.DB) Models {
 		Books: BookModel{DB: db},
 		Nodes: NodeModel{DB: db},
 		Resources: ResourceModel{DB: db},
+		Notes: NoteModel{DB: db},
+		Bookmarks: BookmarkModel{DB: db},
+		Users: UserModel{DB: db},
 	}
 }

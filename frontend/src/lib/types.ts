@@ -54,7 +54,30 @@ export interface Note {
   book_id: string;
   user_id: string;
   title: string;
+  description: string;
   content: any; // JSON object from Tiptap
-  is_published: boolean;
+  is_published?: boolean;
   updated_at: string;
+}
+
+export interface PublicReflection {
+id: string;
+  title: string;
+  description: string; // The short subtitle
+  author_name: string;
+  created_at: string;
+}
+
+export interface GlobalReflection {
+  id: string;
+  title: string;
+  description: string;
+  author_name: string;
+  book_title: string;
+  book_id: string;
+  created_at: string;
+}
+
+export interface BookmarkResponse {
+  bookmarked: boolean;
 }

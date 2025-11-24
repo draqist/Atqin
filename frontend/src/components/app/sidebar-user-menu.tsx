@@ -2,13 +2,14 @@
 
 import {
   ChevronsUpDown,
+  CreditCard,
   LogOut,
   Settings,
   Sparkles,
   User,
-  CreditCard,
 } from "lucide-react";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,34 +19,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@/lib/hooks/queries/auth";
 
 export function SidebarUserMenu() {
+  const { data: user, isLoading } = useUser();
+
+  // Fallback for Guest
+  const displayName = user ? user.name : "Guest Student";
+  const displayEmail = user ? user.email : "Sign in to save";
+  const initials = user ? user.name[0] : "G";
   // Mock User State (Replace with real auth logic later)
-  const user = {
-    name: "Guest Student",
-    email: "guest@iqraa.com",
-    avatar: "", // Empty string = fallback
-    isGuest: true,
-  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-3 w-full py-2 rounded-lg hover:bg-slate-100 transition-colors outline-none group">
           <Avatar className="h-9 w-9 rounded-lg border border-slate-200">
-            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarImage src={""} alt={displayName} />
             <AvatarFallback className="rounded-lg bg-emerald-100 text-emerald-700 font-bold">
-              G
+              {initials}
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex-1 text-left text-sm leading-tight">
+          <div className="flex-1 text-left text-sm leading-tight hidden lg:grid min-w-0">
             <span className="truncate font-semibold text-slate-900 block">
-              {user.name}
+              {displayName}
             </span>
             <span className="truncate text-xs text-slate-500 block">
-              {user.isGuest ? "Sign in to save" : user.email}
+              {displayEmail}
             </span>
           </div>
 
@@ -62,15 +63,15 @@ export function SidebarUserMenu() {
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarImage src={""} alt={displayName} />
               <AvatarFallback className="rounded-lg bg-emerald-100 text-emerald-700">
-                G
+                {initials}
               </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{user.name}</span>
+              <span className="truncate font-semibold">{displayName}</span>
               <span className="truncate text-xs text-slate-500">
-                {user.email}
+                {displayEmail}
               </span>
             </div>
           </div>

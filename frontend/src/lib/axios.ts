@@ -7,4 +7,16 @@ const api = axios.create({
   },
 });
 
+// Add this interceptor
+api.interceptors.request.use((config) => {
+  // Only access window/localStorage on the client side
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 export default api;

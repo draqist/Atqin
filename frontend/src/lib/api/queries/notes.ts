@@ -7,7 +7,7 @@ export const fetchBookDraft = async (bookId: string): Promise<Note | null> => {
   return data;
 };
 
-export const saveBookDraft = async ({ bookId, content }: { bookId: string, content: any }): Promise<Note> => {
-  const { data } = await api.put<Note>(`/books/${bookId}/note`, { content });
+export const saveBookDraft = async ({ bookId, content, title, description, is_published }: { bookId: string, content: any, title?: string, description?: string, is_published?: boolean }): Promise<Note> => {
+  const { data } = await api.put<Note>(`/books/${bookId}/note`, { content, title, description, is_published });
   return data;
 };
