@@ -43,8 +43,8 @@ export default function FullEditorPage({
   const { mutate: saveNote, isPending: isSaving } = useSaveNote();
 
   // Local state for Metadata (Only needed when publishing)
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState(note?.title || "");
+  const [description, setDescription] = useState(note?.description || "");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const debounceSave = useDebounce((editor: Editor) => {
@@ -145,12 +145,16 @@ export default function FullEditorPage({
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-6">
-              Publish Note
+              {note?.is_published === true ? "Update Note" : "Publish Note"}
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px] bg-white">
             <DialogHeader>
-              <DialogTitle>Publish to Library</DialogTitle>
+              <DialogTitle>
+                {note?.is_published === true
+                  ? "Update Note"
+                  : "Publish to Library"}
+              </DialogTitle>
               <DialogDescription>
                 Add a title and description to make your note discoverable by
                 other students.

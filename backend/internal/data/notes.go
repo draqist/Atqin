@@ -186,30 +186,43 @@ func (m NoteModel) GetPublished(bookID string) ([]*PublicNote, error) {
 
 // Enhanced struct for the Global Feed (includes Book Title)
 type GlobalNote struct {
-	ID          string    `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	AuthorName  string    `json:"author_name"`
-	BookTitle   string    `json:"book_title"` // <--- New field
-	BookID      string    `json:"book_id"`    // <--- For linking back
-	CreatedAt   time.Time `json:"created_at"`
+	ID          string          `json:"id"`
+	Title       string          `json:"title"`
+	Description string          `json:"description"`
+	AuthorName  string          `json:"author_name"`
+	BookTitle   string          `json:"book_title"`
+	BookID      string          `json:"book_id"`
+	CreatedAt   time.Time       `json:"created_at"`
+	Content     json.RawMessage `json:"content,omitempty"` // <--- ADD THIS
+}
+// GetAllPublished fetches the latest notes from the entire platform
+// Define a filter struct to keep things tidy
+type NoteFilters struct {
+	Category string
+	Search   string
 }
 
-// GetAllPublished fetches the latest notes from the entire platform
-func (m NoteModel) GetAllPublished() ([]*GlobalNote, error) {
+// Update the function signature
+func (m NoteModel) GetAllPublished(filters NoteFilters) ([]*GlobalNote, error) {
+	// Base query
 	query := `
 		SELECT n.id, n.title, n.description, u.name, b.title, b.id, n.created_at
 		FROM notes n
 		JOIN users u ON n.user_id = u.id
 		JOIN books b ON n.book_id = b.id
 		WHERE n.is_published = TRUE
+		-- Filter by Category (if provided)
+		AND ($1 = '' OR b.metadata->>'category' = $1)
+		-- Search by Book Title OR Author Name (if provided)
+		AND ($2 = '' OR (b.title ILIKE '%' || $2 || '%' OR u.name ILIKE '%' || $2 || '%'))
 		ORDER BY n.created_at DESC
-		LIMIT 50` // Pagination can be added later
+		LIMIT 50`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query)
+	// Pass filters to arguments
+	rows, err := m.DB.QueryContext(ctx, query, filters.Category, filters.Search)
 	if err != nil {
 		return nil, err
 	}
@@ -219,16 +232,11 @@ func (m NoteModel) GetAllPublished() ([]*GlobalNote, error) {
 	for rows.Next() {
 		var n GlobalNote
 		var description sql.NullString 
-		
 		err := rows.Scan(&n.ID, &n.Title, &description, &n.AuthorName, &n.BookTitle, &n.BookID, &n.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
-		
-		if description.Valid {
-			n.Description = description.String
-		}
-		
+		if description.Valid { n.Description = description.String }
 		notes = append(notes, &n)
 	}
 
@@ -237,4 +245,50 @@ func (m NoteModel) GetAllPublished() ([]*GlobalNote, error) {
 	}
 
 	return notes, nil
+}
+
+// GetPublicByID fetches a single published note
+func (m NoteModel) GetPublicByID(noteID string) (*GlobalNote, error) {
+	query := `
+		SELECT n.id, n.title, n.description, u.name, b.title, b.id, n.created_at, n.content
+		FROM notes n
+		JOIN users u ON n.user_id = u.id
+		JOIN books b ON n.book_id = b.id
+		WHERE n.id = $1 AND n.is_published = TRUE`
+
+	var n GlobalNote
+	var content []byte // Holds the raw JSON bytes from DB
+	var description sql.NullString
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, noteID).Scan(
+		&n.ID, 
+		&n.Title, 
+		&description, 
+		&n.AuthorName, 
+		&n.BookTitle, 
+		&n.BookID, 
+		&n.CreatedAt, 
+		&content, // Scan into the byte slice
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
+		return nil, err
+	}
+
+	if description.Valid {
+		n.Description = description.String
+	}
+
+	// CRITICAL FIX: Assign the bytes to the struct field
+	if len(content) > 0 {
+		n.Content = json.RawMessage(content)
+	}
+
+	return &n, nil
 }

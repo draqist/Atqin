@@ -22,6 +22,7 @@ func (app *application) routes() http.Handler { // Change return type to http.Ha
 // Public Community Feed
 mux.HandleFunc("GET /v1/books/{id}/notes/public", app.listPublicNotesHandler)
 
+mux.HandleFunc("GET /v1/notes/public/{id}", app.getPublicNoteHandler)
 
 // GLOBAL FEED
 mux.HandleFunc("GET /v1/notes/public", app.listAllPublicNotesHandler)

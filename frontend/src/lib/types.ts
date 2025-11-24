@@ -61,7 +61,7 @@ export interface Note {
 }
 
 export interface PublicReflection {
-id: string;
+  id: string;
   title: string;
   description: string; // The short subtitle
   author_name: string;
@@ -76,6 +76,7 @@ export interface GlobalReflection {
   book_title: string;
   book_id: string;
   created_at: string;
+  content?: any;
 }
 
 export interface BookmarkResponse {

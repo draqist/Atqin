@@ -97,7 +97,18 @@ func (app *application) listPublicNotesHandler(w http.ResponseWriter, r *http.Re
 
 // listAllPublicNotesHandler fetches the global community feed
 func (app *application) listAllPublicNotesHandler(w http.ResponseWriter, r *http.Request) {
-	notes, err := app.models.Notes.GetAllPublished()
+	// 1. Parse Query Params
+	qs := r.URL.Query()
+	category := qs.Get("category")
+	search := qs.Get("q")
+
+	filters := data.NoteFilters{
+		Category: category,
+		Search:   search,
+	}
+
+	// 2. Call Model
+	notes, err := app.models.Notes.GetAllPublished(filters)
 	if err != nil {
 		app.logger.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -106,4 +117,23 @@ func (app *application) listAllPublicNotesHandler(w http.ResponseWriter, r *http
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(notes)
+}
+
+func (app *application) getPublicNoteHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	note, err := app.models.Notes.GetPublicByID(id)
+	if err != nil {
+		if errors.Is(err, data.ErrRecordNotFound) {
+			app.errorResponse(w, http.StatusNotFound, "Note not found")
+			return
+		}
+		app.logger.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	// Inject content manually if your struct issues exist, otherwise just Encode(note)
+	json.NewEncoder(w).Encode(note)
 }

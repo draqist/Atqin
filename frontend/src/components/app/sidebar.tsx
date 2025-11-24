@@ -18,7 +18,7 @@ const mainNav = [
   { name: "Library", href: "/library", icon: Library },
   {
     name: "Reflections",
-    href: "/library/reflections",
+    href: "/reflections",
     icon: MessageSquareQuote,
   }, // NEW
   { name: "My Hifdh", href: "/hifdh", icon: Mic },
