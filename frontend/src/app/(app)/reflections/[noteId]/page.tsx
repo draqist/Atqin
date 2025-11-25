@@ -1,52 +1,14 @@
 "use client";
 
 import { ReadOnlyEditor } from "@/components/reflections/read-only-editor";
+import { ShareNote } from "@/components/reflections/share-reflection";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useSingleReflection } from "@/lib/hooks/queries/reflections";
-import { BookOpen, Clock, Loader2, Share2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Clock, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
-
-// export async function generateMetadata({
-//   params,
-// }: {
-//   params: Promise<{ noteId: string }>;
-// }): Promise<Metadata> {
-//   const { noteId } = await params;
-
-//   // Fetch data specifically for metadata (Next.js deduplicates this request automatically)
-//   const response = await fetch(
-//     `${process.env.NEXT_PUBLIC_API_URL}/notes/public/${noteId}`
-//   );
-//   const note = await response.json();
-
-//   if (!note) {
-//     return {
-//       title: "Reflection Not Found",
-//     };
-//   }
-
-//   return {
-//     title: `${note.title} | Iqraa Reflections`,
-//     description:
-//       note.description ||
-//       `Read ${note.author_name}'s reflection on ${note.book_title}.`,
-//     openGraph: {
-//       title: note.title,
-//       description: note.description,
-//       type: "article",
-//       authors: [note.author_name],
-//       // The image we just created is automatically linked here by Next.js!
-//     },
-//     twitter: {
-//       card: "summary_large_image",
-//       title: note.title,
-//       description: note.description,
-//     },
-//   };
-// }
 
 export default function ReflectionDetailsPage({
   params,
@@ -72,7 +34,8 @@ export default function ReflectionDetailsPage({
       {/* 1. MINIMAL HEADER */}
       <header className="h-20 px-6 md:px-12 flex items-center justify-between sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-slate-100">
         <div className="flex items-center gap-8">
-          <nav className="hidden md:flex gap-6 text-sm font-medium text-slate-500">
+          <nav className="flex gap-3 text-sm font-medium text-slate-500">
+            <ArrowLeft className="md:hidden" />
             <button
               onClick={() => router.back()}
               className="hover:text-slate-900 transition-colors"
@@ -152,12 +115,7 @@ export default function ReflectionDetailsPage({
 
               {/* Actions */}
               <div className="space-y-2">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-2 text-slate-500 hover:text-slate-900 px-0"
-                >
-                  <Share2 className="w-4 h-4" /> Share this note
-                </Button>
+                <ShareNote noteId={note.id} title={note.title} />
               </div>
             </div>
           </aside>
@@ -172,7 +130,7 @@ export default function ReflectionDetailsPage({
                 </AvatarFallback>
               </Avatar>
               <div>
-                <div className="font-bold text-slate-900">
+                <div className="font-semibold text-base md:font-bold text-slate-900">
                   {note.author_name}
                 </div>
                 <div className="text-xs text-slate-500">Student</div>

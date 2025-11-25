@@ -41,7 +41,7 @@ export function SidebarUserMenu() {
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex-1 text-left text-sm leading-tight hidden lg:grid min-w-0">
+          <div className="flex-1 text-left text-sm leading-tight md:hidden lg:grid min-w-0">
             <span className="truncate font-semibold text-slate-900 block">
               {displayName}
             </span>

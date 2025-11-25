@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -24,78 +25,123 @@ type ResourceModel struct {
 	DB *sql.DB
 }
 
-func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
-	// We keep the ::text cast for UUIDs to be safe
+// Get fetches a single resource by ID
+func (m ResourceModel) Get(id string) (*Resource, error) {
 	query := `
-		SELECT 
-			id::text, 
-			book_id::text, 
-			type, 
-			title, 
-			url, 
-			media_start_seconds, 
-			media_end_seconds, 
-			is_official, 
-			parent_id::text, 
-			sequence_index, 
-			created_at
+		SELECT id::text, book_id::text, type, title, url, media_start_seconds, media_end_seconds, is_official, parent_id::text, sequence_index, created_at
 		FROM resources
-		WHERE book_id = $1
-		ORDER BY is_official DESC, sequence_index ASC, created_at DESC`
+		WHERE id = $1`
+
+	var r Resource
+	var parentID sql.NullString
+	var mediaStart, mediaEnd sql.NullInt32
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, bookID)
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(
+		&r.ID, &r.BookID, &r.Type, &r.Title, &r.URL,
+		&mediaStart, &mediaEnd, &r.IsOfficial, &parentID, &r.SequenceIndex, &r.CreatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
+		return nil, err
+	}
+
+	if parentID.Valid { r.ParentID = &parentID.String }
+	if mediaStart.Valid { r.MediaStartSeconds = int(mediaStart.Int32) }
+	if mediaEnd.Valid { r.MediaEndSeconds = int(mediaEnd.Int32) }
+
+	return &r, nil
+}
+
+// GetAll fetches ALL resources (for Admin Table)
+// We join with books so the admin sees which book the video belongs to
+func (m ResourceModel) GetAll() ([]*Resource, error) {
+	// Note: In a real app, you'd add pagination here
+	query := `
+		SELECT id::text, book_id::text, type, title, url, is_official, created_at
+		FROM resources
+		ORDER BY created_at DESC
+		LIMIT 100`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var resources []*Resource
-	
 	for rows.Next() {
 		var r Resource
-		
-		// HELPERS FOR NULLABLE COLUMNS
-		var parentID sql.NullString 
-		var mediaStart sql.NullInt32 // Fix for potential nulls
-		var mediaEnd sql.NullInt32   // Fix for the error you saw
-
-		err := rows.Scan(
-			&r.ID,
-			&r.BookID,
-			&r.Type,
-			&r.Title,
-			&r.URL,
-			&mediaStart,      // Scan into NullInt32
-			&mediaEnd,        // Scan into NullInt32
-			&r.IsOfficial,
-			&parentID,        // Scan into NullString
-			&r.SequenceIndex,
-			&r.CreatedAt,
-		)
+		err := rows.Scan(&r.ID, &r.BookID, &r.Type, &r.Title, &r.URL, &r.IsOfficial, &r.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
-
-		// ASSIGN VALUES IF VALID
-		if parentID.Valid {
-			r.ParentID = &parentID.String
-		}
-		if mediaStart.Valid {
-			r.MediaStartSeconds = int(mediaStart.Int32)
-		}
-		if mediaEnd.Valid {
-			r.MediaEndSeconds = int(mediaEnd.Int32)
-		}
-
 		resources = append(resources, &r)
 	}
+	return resources, nil
+}
 
-	if err = rows.Err(); err != nil {
-		return nil, err
+// Insert adds a new resource
+func (m ResourceModel) Insert(r *Resource) error {
+	query := `
+		INSERT INTO resources (book_id, type, title, url, media_start_seconds, media_end_seconds, is_official, parent_id, sequence_index)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		RETURNING id, created_at`
+
+	args := []any{
+		r.BookID, r.Type, r.Title, r.URL, 
+		r.MediaStartSeconds, r.MediaEndSeconds, r.IsOfficial, 
+		r.ParentID, r.SequenceIndex,
 	}
 
-	return resources, nil
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(&r.ID, &r.CreatedAt)
+}
+
+// Update modifies a resource
+func (m ResourceModel) Update(r *Resource) error {
+	query := `
+		UPDATE resources
+		SET title = $1, url = $2, type = $3, is_official = $4, sequence_index = $5, parent_id = $6
+		WHERE id = $7`
+
+	args := []any{r.Title, r.URL, r.Type, r.IsOfficial, r.SequenceIndex, r.ParentID, r.ID}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, args...)
+	return err
+}
+
+// Delete removes a resource
+func (m ResourceModel) Delete(id string) error {
+	query := `DELETE FROM resources WHERE id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return ErrRecordNotFound
+	}
+	return nil
 }

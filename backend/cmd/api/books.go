@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/draqist/iqraa/backend/internal/data"
@@ -14,6 +15,7 @@ func (app *application) createBookHandler(w http.ResponseWriter, r *http.Request
 		Title          string `json:"title"`
 		OriginalAuthor string `json:"original_author"`
 		Description    string `json:"description"`
+		CoverImageURL string `json:"cover_image_url"`
 	}
 
 	// 2. Decode the JSON body
@@ -30,6 +32,7 @@ func (app *application) createBookHandler(w http.ResponseWriter, r *http.Request
 		Description:    input.Description,
 		Metadata:       json.RawMessage(`{}`), // Empty JSON for now
 		IsPublic:       true,
+		CoverImageURL:  input.CoverImageURL,
 	}
 
 	// 4. Insert data into the database
@@ -81,4 +84,72 @@ func (app *application) listBooksHandler(w http.ResponseWriter, r *http.Request)
 	// 2. Serve the JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(books)
+}
+
+func (app *application) updateBookHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	// 1. Fetch existing book
+	book, err := app.models.Books.Get(id)
+	if err != nil {
+		app.errorResponse(w, http.StatusNotFound, "Book not found")
+		return
+	}
+
+	// 2. Parse updates
+	var input struct {
+		Title          *string `json:"title"`
+		OriginalAuthor *string `json:"original_author"`
+		Description    *string `json:"description"`
+		CoverImageURL  *string `json:"cover_image_url"`
+		Category       *string `json:"category"` // We extract this from metadata
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		app.errorResponse(w, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	// 3. Apply updates (Partial Update logic)
+	if input.Title != nil { book.Title = *input.Title }
+	if input.OriginalAuthor != nil { book.OriginalAuthor = *input.OriginalAuthor }
+	if input.Description != nil { book.Description = *input.Description }
+	if input.CoverImageURL != nil { book.CoverImageURL = *input.CoverImageURL }
+	
+	// Handle Metadata Update manually
+	if input.Category != nil {
+		// Re-marshal the metadata with new category
+		metaMap := map[string]string{"category": *input.Category}
+		jsonBytes, _ := json.Marshal(metaMap)
+		book.Metadata = jsonBytes
+	}
+
+	// 4. Save
+	err = app.models.Books.Update(book)
+	if err != nil {
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to update book")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(book)
+}
+
+func (app *application) deleteBookHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	err := app.models.Books.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.errorResponse(w, http.StatusNotFound, "Book not found")
+		default:
+			app.errorResponse(w, http.StatusInternalServerError, "Failed to delete book")
+		}
+		return
+	}
+
+	// Return 200 OK with a simple success message
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(`{"message": "book deleted successfully"}`))
 }

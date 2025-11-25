@@ -1,74 +1,113 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table"; // Ensure this is your clean version
+import { Input } from "@/components/ui/input";
 import { useBooks } from "@/lib/hooks/queries/books";
-import { Plus } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { columns } from "./columns";
 
 export default function AdminBooksPage() {
   const { data: books, isLoading } = useBooks();
+  const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
+  const [search, setSearch] = useState("");
+
+  // --- CLIENT SIDE FILTERING LOGIC ---
+  const filteredBooks =
+    books?.filter((book) => {
+      // 1. Status Filter
+      if (filter === "published" && !book.is_public) return false;
+      if (filter === "draft" && book.is_public) return false;
+
+      // 2. Search Filter
+      if (search) {
+        const searchLower = search.toLowerCase();
+        return (
+          book.title.toLowerCase().includes(searchLower) ||
+          book.original_author.toLowerCase().includes(searchLower)
+        );
+      }
+      return true;
+    }) || [];
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-slate-900">Books Library</h2>
+    <div className="space-y-6">
+      {/* 1. PAGE HEADER (Title + Primary Action) */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Books Library
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Manage your catalog of {books?.length || 0} texts.
+          </p>
+        </div>
         <Link href="/admin/books/new">
-          <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700">
-            <Plus className="w-4 h-4" /> Add New Book
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5">
+            <Plus className="w-4 h-4 mr-2" /> Add New Book
           </Button>
         </Link>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-slate-50 hover:bg-slate-50">
-              <TableHead>Title</TableHead>
-              <TableHead>Author</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="text-center py-10 text-slate-400"
-                >
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : (
-              books?.map((book) => (
-                <TableRow key={book.id}>
-                  <TableCell className="font-medium">{book.title}</TableCell>
-                  <TableCell>{book.original_author}</TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                      {(typeof book.metadata === "object"
-                        ? book.metadata.category
-                        : "General") || "General"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
-                      Edit
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      {/* 2. CONTROL BAR (Unified Toolbar) */}
+      <div className="bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center gap-2">
+        {/* Search Input (Borderless look) */}
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input
+            placeholder="Search by title or author..."
+            className="pl-10 border-0 bg-transparent shadow-none focus-visible:ring-0 text-slate-900 placeholder:text-slate-400"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="hidden sm:block w-px h-6 bg-slate-200 mx-2" />
+
+        {/* Segmented Filter Controls */}
+        <div className="flex bg-slate-100 p-1 rounded-lg w-full sm:w-auto">
+          {["all", "published", "draft"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setFilter(tab as any)}
+              className={`flex-1 sm:flex-none px-4 py-1.5 text-xs font-medium rounded-md transition-all capitalize ${
+                filter === tab
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. THE TABLE CARD */}
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        {isLoading ? (
+          <div className="h-96 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
+          </div>
+        ) : filteredBooks.length === 0 ? (
+          <div className="h-64 flex flex-col items-center justify-center text-slate-400">
+            <Search className="w-10 h-10 mb-3 opacity-20" />
+            <p>No books matching your filters.</p>
+            <Button
+              variant="link"
+              onClick={() => {
+                setFilter("all");
+                setSearch("");
+              }}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        ) : (
+          <DataTable columns={columns} data={filteredBooks} />
+        )}
       </div>
     </div>
   );

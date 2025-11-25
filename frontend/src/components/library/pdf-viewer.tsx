@@ -1,13 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  ZoomIn,
-  ZoomOut,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 
@@ -93,11 +87,7 @@ export function PdfViewer({ url, onClose }: PdfViewerProps) {
         <Document
           file={url}
           onLoadSuccess={onDocumentLoadSuccess}
-          loading={
-            <div className="flex items-center justify-center min-h-96 w-[600px] bg-white">
-              <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
-            </div>
-          }
+          loading={<div className="sr-only">Loading pdf!</div>}
           error={
             <div className="flex items-center justify-center h-96 w-full bg-red-50 text-red-500">
               Failed to load PDF.

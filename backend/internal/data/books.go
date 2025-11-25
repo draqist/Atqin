@@ -127,3 +127,54 @@ func (m BookModel) GetAll() ([]*Book, error) {
 
 	return books, nil
 }
+
+func (m BookModel) Update(book *Book) error {
+	query := `
+		UPDATE books
+		SET title = $1, original_author = $2, description = $3, cover_image_url = $4, metadata = $5, is_public = $6, version = version + 1
+		WHERE id = $7
+		RETURNING version`
+
+	args := []any{
+		book.Title,
+		book.OriginalAuthor,
+		book.Description,
+		book.CoverImageURL,
+		book.Metadata,
+		book.IsPublic,
+		book.ID,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(&book.Version)
+}
+
+func (m BookModel) Delete(id string) error {
+	// Verify it exists first (optional, but good practice)
+	if id == "" {
+		return errors.New("invalid id")
+	}
+
+	query := `DELETE FROM books WHERE id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+
+	return nil
+}

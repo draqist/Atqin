@@ -2,8 +2,9 @@
 
 import { QuickNote } from "@/components/editor/quick-note";
 import { MobilePlayer } from "@/components/library/mobile-player";
-import { PdfViewer } from "@/components/library/pdf-viewer";
+// import { PdfViewer } from "@/components/library/pdf-viewer";
 import { ShareMenu } from "@/components/library/share-menu";
+import { PdfSkeleton } from "@/components/skeletons/pdf-skeleton";
 import {
   Accordion,
   AccordionContent,
@@ -47,13 +48,17 @@ import {
   PlayCircle,
   Sparkles,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 
-const handleBookmark = () => {
-  // We will wire this up to the API later
-  console.log("Bookmarked!");
-};
+const PdfViewer = dynamic(
+  () => import("@/components/library/pdf-viewer").then((mod) => mod.PdfViewer),
+  {
+    ssr: false,
+    loading: () => <PdfSkeleton />,
+  }
+);
 
 export default function StudyPage({
   params,
@@ -274,7 +279,7 @@ export default function StudyPage({
   // --- MOBILE VIEW ---
   if (!isDesktop) {
     return (
-      <div className="h-screen flex flex-col bg-[#F8F9FA]">
+      <div className="max-h-screen flex flex-col bg-[#F8F9FA]">
         {/* 1. Mobile Header */}
         <header className="h-14 px-4 flex items-center justify-between bg-white border-b border-slate-200 sticky top-0 z-20">
           <div className="flex items-center gap-3 overflow-hidden">
@@ -295,18 +300,49 @@ export default function StudyPage({
               </span>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-slate-500 shrink-0"
-          >
-            <MoreHorizontal className="w-5 h-5" />
-          </Button>
+          <div>
+            <ShareMenu
+              bookId={bookData?.id ?? ""}
+              title={bookData?.title ?? ""}
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-slate-500 hover:bg-slate-100 rounded-full"
+                >
+                  <MoreHorizontal className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                {/* 1. View Reflections */}
+                <DropdownMenuItem
+                  onClick={() => router.push(`/library/${bookId}/reflections`)}
+                >
+                  <MessageSquareQuoteIcon className="w-4 h-4 mr-2 text-indigo-500" />
+                  <span>View Reflections</span>
+                  <ArrowUpRight className="w-3 h-3 ml-auto text-slate-400" />
+                </DropdownMenuItem>
+
+                {/* 2. Bookmark */}
+                <DropdownMenuItem onClick={() => toggleBookmark(bookId)}>
+                  <Bookmark className="w-4 h-4 mr-2 text-amber-500" />
+                  <span className="text-sm">
+                    {isToggling ? "Updating..." : "Add to Study List"}
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
 
         {/* 2. The Text (Full Height Reader) */}
         <div className="flex-1 overflow-y-auto bg-[#F3F4F6]">
-          <div className="min-h-full p-4 pb-32">
+          <div className="p-4 pb-32">
             <PdfViewer
               url={
                 "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"

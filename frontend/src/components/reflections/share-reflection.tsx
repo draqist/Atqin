@@ -13,16 +13,16 @@ import { Facebook, Link as LinkIcon, Share2, Twitter } from "lucide-react";
 import { toast } from "sonner";
 
 interface ShareMenuProps {
-  bookId: string;
+  noteId: string;
   title: string;
 }
 
-export function ShareMenu({ bookId, title }: ShareMenuProps) {
+export function ShareNote({ noteId, title }: ShareMenuProps) {
   // In a real app, get the full URL dynamically. For now:
   const currentUrl =
     typeof window !== "undefined"
       ? window.location.href
-      : `https://iqraa.com/library/${bookId}`;
+      : `https://iqraa.com/reflections/${noteId}`;
   const encodedUrl = encodeURIComponent(currentUrl);
   const encodedTitle = encodeURIComponent(`Check out ${title} on Iqraa!`);
 
@@ -35,16 +35,14 @@ export function ShareMenu({ bookId, title }: ShareMenuProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
-          size="sm"
-          className="md:flex gap-2 rounded-full text-slate-600 border-none md:border-slate-200 shadow-none md:shadow h-10 md:h-8 focus-visible:ring-transparent"
+          variant="ghost"
+          className="w-full justify-start gap-2 text-slate-500 hover:text-slate-900 px-0"
         >
-          <Share2 className="w-4 h-4" />{" "}
-          <span className="hidden md:inline">Share </span>
+          <Share2 className="w-4 h-4" /> Share this note
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 rounded-xl">
-        <DropdownMenuLabel>Share this book</DropdownMenuLabel>
+        <DropdownMenuLabel>Share this note</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
         {/* Twitter / X */}

@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
+import { ArrowRight, Library, Mic } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { WordRotator } from "./WordRotator";
-import { ArrowRight, Library, Mic } from "lucide-react";
 
 const HeroSection = () => {
   return (
@@ -33,7 +33,7 @@ const HeroSection = () => {
             </h1>
 
             {/* BROADENED COPY: Focus on Classical Works generally */}
-            <p className="text-slate-400 text-lg max-w-lg leading-relaxed mb-8">
+            <p className="text-slate-400 text-md lg:text-lg max-w-lg leading-relaxed mb-8">
               A unified platform to read, study, and memorize
               <span className="text-slate-200 font-medium">
                 {" "}
@@ -47,7 +47,7 @@ const HeroSection = () => {
               <Link href="/library">
                 <Button
                   size="lg"
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-full px-8 h-14 text-base shadow-lg shadow-emerald-900/20 transition-all hover:scale-105"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-full px-8 h-12 lg:h-14 text-md lg:text-base shadow-lg shadow-emerald-900/20 transition-all hover:scale-105"
                 >
                   Explore the Library
                   <ArrowRight className="ml-2 w-5 h-5" />

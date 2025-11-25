@@ -36,12 +36,12 @@ export default function ReflectionsPage() {
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-20">
       {/* 1. HEADER & FILTERS */}
-      <div className="bg-white border-b border-slate-200 pt-12 pb-8 px-6 sticky top-0 z-10 shadow-sm">
+      <div className="bg-white border-b border-slate-200 pt-12 pb-8 px-6 sticky top-0 z-10 shadow-xs rounded-lg">
         <div className="w-full mx-auto space-y-6">
           {/* Title & Search Row */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                 Community Reflections
               </h1>
               <p className="text-slate-500 mt-1 text-sm">
@@ -70,7 +70,7 @@ export default function ReflectionsPage() {
           </div>
 
           {/* Category Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+          <div className="flex flex-wrap items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
             <SlidersHorizontal className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
             {categories.map((cat) => (
               <button

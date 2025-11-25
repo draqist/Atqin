@@ -29,11 +29,11 @@ export function MobilePlayer({
   onResourceSelect,
   onClose,
 }: MobilePlayerProps) {
-  const [snap, setSnap] = useState<number | string | null>("130px");
+  const [snap, setSnap] = useState<number | string | null>("140px");
 
   // Helper to toggle snap position reliably
   const toggleSnap = () => {
-    setSnap((prev) => (prev === 0.85 ? "130px" : 0.85));
+    setSnap((prev) => (prev === 0.85 ? "140px" : 0.85));
   };
 
   const isExpanded = snap === 0.85;
@@ -41,7 +41,7 @@ export function MobilePlayer({
   return (
     <Drawer.Root
       open={true} // Always open
-      snapPoints={["130px", 0.85]}
+      snapPoints={["140px", 0.85]}
       activeSnapPoint={snap}
       setActiveSnapPoint={setSnap}
       modal={false} // Allows interacting with the background text

@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Bell, Search } from "lucide-react";
+import { MobileNav } from "./mobile-nav";
 
 export function Header() {
   return (
@@ -13,15 +14,14 @@ export function Header() {
       </div>
 
       {/* Center/Right: Search & Actions */}
-      <div className="flex items-center gap-4 w-full md:w-auto">
-        {/* Global Search Bar */}
+      <MobileNav />
+      <div className="hidden md:flex items-center gap-4 w-full md:w-auto">
         <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
             placeholder="Search books, authors, or topics... (Cmd+K)"
             className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-emerald-500"
           />
-          {/* Keyboard Shortcut Hint */}
           <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1">
             <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-white px-1.5 font-mono text-[10px] font-medium text-slate-500 opacity-100">
               <span className="text-xs">⌘</span>K
@@ -29,7 +29,6 @@ export function Header() {
           </div>
         </div>
 
-        {/* Notifications */}
         <Button
           variant="ghost"
           size="icon"

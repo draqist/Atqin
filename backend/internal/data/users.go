@@ -20,6 +20,7 @@ type User struct {
 	Password     string    `json:"-"`              // Never output this to JSON
 	PasswordHash []byte    `json:"-"`              // Never output this to JSON
 	CreatedAt    time.Time `json:"created_at"`
+	Role         string    `json:"role"`
 }
 
 type UserModel struct {
@@ -101,6 +102,7 @@ func (m UserModel) GetByID(id string) (*User, error) {
 		&user.Name,
 		&user.Email,
 		&user.CreatedAt,
+		&user.Role,
 	)
 
 	if err != nil {

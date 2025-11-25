@@ -1,5 +1,18 @@
-import { BookOpen, FileText, LayoutDashboard, Settings } from "lucide-react";
+"use client"; // Need client for pathname check
+
+import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
+import { cn } from "@/lib/utils";
+import {
+  BookOpen,
+  ChevronRight,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+} from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function AdminLayout({
   children,
@@ -7,45 +20,98 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen bg-slate-100">
-      {/* Admin Sidebar */}
-      <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col">
-        <div className="h-16 flex items-center px-6 border-b border-slate-800">
-          <span className="font-bold text-white text-lg">Iqraa Admin</span>
+    <div className="min-h-screen bg-[#F9FAFB] flex font-sans text-slate-900">
+      {/* DESKTOP SIDEBAR */}
+      <aside className="hidden lg:flex w-64 bg-white border-r border-slate-200 flex-col fixed inset-y-0 z-50">
+        {/* Logo Area */}
+        <div className="h-16 flex items-center px-6 border-b border-slate-100">
+          <Link
+            href="/admin"
+            className="flex items-center gap-2 font-bold text-lg tracking-tight"
+          >
+            <Image
+              src={"/iqraa.svg"}
+              alt="admin_logo"
+              height={20}
+              width={70}
+            />
+          </Link>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
-          <NavItem href="/admin" icon={LayoutDashboard} label="Dashboard" />
-          <NavItem href="/admin/books" icon={BookOpen} label="Books" />
-          <NavItem href="/admin/resources" icon={FileText} label="Resources" />
-          <NavItem href="/admin/settings" icon={Settings} label="Settings" />
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-1">
+          <div className="px-2 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Platform
+          </div>
+          <AdminNavItem href="/admin" icon={LayoutDashboard} label="Overview" />
+          <AdminNavItem
+            href="/admin/books"
+            icon={BookOpen}
+            label="Books Library"
+          />
+          <AdminNavItem
+            href="/admin/resources"
+            icon={FileText}
+            label="Resources"
+          />
+
+          <div className="px-2 mt-8 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            System
+          </div>
+          <AdminNavItem
+            href="/admin/settings"
+            icon={Settings}
+            label="Settings"
+          />
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
-          <div className="text-xs text-slate-500">v1.0.0 Admin Panel</div>
+        {/* Footer Action */}
+        <div className="p-4 border-t border-slate-100">
+          <Link
+            href="/library"
+            className="group flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <LogOut className="w-4 h-4 text-slate-400 group-hover:text-slate-600" />
+              Exit to App
+            </div>
+            <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </Link>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-8 justify-between">
-          <h1 className="font-semibold text-slate-700">
-            Content Management System
-          </h1>
-          <Link
-            href="/library"
-            className="text-sm text-emerald-600 hover:underline"
-          >
-            View Live Site &rarr;
-          </Link>
+      {/* MAIN CONTENT WRAPPER */}
+      <div className="flex-1 flex flex-col lg:pl-64 min-w-0 transition-all">
+        {/* HEADER */}
+        <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40">
+          <div className="flex items-center gap-3">
+            <AdminMobileNav /> {/* Mobile Trigger */}
+            {/* Breadcrumbs (Simple Version) */}
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <span className="hidden sm:inline">Admin</span>
+              <span className="hidden sm:inline text-slate-300">/</span>
+              <span className="font-medium text-slate-900">Dashboard</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
+              A
+            </div>
+          </div>
         </header>
-        <div className="flex-1 overflow-y-auto p-8">{children}</div>
-      </main>
+
+        {/* CONTENT AREA */}
+        <main className="flex-1 p-6 lg:p-10 max-w-7xl mx-auto w-full">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
 
-function NavItem({
+// Improved NavItem with Active State
+function AdminNavItem({
   href,
   icon: Icon,
   label,
@@ -54,12 +120,29 @@ function NavItem({
   icon: any;
   label: string;
 }) {
+  const pathname = usePathname();
+  // Check if active (exact match or sub-path match for books)
+  const isActive =
+    pathname === href || (href !== "/admin" && pathname.startsWith(href));
+
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800 hover:text-white transition-colors"
+      className={cn(
+        "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+        isActive
+          ? "bg-slate-100 text-slate-900" // Active Style
+          : "text-slate-500 hover:bg-slate-50 hover:text-slate-900" // Inactive Style
+      )}
     >
-      <Icon className="w-4 h-4" />
+      <Icon
+        className={cn(
+          "w-4 h-4",
+          isActive
+            ? "text-slate-900"
+            : "text-slate-400 group-hover:text-slate-600"
+        )}
+      />
       <span>{label}</span>
     </Link>
   );
