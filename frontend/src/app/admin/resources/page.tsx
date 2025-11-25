@@ -1,35 +1,75 @@
 "use client";
-
+// Hook created above
 import { Button } from "@/components/ui/button";
-import { Plus, PlayCircle, FileText } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
+import { Input } from "@/components/ui/input";
+import { useAdminResources } from "@/lib/hooks/queries/resources";
+import { Filter, Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { columns } from "./columns";
 
 export default function AdminResourcesPage() {
+  const { data: resources, isLoading } = useAdminResources();
+  const [search, setSearch] = useState("");
+
+  // Client Side Filter
+  const filteredResources =
+    resources?.filter((res) => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return (
+        res.title.toLowerCase().includes(q) ||
+        res.book_title?.toLowerCase().includes(q)
+      );
+    }) || [];
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-slate-900">Resources</h2>
+    <div className="space-y-6">
+      {/* HEADER */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Resources
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Manage videos, pdfs, and links.
+          </p>
+        </div>
         <Link href="/admin/resources/new">
-          <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700">
-            <Plus className="w-4 h-4" /> Add Resource
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5">
+            <Plus className="w-4 h-4 mr-2" /> Add Resource
           </Button>
         </Link>
       </div>
 
-      <div className="bg-white p-12 rounded-xl border border-dashed border-slate-300 text-center">
-        <div className="mx-auto w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-4">
-          <PlayCircle className="w-6 h-6" />
+      {/* TOOLBAR */}
+      <div className="bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center gap-2">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input
+            placeholder="Search resources..."
+            className="pl-10 border-0 bg-transparent shadow-none focus-visible:ring-0 text-slate-900 placeholder:text-slate-400"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-        <h3 className="text-lg font-medium text-slate-900">
-          Manage your content
-        </h3>
-        <p className="text-slate-500 max-w-sm mx-auto mt-2">
-          This table will list all YouTube videos and PDFs linked to your books.
-          (We need to build a 'GetAllResources' endpoint in Go first to populate
-          this).
-        </p>
+        <div className="hidden sm:block w-px h-6 bg-slate-200 mx-2" />
+        <Button variant="ghost" size="sm" className="text-slate-500">
+          <Filter className="w-4 h-4 mr-2" /> Filter
+        </Button>
+      </div>
+
+      {/* TABLE */}
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        {isLoading ? (
+          <div className="h-64 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
+          </div>
+        ) : (
+          <DataTable columns={columns} data={filteredResources} />
+        )}
       </div>
     </div>
   );
 }
-  

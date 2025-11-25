@@ -7,11 +7,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	// Import the pgx driver for Postgres
-	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/draqist/iqraa/backend/internal/data"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 // Config holds all the configuration for our application
@@ -36,7 +37,17 @@ type application struct {
 func main() {
 	// 1. Declare our configuration
 	var cfg config
-	cfg.port = 8080
+    
+    // 1. Read PORT from environment, default to 8080 if missing
+    portStr := os.Getenv("PORT")
+    if portStr == "" {
+        portStr = "8080"
+    }
+    var err error
+    cfg.port, err = strconv.Atoi(portStr)
+    if err != nil {
+        cfg.port = 8080
+    }
 	
 	// This DSN (Data Source Name) matches your docker-compose environment variables
 	// format: postgres://user:password@host:port/dbname

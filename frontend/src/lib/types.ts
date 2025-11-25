@@ -47,6 +47,16 @@ export interface Resource {
   parent_id: string | null;
   sequence_index: number;
   children?: Resource[]; // We will add this manually in the frontend
+  book_title?: string
+}
+
+export interface CreateResourcePayload {
+  title: string;
+  type: ResourceType;
+  book_id: string;
+  is_official: boolean;
+  url?: string;
+  children?: { title: string; url: string }[];
 }
 
 export interface Note {

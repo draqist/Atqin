@@ -61,6 +61,8 @@ mux.HandleFunc("POST /v1/users/register", app.registerUserHandler)
 	mux.HandleFunc("GET /v1/bookmarks", app.requireAuth(app.listBookmarksHandler))
 	// User Profile
 mux.HandleFunc("GET /v1/users/me", app.requireAuth(app.getMeHandler))
+// Inside protected routes, or public if you prefer
+mux.HandleFunc("GET /v1/resources/{id}", app.requireAuth(app.getResourceHandler))
 	// WRAP the mux with the CORS middleware
 	return app.enableCORS(mux)
 }

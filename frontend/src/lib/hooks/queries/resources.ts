@@ -1,4 +1,4 @@
-import { fetchBookResources } from '@/lib/api/queries/resources';
+import { fetchAllResources, fetchBookResources } from '@/lib/api/queries/resources';
 import { Resource } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 
@@ -11,5 +11,13 @@ export const useBookResources = (bookId: string) => {
     enabled: !!bookId,
     // Keep resources fresh for 5 minutes
     staleTime: 5 * 60 * 1000,
+  });
+};
+
+
+export const useAdminResources = () => {
+  return useQuery({
+    queryKey: ["admin", "resources"],
+    queryFn: fetchAllResources,
   });
 };

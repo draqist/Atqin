@@ -1,12 +1,20 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+	"os"
+)
 
 func (app *application) enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 1. Allow specific origin (Frontend)
 		// In production, you would check a list of allowed origins
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		frontendURL := os.Getenv("FRONTEND_URL")
+        if frontendURL == "" {
+            frontendURL = "http://localhost:3000" // Fallback for dev
+        }
+
+        w.Header().Set("Access-Control-Allow-Origin", frontendURL)
 
 		// 2. Allow specific methods
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")

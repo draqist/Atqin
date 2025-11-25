@@ -68,31 +68,39 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 
 	// 3. Generate Token
 	token, err := auth.GenerateToken(user.ID)
-	if err != nil {
-		app.errorResponse(w, http.StatusInternalServerError, "Token generation failed")
-		return
-	}
+    if err != nil {
+        app.errorResponse(w, http.StatusInternalServerError, "Token generation failed")
+        return
+    }
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"token": token, "user_id": user.ID, "name": user.Name})
+    w.Header().Set("Content-Type", "application/json")
+    // ADD "role": user.Role HERE
+    json.NewEncoder(w).Encode(map[string]string{
+        "token": token, 
+        "user_id": user.ID, 
+        "name": user.Name,
+        "role": user.Role, 
+    })
 }
 
 func (app *application) getMeHandler(w http.ResponseWriter, r *http.Request) {
-	// 1. Get ID from Context (set by middleware)
-	userID, ok := r.Context().Value(UserContextKey).(string)
-	if !ok || userID == "" {
-		app.errorResponse(w, http.StatusUnauthorized, "Invalid user context")
-		return
-	}
+    userID, ok := r.Context().Value(UserContextKey).(string)
+    if !ok || userID == "" {
+        app.errorResponse(w, http.StatusUnauthorized, "Invalid user context")
+        return
+    }
 
-	// 2. Fetch User Details
-	user, err := app.models.Users.GetByID(userID)
-	if err != nil {
-		app.errorResponse(w, http.StatusNotFound, "User not found")
-		return
-	}
+    // DEBUG LOG: Print the ID we are looking for
+    app.logger.Printf("DEBUG: Looking for User ID: %s", userID) 
 
-	// 3. Return JSON
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+    user, err := app.models.Users.GetByID(userID)
+    if err != nil {
+        // DEBUG LOG: Print the error
+        app.logger.Printf("DEBUG: Error finding user: %v", err)
+        app.errorResponse(w, http.StatusNotFound, "User not found")
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(user)
 }

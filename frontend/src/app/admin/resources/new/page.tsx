@@ -1,5 +1,5 @@
-const AddResources = () => {
-  return <div>AddResources</div>;
-};
+import { ResourceForm } from "@/components/admin/admin-resources-form";
 
-export default AddResources;
+export default function NewResourcePage() {
+  return <ResourceForm />;
+}

@@ -19,10 +19,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useLogout } from "@/hooks/use-auth";
 import { useUser } from "@/lib/hooks/queries/auth";
 
 export function SidebarUserMenu() {
   const { data: user, isLoading } = useUser();
+  const { logout } = useLogout();
 
   // Fallback for Guest
   const displayName = user ? user.name : "Guest Student";
@@ -105,7 +107,10 @@ export function SidebarUserMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
+        <DropdownMenuItem
+          className="text-red-600 focus:text-red-600 focus:bg-red-50"
+          onClick={logout}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           Log out
         </DropdownMenuItem>

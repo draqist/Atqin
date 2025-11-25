@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner"; // Assuming you have sonner or use generic alert
 
@@ -8,6 +8,7 @@ interface AuthResponse {
   token: string;
   user_id: string;
   name: string;
+  role: string;
 }
 
 export const useLogin = () => {
@@ -28,7 +29,12 @@ export const useLogin = () => {
       api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
       toast.success(`Welcome back, ${data.name}!`);
-      router.push("/library");
+      // THE SMART REDIRECT LOGIC
+      if (data.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/library");
+      }
     },
     onError: (error: any) => {
       // Extract error message from Go backend
@@ -59,4 +65,26 @@ export const useRegister = () => {
       toast.error(msg);
     },
   });
+};
+
+export const useLogout = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const logout = () => {
+    // 1. Destroy the Token
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // 2. Clear the Cache (Critical)
+    // This ensures that if another user logs in, they don't see the previous user's data 
+    // flashing on the screen from the React Query cache.
+    queryClient.clear();
+
+    // 3. Feedback & Redirect
+    toast.success("Logged out successfully");
+    router.push("/login");
+  };
+
+  return { logout };
 };

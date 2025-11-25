@@ -55,8 +55,10 @@ func (m UserModel) Insert(user *User) error {
 }
 
 // GetByEmail fetches a user to verify login
+// GetByEmail fetches a user to verify login
 func (m UserModel) GetByEmail(email string) (*User, error) {
-	query := `SELECT id, name, email, password_hash, created_at FROM users WHERE email = $1`
+	// CHANGED: Added 'role' to the SELECT statement
+	query := `SELECT id, name, email, password_hash, role, created_at FROM users WHERE email = $1`
 
 	var user User
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -67,6 +69,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 		&user.Name,
 		&user.Email,
 		&user.PasswordHash,
+		&user.Role, // CHANGED: Added scan for role
 		&user.CreatedAt,
 	)
 
@@ -90,27 +93,35 @@ func (u *User) PasswordMatches(plaintextPassword string) (bool, error) {
 }
 
 // GetByID fetches a user by their UUID
+// GetByID fetches a user by their UUID
 func (m UserModel) GetByID(id string) (*User, error) {
-	query := `SELECT id, name, email, created_at FROM users WHERE id = $1`
+    // 1. Ensure we SELECT 'role' here
+    query := `
+        SELECT id, name, email, role, created_at 
+        FROM users 
+        WHERE id = $1`
 
-	var user User
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
+    var user User
+    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+    defer cancel()
 
-	err := m.DB.QueryRowContext(ctx, query, id).Scan(
-		&user.ID,
-		&user.Name,
-		&user.Email,
-		&user.CreatedAt,
-		&user.Role,
-	)
+    // 2. Ensure we SCAN 'role' here (Total 5 variables for 5 columns)
+    err := m.DB.QueryRowContext(ctx, query, id).Scan(
+        &user.ID,
+        &user.Name,
+        &user.Email,
+        &user.Role, // <--- Make sure this matches the position in SELECT
+        &user.CreatedAt,
+    )
 
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrRecordNotFound
-		}
-		return nil, err
-	}
+    if err != nil {
+        if errors.Is(err, sql.ErrNoRows) {
+            return nil, ErrRecordNotFound
+        }
+        // If this returns an error like "expected 4 destination args", 
+        // it will bubble up and cause your 500/404 issue.
+        return nil, err
+    }
 
-	return &user, nil
+    return &user, nil
 }

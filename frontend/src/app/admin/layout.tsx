@@ -1,18 +1,21 @@
 "use client"; // Need client for pathname check
 
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
+import { useUser } from "@/lib/hooks/queries/auth";
 import { cn } from "@/lib/utils";
 import {
   BookOpen,
   ChevronRight,
   FileText,
   LayoutDashboard,
+  Loader2,
   LogOut,
   Settings,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function AdminLayout({
   children,
@@ -29,12 +32,7 @@ export default function AdminLayout({
             href="/admin"
             className="flex items-center gap-2 font-bold text-lg tracking-tight"
           >
-            <Image
-              src={"/iqraa.svg"}
-              alt="admin_logo"
-              height={20}
-              width={70}
-            />
+            <Image src={"/iqraa.svg"} alt="admin_logo" height={20} width={70} />
           </Link>
         </div>
 
@@ -124,7 +122,28 @@ function AdminNavItem({
   // Check if active (exact match or sub-path match for books)
   const isActive =
     pathname === href || (href !== "/admin" && pathname.startsWith(href));
+  const router = useRouter();
+  const { data: user, isLoading } = useUser();
 
+  useEffect(() => {
+    if (!isLoading && user) {
+      // If user is loaded but NOT an admin, kick them out
+      if (user.role !== "admin") {
+        router.replace("/library"); // Use replace so they can't back button into admin
+      }
+    } else if (!isLoading && !user) {
+      // Not logged in at all
+      router.replace("/login");
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-[#F9FAFB]">
+        <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
+      </div>
+    );
+  }
   return (
     <Link
       href={href}

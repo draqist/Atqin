@@ -5,6 +5,7 @@ export interface UserProfile {
   name: string;
   email: string;
   created_at: string;
+  role: string;
 }
 
 export const fetchMe = async (): Promise<UserProfile> => {

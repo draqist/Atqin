@@ -19,6 +19,7 @@ type Resource struct {
 	ParentID          *string   `json:"parent_id"`
 	SequenceIndex     int       `json:"sequence_index"`
 	CreatedAt         time.Time `json:"created_at"`
+	BookTitle string `json:"book_title,omitempty"`
 }
 
 type ResourceModel struct {
@@ -61,32 +62,41 @@ func (m ResourceModel) Get(id string) (*Resource, error) {
 // GetAll fetches ALL resources (for Admin Table)
 // We join with books so the admin sees which book the video belongs to
 func (m ResourceModel) GetAll() ([]*Resource, error) {
-	// Note: In a real app, you'd add pagination here
-	query := `
-		SELECT id::text, book_id::text, type, title, url, is_official, created_at
-		FROM resources
-		ORDER BY created_at DESC
-		LIMIT 100`
+    query := `
+        SELECT 
+            r.id::text, 
+            r.book_id::text, 
+            b.title as book_title, -- Get the human readable title
+            r.type, 
+            r.title, 
+            r.url, 
+            r.is_official, 
+            r.created_at
+        FROM resources r
+        JOIN books b ON r.book_id = b.id
+        ORDER BY r.created_at DESC
+        LIMIT 100`
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
+    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+    defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+    rows, err := m.DB.QueryContext(ctx, query)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
 
-	var resources []*Resource
-	for rows.Next() {
-		var r Resource
-		err := rows.Scan(&r.ID, &r.BookID, &r.Type, &r.Title, &r.URL, &r.IsOfficial, &r.CreatedAt)
-		if err != nil {
-			return nil, err
-		}
-		resources = append(resources, &r)
-	}
-	return resources, nil
+    var resources []*Resource
+    for rows.Next() {
+        var r Resource
+        // Scan book_title into the new field
+        err := rows.Scan(&r.ID, &r.BookID, &r.BookTitle, &r.Type, &r.Title, &r.URL, &r.IsOfficial, &r.CreatedAt)
+        if err != nil {
+            return nil, err
+        }
+        resources = append(resources, &r)
+    }
+    return resources, nil
 }
 
 // Insert adds a new resource
@@ -145,3 +155,4 @@ func (m ResourceModel) Delete(id string) error {
 	}
 	return nil
 }
+
