@@ -142,7 +142,7 @@ export function BookForm() {
                         <Input
                           placeholder="e.g. Matn Ash-Shatibiyyah"
                           {...field}
-                          className="text-lg h-12"
+                          className="text-base h-10"
                         />
                       </FormControl>
                       <FormDescription>
@@ -162,7 +162,7 @@ export function BookForm() {
                       <FormControl>
                         <Textarea
                           placeholder="Write a brief summary regarding the significance of this text..."
-                          className="min-h-[200px] resize-y leading-relaxed"
+                          className="min-h-[200px] resize-y focus-visible:ring-1 leading-relaxed"
                           {...field}
                         />
                       </FormControl>

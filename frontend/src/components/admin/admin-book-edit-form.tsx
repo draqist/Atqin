@@ -175,7 +175,7 @@ export function BookEditForm({ book }: BookEditFormProps) {
                     <FormItem>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input {...field} className="text-lg h-12" />
+                        <Input {...field} className="text-base h-10" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

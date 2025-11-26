@@ -136,7 +136,11 @@ export function ResourceForm({ resource }: { resource?: Resource }) {
                           : "Title"}
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} className="text-lg" />
+                        <Input
+                          {...field}
+                          className="text-base"
+                          placeholder="Explanation of Matn Ash-Shaatibiyah"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
