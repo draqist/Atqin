@@ -50,7 +50,7 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 const PdfViewer = dynamic(
   () => import("@/components/library/pdf-viewer").then((mod) => mod.PdfViewer),
@@ -93,24 +93,16 @@ export default function StudyPage({
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"text" | "pdf">("pdf");
-
-  const handleResourceSelect = (resourceId: string) => {
-    // Find the resource object
-    const allItems = structuredResources.flatMap((r) =>
-      r.children && r.children.length > 0 ? r.children : [r]
-    );
-    const selected = allItems.find((r) => r.id === resourceId);
-
-    if (selected?.type === "pdf") {
-      setPdfUrl(selected.url);
+  useEffect(() => {
+    const mainPdf =
+      resources?.find((r) => r.type === "pdf" && r.is_official) ||
+      resources?.find((r) => r.type === "pdf");
+    if (mainPdf) {
+      setPdfUrl(mainPdf.url);
       setViewMode("pdf");
-    } else if (selected?.type === "youtube_video") {
-      // Keep standard video logic
-      setActiveResource(resourceId);
-    } else if (selected?.type === "web_link") {
-      window.open(selected.url, "_blank");
     }
-  };
+  }, [resources]);
+
   const { mutate: toggleBookmark, isPending: isToggling } = useToggleBookmark();
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -343,12 +335,7 @@ export default function StudyPage({
         {/* 2. The Text (Full Height Reader) */}
         <div className="flex-1 overflow-y-auto bg-[#F3F4F6]">
           <div className="p-4 pb-32">
-            <PdfViewer
-              url={
-                "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
-              }
-              onClose={() => setViewMode("text")}
-            />
+            <PdfViewer url={pdfUrl ?? ""} onClose={() => setViewMode("text")} />
           </div>
         </div>
 
@@ -445,9 +432,7 @@ export default function StudyPage({
                 {viewMode === "pdf" ? (
                   <div className="w-full max-w-4xl pb-8">
                     <PdfViewer
-                      url={
-                        "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
-                      }
+                      url={pdfUrl ?? ""}
                       onClose={() => setViewMode("text")}
                     />
                   </div>

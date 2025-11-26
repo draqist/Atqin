@@ -63,6 +63,10 @@ mux.HandleFunc("POST /v1/users/register", app.registerUserHandler)
 mux.HandleFunc("GET /v1/users/me", app.requireAuth(app.getMeHandler))
 // Inside protected routes, or public if you prefer
 mux.HandleFunc("GET /v1/resources/{id}", app.requireAuth(app.getResourceHandler))
+// In routes.go
+mux.HandleFunc("GET /v1/books/{id}/resources", app.listBookResourcesHandler)
+// Add inside requireAdmin block
+mux.HandleFunc("POST /v1/uploads/sign", app.requireAuth(app.requireAdmin(app.generateUploadURLHandler)))
 	// WRAP the mux with the CORS middleware
 	return app.enableCORS(mux)
 }

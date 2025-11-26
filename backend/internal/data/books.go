@@ -19,6 +19,8 @@ type Book struct {
 	IsPublic       bool            `json:"is_public"`
 	CreatedAt      time.Time       `json:"created_at"`
 	Version        int             `json:"version"`
+	TitleAr       *string `json:"title_ar"`       // Use pointer to handle nulls safely
+    OriginalAuthorAr *string `json:"author_ar"`
 }
 
 // BookModel wraps the connection pool

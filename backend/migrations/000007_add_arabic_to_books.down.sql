@@ -1,0 +1,1 @@
+ALTER TABLE books DROP COLUMN title_ar, DROP COLUMN author_ar;

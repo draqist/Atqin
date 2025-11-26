@@ -31,6 +31,8 @@ services:
       # Note: host=db works because the service above is named 'db'
       DB_DSN: "host=db user=user password=password dbname=iqraa_db port=5432 sslmode=disable"
       REDIS_ADDR: "redis:6379"
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
     depends_on:
       - db
       - redis

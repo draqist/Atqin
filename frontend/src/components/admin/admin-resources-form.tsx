@@ -31,6 +31,7 @@ import { GripVertical, ListVideo, Loader2, Plus, Trash2 } from "lucide-react"; /
 import { useRouter } from "next/navigation";
 import { Resolver, useFieldArray, useForm } from "react-hook-form"; // Import useFieldArray
 import * as z from "zod";
+import { FileUpload } from "./admin-file-upload";
 
 // UPDATED SCHEMA: Supports children
 const formSchema = z.object({
@@ -148,7 +149,25 @@ export function ResourceForm({ resource }: { resource?: Resource }) {
                 />
 
                 {/* URL Field (Hidden for Playlist containers usually, or optional) */}
-                {resourceType !== "playlist" && (
+                {resourceType !== "playlist" && form.watch("type") === "pdf" ? (
+                  <FormField
+                    control={form.control}
+                    name="url"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Upload PDF</FormLabel>
+                        <FormControl>
+                          <FileUpload
+                            value={field.value ?? ""}
+                            onChange={field.onChange}
+                            accept="application/pdf"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
                   <FormField
                     control={form.control}
                     name="url"

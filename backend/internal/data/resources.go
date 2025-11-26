@@ -19,11 +19,74 @@ type Resource struct {
 	ParentID          *string   `json:"parent_id"`
 	SequenceIndex     int       `json:"sequence_index"`
 	CreatedAt         time.Time `json:"created_at"`
-	BookTitle string `json:"book_title,omitempty"`
+	BookTitle         string    `json:"book_title,omitempty"`
 }
 
 type ResourceModel struct {
 	DB *sql.DB
+}
+
+func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
+    // UPDATED QUERY: Added parent_id and sequence_index
+    query := `
+        SELECT id, book_id, type, title, url, media_start_seconds, media_end_seconds, is_official, created_at, parent_id, sequence_index
+        FROM resources
+        WHERE book_id = $1
+        ORDER BY is_official DESC, sequence_index ASC, created_at DESC` 
+
+    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+    defer cancel()
+
+    rows, err := m.DB.QueryContext(ctx, query, bookID)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var resources []*Resource
+	for rows.Next() {
+		var r Resource
+
+		// Helper for nullable fields
+		var parentID sql.NullString
+		var mediaStart, mediaEnd sql.NullInt32
+
+		err := rows.Scan(
+			&r.ID,
+			&r.BookID,
+			&r.Type,
+			&r.Title,
+			&r.URL,
+			&mediaStart,
+			&mediaEnd,
+			&r.IsOfficial,
+			&r.CreatedAt,
+			&parentID,        // Scan into NullString
+			&r.SequenceIndex, // Scan sequence
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		// Convert NullString to pointer for our struct
+		if parentID.Valid {
+			r.ParentID = &parentID.String
+		}
+		if mediaStart.Valid {
+			r.MediaStartSeconds = int(mediaStart.Int32)
+		}
+		if mediaEnd.Valid {
+			r.MediaEndSeconds = int(mediaEnd.Int32)
+		}
+
+		resources = append(resources, &r)
+	}
+
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+
+    return resources, nil
 }
 
 // Get fetches a single resource by ID
@@ -52,9 +115,15 @@ func (m ResourceModel) Get(id string) (*Resource, error) {
 		return nil, err
 	}
 
-	if parentID.Valid { r.ParentID = &parentID.String }
-	if mediaStart.Valid { r.MediaStartSeconds = int(mediaStart.Int32) }
-	if mediaEnd.Valid { r.MediaEndSeconds = int(mediaEnd.Int32) }
+	if parentID.Valid {
+		r.ParentID = &parentID.String
+	}
+	if mediaStart.Valid {
+		r.MediaStartSeconds = int(mediaStart.Int32)
+	}
+	if mediaEnd.Valid {
+		r.MediaEndSeconds = int(mediaEnd.Int32)
+	}
 
 	return &r, nil
 }
@@ -62,7 +131,7 @@ func (m ResourceModel) Get(id string) (*Resource, error) {
 // GetAll fetches ALL resources (for Admin Table)
 // We join with books so the admin sees which book the video belongs to
 func (m ResourceModel) GetAll() ([]*Resource, error) {
-    query := `
+	query := `
         SELECT 
             r.id::text, 
             r.book_id::text, 
@@ -77,26 +146,26 @@ func (m ResourceModel) GetAll() ([]*Resource, error) {
         ORDER BY r.created_at DESC
         LIMIT 100`
 
-    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-    defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
-    rows, err := m.DB.QueryContext(ctx, query)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-    var resources []*Resource
-    for rows.Next() {
-        var r Resource
-        // Scan book_title into the new field
-        err := rows.Scan(&r.ID, &r.BookID, &r.BookTitle, &r.Type, &r.Title, &r.URL, &r.IsOfficial, &r.CreatedAt)
-        if err != nil {
-            return nil, err
-        }
-        resources = append(resources, &r)
-    }
-    return resources, nil
+	var resources []*Resource
+	for rows.Next() {
+		var r Resource
+		// Scan book_title into the new field
+		err := rows.Scan(&r.ID, &r.BookID, &r.BookTitle, &r.Type, &r.Title, &r.URL, &r.IsOfficial, &r.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		resources = append(resources, &r)
+	}
+	return resources, nil
 }
 
 // Insert adds a new resource
@@ -107,8 +176,8 @@ func (m ResourceModel) Insert(r *Resource) error {
 		RETURNING id, created_at`
 
 	args := []any{
-		r.BookID, r.Type, r.Title, r.URL, 
-		r.MediaStartSeconds, r.MediaEndSeconds, r.IsOfficial, 
+		r.BookID, r.Type, r.Title, r.URL,
+		r.MediaStartSeconds, r.MediaEndSeconds, r.IsOfficial,
 		r.ParentID, r.SequenceIndex,
 	}
 
@@ -155,4 +224,3 @@ func (m ResourceModel) Delete(id string) error {
 	}
 	return nil
 }
-

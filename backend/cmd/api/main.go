@@ -24,6 +24,10 @@ type config struct {
 		maxIdleConns int
 		maxIdleTime  string
 	}
+	supabase struct {
+		url string
+		key string
+	}
 }
 
 // Application holds the dependencies for our HTTP handlers, helpers, and middleware.
@@ -37,6 +41,7 @@ type application struct {
 func main() {
 	// 1. Declare our configuration
 	var cfg config
+	
     
     // 1. Read PORT from environment, default to 8080 if missing
     portStr := os.Getenv("PORT")
@@ -52,6 +57,8 @@ func main() {
 	// This DSN (Data Source Name) matches your docker-compose environment variables
 	// format: postgres://user:password@host:port/dbname
 	cfg.db.dsn = os.Getenv("DB_DSN")
+	cfg.supabase.url = os.Getenv("SUPABASE_URL")
+    cfg.supabase.key = os.Getenv("SUPABASE_SERVICE_KEY")
 	if cfg.db.dsn == "" {
 		// Fallback for local testing outside docker if needed
 		cfg.db.dsn = "postgres://user:password@localhost:5432/iqraa_db?sslmode=disable"

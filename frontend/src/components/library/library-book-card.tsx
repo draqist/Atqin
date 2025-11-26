@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Book } from "@/lib/types";
 import { BookOpen, Star } from "lucide-react";
@@ -22,15 +21,15 @@ export function LibraryBookCard({ book }: LibraryBookCardProps) {
           <img
             src={coverImage}
             alt={book.title}
-            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105 object-center"
           />
           {/* Optional: "Matn" Badge overlay on image */}
           <div className="absolute top-3 left-3">
             <Badge
               variant="secondary"
-              className="bg-white/90 text-slate-700 backdrop-blur-sm shadow-sm border-0 hover:bg-white rounded-sm"
+              className="bg-white/90 text-slate-700 backdrop-blur-sm shadow-sm border-0 hover:bg-white rounded-sm capitalize"
             >
-              Matn
+              {book.metadata.category}
             </Badge>
           </div>
         </div>
@@ -72,7 +71,9 @@ export function LibraryBookCard({ book }: LibraryBookCardProps) {
             <div className="h-3 w-px bg-slate-200" />
 
             {/* Students Count */}
-            <div className="text-xs text-slate-500">Beginner Level</div>
+            <div className="text-xs text-slate-500 capitalize">
+              {book.metadata.level} Level
+            </div>
           </div>
         </div>
       </div>
