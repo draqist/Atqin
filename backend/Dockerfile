@@ -1,26 +1,39 @@
-# 1. Use the Debian Bookworm image (Stable & "Batteries Included")
-# Using 'latest' ensures you have Go 1.25+ to satisfy Air's requirements
-FROM golang:latest
+# --- STAGE 1: BUILDER ---
+# We use the standard image (same as your local) to ensure tools work
+FROM golang:1.24 AS builder
 
-# 2. Set working directory
 WORKDIR /app
 
-# 3. Install Git (Debian uses apt-get, not apk)
-# We run update to ensure package lists are fresh
+# Install git just in case dependencies need it
 RUN apt-get update && apt-get install -y git
 
-# 4. Install Air
-# Since we are on the latest Go, we can safely use @latest
-RUN go install github.com/air-verse/air@latest
-
-# 5. Copy dependency files
+# Copy dependencies first (Caching layer)
 COPY go.mod go.sum ./
-
-# 6. Download dependencies
 RUN go mod download
 
-# 7. Copy the source code
+# Copy the source code
 COPY . .
 
-# 8. Run Air
-CMD ["air"]
+# CRITICAL FIX: Disable CGO to create a static binary that runs anywhere
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/api
+
+# --- STAGE 2: RUNNER ---
+# We use Alpine for a tiny, fast production image
+FROM alpine:latest
+
+WORKDIR /app
+
+# Install certificates so your app can talk to YouTube/Supabase (HTTPS)
+RUN apk --no-cache add ca-certificates
+
+# Copy ONLY the compiled binary from the builder stage
+COPY --from=builder /app/main .
+
+# Create the uploads directory just in case
+RUN mkdir -p uploads
+
+# Expose the port
+EXPOSE 8080
+
+# Run the binary
+CMD ["./main"]

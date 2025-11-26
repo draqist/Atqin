@@ -21,9 +21,9 @@ services:
 
   # 3. The Backend (Go) - UPDATED
   backend:
-    build: 
+    build:
       context: ./backend # Ensure Dockerfile is inside /backend folder!
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: iqraa_backend
     ports:
       - "8080:8080"
@@ -35,8 +35,8 @@ services:
       - db
       - redis
     volumes:
-      - ./backend:/app      # Maps local code to container
-      - /app/tmp            # IGNORE the build artifacts (Crucial for Air)
+      - ./backend:/app # Maps local code to container
+      - /app/tmp # IGNORE the build artifacts (Crucial for Air)
     restart: on-failure
 
 volumes:
