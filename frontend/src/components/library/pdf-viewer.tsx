@@ -99,7 +99,7 @@ export function PdfViewer({ url, onClose }: PdfViewerProps) {
             scale={scale}
             renderTextLayer={false} // Set to true if you want selectable text
             renderAnnotationLayer={false}
-            className="max-w-full"
+            className="max-w-full flex justify-center"
           />
         </Document>
       </div>
