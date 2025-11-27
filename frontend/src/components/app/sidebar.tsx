@@ -2,9 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import {
-  Hash,
   LayoutDashboard,
   Library,
+  Map,
   MessageSquareQuote,
   Mic,
 } from "lucide-react";
@@ -22,15 +22,17 @@ const mainNav = [
     icon: MessageSquareQuote,
   }, // NEW
   { name: "My Hifdh", href: "/hifdh", icon: Mic },
+  { name: "Roadmaps", href: "/roadmaps", icon: Map },
+  // { name: "API Docs", href: "/docs", icon: FileText },
 ];
 
 // Matching the categories from your Landing Page
-const categories = [
-  { name: "Tajweed & Qira'at", slug: "tajweed" },
-  { name: "Aqeedah", slug: "aqeedah" },
-  { name: "Hadith", slug: "hadith" },
-  { name: "Arabic Grammar", slug: "grammar" },
-];
+// const categories = [
+//   { name: "Tajweed & Qira'at", slug: "tajweed" },
+//   { name: "Aqeedah", slug: "aqeedah" },
+//   { name: "Hadith", slug: "hadith" },
+//   { name: "Arabic Grammar", slug: "grammar" },
+// ];
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -98,7 +100,7 @@ export function Sidebar() {
         </div>
 
         {/* Categories */}
-        <div>
+        {/* <div>
           <h3 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-slate-400 hidden lg:block">
             Categories
           </h3>
@@ -133,7 +135,7 @@ export function Sidebar() {
               );
             })}
           </nav>
-        </div>
+        </div> */}
       </div>
 
       {/* 3. USER FOOTER */}

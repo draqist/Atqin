@@ -1,44 +1,55 @@
 "use client";
 
 import { LibraryBookCard } from "@/components/library/library-book-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LibraryFilters } from "@/components/library/library-filters";
 import { Button } from "@/components/ui/button";
-import {
-  Sparkles,
-  AlertCircle,
-  SearchX,
-  RefreshCw,
-  BookOpen,
-} from "lucide-react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBooks } from "@/lib/hooks/queries/books";
+import { AlertCircle, RefreshCw, SearchX, Sparkles } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LibraryPage() {
   const { data: books, isLoading, isError, refetch } = useBooks();
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Get active category from URL (e.g. ?category=tajweed)
+  // 1. Get Params
+  const searchQuery = searchParams.get("q") || "";
   const currentCategory = searchParams.get("category");
+  const currentLevel = searchParams.get("level");
+  const currentSort = searchParams.get("sort") || "newest";
 
-  // --- FILTERING LOGIC (Client Side for MVP) ---
-  // In a real app with thousands of books, you'd pass this param to the API instead.
   const filteredBooks =
-    books?.filter((book) => {
-      if (!currentCategory) return true;
+    books
+      ?.filter((book) => {
+        // Parse metadata once safely
+        const meta: any =
+          typeof book.metadata === "string"
+            ? JSON.parse(book.metadata)
+            : book.metadata;
 
-      // We check if the book's metadata contains the category slug
-      // Note: This assumes book.metadata is an object. If it's a string in your type, parse it first.
-      // Safe check:
-      const metadata =
-        typeof book.metadata === "string"
-          ? JSON.parse(book.metadata)
-          : book.metadata;
+        // Category Filter
+        if (currentCategory && meta?.category !== currentCategory) return false;
 
-      return metadata?.category === currentCategory;
-    }) || [];
+        // Level Filter
+        if (currentLevel && meta?.level !== currentLevel) return false;
 
-  const mostReadBooks = filteredBooks.slice(0, 4);
+        return true;
+      })
+      .sort((a, b) => {
+        // Sorting Logic
+        if (currentSort === "alpha") {
+          return a.title.localeCompare(b.title);
+        }
+        // Default: Newest first (assuming bigger ID = newer, or use created_at)
+        return b.id.localeCompare(a.id);
+      }) || [];
+
+  // Split for "Trending" section (Just takes top 4 of current filter)
+  const trendingBooks =
+    !currentCategory && !currentLevel && !searchQuery
+      ? filteredBooks.slice(0, 4)
+      : [];
 
   // 1. LOADING STATE
   if (isLoading) {
@@ -104,22 +115,22 @@ export default function LibraryPage() {
   // 4. SUCCESS STATE
   return (
     <div className="space-y-12 pb-20 animate-in fade-in duration-500">
-      {/* SECTION 1: MOST READ (Only show if we have enough data) */}
-      {mostReadBooks.length > 0 && (
+      {/* FILTER BAR */}
+      <section>
+        <LibraryFilters />
+      </section>
+
+      {/* Only show if no search/filters active, keeps homepage dynamic */}
+      {trendingBooks.length > 0 && !currentCategory && !searchQuery && (
         <section>
-          <div className="flex items-center gap-2 mb-6">
-            <div className="p-1.5 bg-linear-to-br from-purple-100 to-indigo-100 rounded-md text-indigo-600">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-900">
-              {currentCategory
-                ? `Popular in ${currentCategory}`
-                : "Trending this Week"}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-500" />
+              Trending this Week
             </h2>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mostReadBooks.map((book) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            {trendingBooks.map((book) => (
               <LibraryBookCard key={book.id} book={book} />
             ))}
           </div>
@@ -128,20 +139,31 @@ export default function LibraryPage() {
 
       {/* SECTION 2: ALL BOOKS */}
       <section>
-        <div className="flex items-center gap-2 mb-6">
-          <div className="p-1.5 bg-slate-100 rounded-md text-slate-600">
-            <BookOpen className="w-4 h-4" />
+        {currentCategory && (
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-slate-900 capitalize">
+              {currentCategory} Collection
+            </h1>
+            <p className="text-slate-500 text-sm mt-1">
+              {filteredBooks.length} books available
+            </p>
           </div>
-          <h2 className="text-xl font-bold text-slate-900">
-            {currentCategory ? "All Titles" : "Full Collection"}
-          </h2>
-        </div>
+        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredBooks.map((book) => (
-            <LibraryBookCard key={book.id} book={book} />
-          ))}
-        </div>
+        {filteredBooks.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredBooks.map((book) => (
+              <LibraryBookCard key={book.id} book={book} />
+            ))}
+          </div>
+        ) : (
+          <div className="py-20 text-center border-2 border-dashed border-slate-200 rounded-2xl">
+            <SearchX className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-500 font-medium">
+              No books found for this filter.
+            </p>
+          </div>
+        )}
       </section>
     </div>
   );

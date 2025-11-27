@@ -92,3 +92,47 @@ export interface GlobalReflection {
 export interface BookmarkResponse {
   bookmarked: boolean;
 }
+
+export interface Roadmap {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  cover_image_url?: string;
+  is_public: boolean;
+  created_at: string;
+  nodes: RoadmapNode[];
+  // Optional: count of nodes if your backend sends it
+  nodes_count?: number;
+}
+
+export interface RoadmapNode {
+  id: string;
+  roadmap_id: string;
+  book_id: string;
+  book_title: string;
+  book_author: string;
+  book_cover: string;
+  sequence_index: number;
+  level: string;
+  description?: string;
+  user_status?: string;
+}
+
+export interface RoadmapNodeInput {
+  book_id: string;
+  level: string;
+  sequence_index: number;
+  description?: string;
+}
+
+export interface StudentNode {
+  id: string;
+  bookId: string;
+  title: string;
+  author: string;
+  level: string;
+  description: string; // Specific instruction for this step
+  status: "completed" | "active" | "locked";
+  sequence: number;
+}

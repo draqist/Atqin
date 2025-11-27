@@ -52,6 +52,11 @@ export default function AdminLayout({
             icon={FileText}
             label="Resources"
           />
+          <AdminNavItem
+            href="/admin/roadmaps"
+            icon={FileText}
+            label="Roadmaps"
+          />
 
           <div className="px-2 mt-8 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
             System

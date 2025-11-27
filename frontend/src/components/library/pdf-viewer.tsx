@@ -17,17 +17,23 @@ interface PdfViewerProps {
   onClose?: () => void;
 }
 
+import { useResizeObserver } from "@/lib/hooks/use-resize-observer";
+import { useRef } from "react";
+
 export function PdfViewer({ url, onClose }: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const containerWidth = useResizeObserver(containerRef);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
   }
 
   return (
-    <div className="flex flex-col items-center w-full min-h-[600px]">
+    <div className="flex flex-col items-center w-full">
       {/* PDF Controls Toolbar */}
       <div className="sticky top-0 z-10 flex items-center gap-2 bg-slate-900/5 backdrop-blur-md p-2 rounded-full mb-6 border border-white/20 shadow-sm">
         <Button
@@ -83,7 +89,10 @@ export function PdfViewer({ url, onClose }: PdfViewerProps) {
       </div>
 
       {/* The Document */}
-      <div className="border border-slate-200 shadow-md rounded-sm overflow-hidden bg-white min-h-[600px] min-w-full">
+      <div
+        ref={containerRef}
+        className="border border-slate-200 shadow-md rounded-sm overflow-hidden bg-white w-full"
+      >
         <Document
           file={url}
           onLoadSuccess={onDocumentLoadSuccess}
@@ -97,9 +106,10 @@ export function PdfViewer({ url, onClose }: PdfViewerProps) {
           <Page
             pageNumber={pageNumber}
             scale={scale}
+            width={containerWidth ? containerWidth : undefined}
             renderTextLayer={false} // Set to true if you want selectable text
             renderAnnotationLayer={false}
-            className="max-w-full flex justify-center"
+            className="max-w-full w-full flex justify-center"
           />
         </Document>
       </div>

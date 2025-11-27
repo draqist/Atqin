@@ -25,7 +25,6 @@ export function FileUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
   const handleUpload = async (file: File) => {
     if (!file) return;
     setIsUploading(true);

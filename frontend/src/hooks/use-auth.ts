@@ -1,6 +1,7 @@
 import api from "@/lib/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner"; // Assuming you have sonner or use generic alert
 
 // Types matching your Go Backend response
@@ -13,6 +14,16 @@ interface AuthResponse {
 
 export const useLogin = () => {
   const router = useRouter();
+  const searchParams = useSearchParams(); // Get URL params
+  const nextUrl = searchParams.get("next");
+  useEffect(() => {
+    if (searchParams.get("error") === "session_expired") {
+      // Use setTimeout to ensure it renders after the page load
+      setTimeout(() => {
+        toast.error("Session expired. Please log in again.");
+      }, 0);
+    }
+  }, [searchParams]);
 
   return useMutation({
     mutationFn: async (credentials: any) => {
@@ -29,10 +40,13 @@ export const useLogin = () => {
       api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
       toast.success(`Welcome back, ${data.name}!`);
-      // THE SMART REDIRECT LOGIC
       if (data.role === "admin") {
         router.push("/admin");
+      } else if (nextUrl) {
+        // If there was a specific destination, go there!
+        router.push(nextUrl);
       } else {
+        // Default fallback
         router.push("/library");
       }
     },
@@ -46,6 +60,8 @@ export const useLogin = () => {
 
 export const useRegister = () => {
   const router = useRouter();
+  const searchParams = useSearchParams(); // Get URL params
+  const nextUrl = searchParams.get("next");
 
   return useMutation({
     mutationFn: async (credentials: any) => {
@@ -58,7 +74,13 @@ export const useRegister = () => {
       api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
       toast.success("Account created successfully!");
-      router.push("/library");
+      if (nextUrl) {
+        // If there was a specific destination, go there!
+        router.push(nextUrl);
+      } else {
+        // Default fallback
+        router.push("/library");
+      }
     },
     onError: (error: any) => {
       const msg = error.response?.data?.error || "Registration failed";

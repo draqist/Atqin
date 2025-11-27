@@ -334,7 +334,7 @@ export default function StudyPage({
 
         {/* 2. The Text (Full Height Reader) */}
         <div className="flex-1 overflow-y-auto bg-[#F3F4F6]">
-          <div className="p-4 pb-32">
+          <div className="p-4">
             <PdfViewer url={pdfUrl ?? ""} onClose={() => setViewMode("text")} />
           </div>
         </div>

@@ -4,12 +4,14 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export const useCreateResource = () => {
+  const queryClient = useQueryClient();
   const router = useRouter();
   return useMutation({
     mutationFn: createResource,
     onSuccess: () => {
       toast.success("Resource created");
       router.push("/admin/resources");
+      queryClient.invalidateQueries({ queryKey: ["admin", "resources"] });
     },
     onError: () => toast.error("Failed to create resource"),
   });
