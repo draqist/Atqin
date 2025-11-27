@@ -67,6 +67,35 @@ mux.HandleFunc("GET /v1/resources/{id}", app.requireAuth(app.getResourceHandler)
 mux.HandleFunc("GET /v1/books/{id}/resources", app.listBookResourcesHandler)
 // Add inside requireAdmin block
 mux.HandleFunc("POST /v1/uploads/sign", app.requireAuth(app.requireAdmin(app.generateUploadURLHandler)))
+// ROADMAPS (Public Read)
+	// Note: We wrap getRoadmapHandler in requireAuth *Optionally* if we want progress, 
+    // or we handle the empty context inside the handler (which we did above). 
+    // Actually, to support Guest viewing, don't wrap GetBySlug in requireAuth, 
+    // instead use a middleware that "Extracts User if Present" but doesn't block.
+    
+    // For simplicity now: Public routes
+	mux.HandleFunc("GET /v1/roadmaps", app.authenticateIfExists(app.listRoadmapsHandler))
+    
+    // We use a special wrapper or just let the handler check headers manually if you want hybrid auth
+    // For now, let's assume we just use the handler and if no token, no progress shown.
+    // You might need a middleware "authenticateIfExists"
+	mux.HandleFunc("GET /v1/roadmaps/{slug}", app.authenticateIfExists(app.getRoadmapHandler))
+
+	// ROADMAPS (Protected Write)
+	mux.HandleFunc("POST /v1/roadmaps/nodes/{node_id}/progress", app.requireAuth(app.updateRoadmapProgressHandler))
+	// --- ROADMAPS (ADMIN) ---
+	
+	// 1. Container Management
+	mux.HandleFunc("POST /v1/roadmaps", app.requireAuth(app.requireAdmin(app.createRoadmapHandler)))
+	mux.HandleFunc("PUT /v1/roadmaps/{id}", app.requireAuth(app.requireAdmin(app.updateRoadmapHandler)))
+	mux.HandleFunc("DELETE /v1/roadmaps/{id}", app.requireAuth(app.requireAdmin(app.deleteRoadmapHandler)))
+
+	// 2. Node Management (Adding Books to Roadmap)
+	mux.HandleFunc("POST /v1/roadmaps/{id}/nodes", app.requireAuth(app.requireAdmin(app.addRoadmapNodeHandler)))
+	mux.HandleFunc("PUT /v1/roadmaps/nodes/{node_id}", app.requireAuth(app.requireAdmin(app.updateRoadmapNodeHandler)))
+	mux.HandleFunc("DELETE /v1/roadmaps/nodes/{node_id}", app.requireAuth(app.requireAdmin(app.deleteRoadmapNodeHandler)))
+	// PUT /v1/roadmaps/{id}/nodes/reorder
+mux.HandleFunc("PUT /v1/roadmaps/{id}/nodes/reorder", app.requireAuth(app.requireAdmin(app.batchUpdateRoadmapNodesHandler)))
 	// WRAP the mux with the CORS middleware
 	return app.enableCORS(mux)
 }

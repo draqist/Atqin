@@ -18,6 +18,7 @@ type Models struct {
 	Notes NoteModel
 	Bookmarks BookmarkModel
 	Users UserModel
+	Roadmaps RoadmapModel
 	// We will add Nodes, Users, Resources here later
 }
 
@@ -30,5 +31,6 @@ func NewModels(db *sql.DB) Models {
 		Notes: NoteModel{DB: db},
 		Bookmarks: BookmarkModel{DB: db},
 		Users: UserModel{DB: db},
+		Roadmaps: RoadmapModel{DB: db},
 	}
 }

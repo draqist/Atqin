@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
+	"strings"
+
+	"github.com/draqist/iqraa/backend/internal/auth"
 )
 
 func (app *application) enableCORS(next http.Handler) http.Handler {
@@ -33,4 +37,40 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 		// 5. Pass the request to the next handler (The Waiter)
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (app *application) authenticateIfExists(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+
+		// 1. If no header, proceed as Guest immediately (Don't error)
+		if authHeader == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// 2. Check format
+		headerParts := strings.Split(authHeader, " ")
+		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+			// Bad format? Just ignore it and proceed as Guest
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		token := headerParts[1]
+
+		// 3. Validate the token
+		claims, err := auth.ValidateToken(token)
+		if err != nil {
+			// Invalid token? Just ignore it and proceed as Guest
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// 4. Valid Token found! Add to context.
+		ctx := context.WithValue(r.Context(), UserContextKey, claims.UserID)
+
+		// CRITICAL FIX: Use r.WithContext(ctx) to pass the user ID down the chain
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
 }
