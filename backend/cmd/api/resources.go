@@ -3,9 +3,14 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"net/url"
+	"os"
 
 	"github.com/draqist/iqraa/backend/internal/data"
+	"github.com/draqist/iqraa/backend/internal/youtube"
 )
 
 // createResourceHandler
@@ -186,4 +191,71 @@ func (app *application) listBookResourcesHandler(w http.ResponseWriter, r *http.
 	// 3. Send the JSON response (Serve the food)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resources)
+}
+
+// import "github.com/yourusername/iqraa/backend/internal/youtube"
+
+func (app *application) fetchYouTubePlaylistHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		PlaylistID string `json:"playlist_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		app.errorResponse(w, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	// 1. Call the YouTube Helper
+	videos, err := youtube.FetchPlaylistVideos(input.PlaylistID)
+	if err != nil {
+		app.logger.Println(err)
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to fetch from YouTube")
+		return
+	}
+
+	// 2. Transform to your Resource Input format
+	// We return a list of "Children" ready for your Bulk Create form
+	type ChildInput struct {
+		Title string `json:"title"`
+		URL   string `json:"url"`
+	}
+	var children []ChildInput
+
+	for _, v := range videos {
+		children = append(children, ChildInput{
+			Title: v.Snippet.Title,
+			URL:   "https://www.youtube.com/watch?v=" + v.Snippet.ResourceId.VideoId,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(children)
+}
+
+func (app *application) searchYouTubePlaylistsHandler(w http.ResponseWriter, r *http.Request) {
+	// Get query from URL ?q=...
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		app.errorResponse(w, http.StatusBadRequest, "Search query required")
+		return
+	}
+
+	apiKey := os.Getenv("YOUTUBE_API_KEY")
+	// Call YouTube Search API
+	// Type=playlist ensures we only get playlists
+	url := fmt.Sprintf(
+		"https://www.googleapis.com/youtube/v3/search?part=snippet&type=playlist&q=%s&maxResults=10&key=%s",
+		url.QueryEscape(query), apiKey,
+	)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to contact YouTube")
+		return
+	}
+	defer resp.Body.Close()
+
+	// We can just pipe the YouTube JSON directly back to the frontend
+	// effectively acting as a proxy to hide the API Key
+	w.Header().Set("Content-Type", "application/json")
+	io.Copy(w, resp.Body)
 }

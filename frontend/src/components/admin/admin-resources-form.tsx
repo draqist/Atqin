@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import api from "@/lib/axios";
 import {
   useCreateResource,
   useUpdateResource,
@@ -30,8 +31,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { GripVertical, ListVideo, Loader2, Plus, Trash2 } from "lucide-react"; // New Icons
 import { useRouter } from "next/navigation";
 import { Resolver, useFieldArray, useForm } from "react-hook-form"; // Import useFieldArray
+import { toast } from "sonner";
 import * as z from "zod";
 import { FileUpload } from "./admin-file-upload";
+import { YouTubePicker } from "./youtube-picker";
 
 // UPDATED SCHEMA: Supports children
 const formSchema = z.object({
@@ -90,7 +93,22 @@ export function ResourceForm({ resource }: { resource?: Resource }) {
       createMutation.mutate(values);
     }
   }
+  const handlePlaylistSelect = async (playlistId: string) => {
+    // 1. Call your existing fetchYouTubePlaylistHandler endpoint
+    // (We reuse the logic from the "Manual ID" import button)
+    try {
+      const { data: videos } = await api.post("/tools/youtube-playlist", {
+        playlist_id: playlistId,
+      });
 
+      // 2. Populate the form
+      form.setValue("children", videos);
+      form.setValue("type", "playlist"); // Switch type automatically
+      toast.success(`Imported ${videos.length} videos!`);
+    } catch (e) {
+      toast.error("Failed to import playlist");
+    }
+  };
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pb-20">
@@ -191,15 +209,18 @@ export function ResourceForm({ resource }: { resource?: Resource }) {
                         <ListVideo className="w-4 h-4 text-indigo-600" />{" "}
                         Playlist Videos
                       </h3>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => append({ title: "", url: "" })}
-                        className="gap-2 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
-                      >
-                        <Plus className="w-3 h-3" /> Add Video
-                      </Button>
+                      <div className="flex gap-2">
+                        <YouTubePicker onSelect={handlePlaylistSelect} />{" "}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => append({ title: "", url: "" })}
+                          className="gap-2 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+                        >
+                          <Plus className="w-3 h-3" /> Add Manually
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="space-y-3">
