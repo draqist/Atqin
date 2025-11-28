@@ -59,7 +59,7 @@ export function YouTubePicker({ onSelect }: YouTubePickerProps) {
           <DialogTitle>Search YouTube Playlists</DialogTitle>
         </DialogHeader>
 
-        <div className="flex gap-2 my-4">
+        <div className="flex gap-2 my-4 shrink-0">
           <Input
             placeholder="e.g. Sharh Shatibiyyah"
             value={query}
@@ -75,51 +75,56 @@ export function YouTubePicker({ onSelect }: YouTubePickerProps) {
           </Button>
         </div>
 
-        <ScrollArea className="flex-1 -mx-6 px-6">
-          <div className="space-y-4 pb-4">
-            {results.map((item) => (
-              <div
-                key={item.id.playlistId}
-                className="flex gap-3 p-3 border rounded-xl hover:border-red-300 transition-colors group"
-              >
-                {/* Thumbnail */}
-                <div className="w-32 aspect-video bg-slate-100 rounded-lg overflow-hidden shrink-0 relative">
-                  <img
-                    src={item.snippet.thumbnails.medium.url}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1 rounded">
-                    Playlist
+        {/* FIX: Wrap ScrollArea in a flex-1 container with min-h-0 to force containment */}
+        <div className="flex-1 min-h-0 -mx-6 px-6">
+          <ScrollArea className="h-full">
+            <div className="space-y-4 pb-4 pr-4">
+              {results.map((item) => (
+                <div
+                  key={item.id.playlistId}
+                  className="flex gap-3 p-3 border rounded-xl hover:border-red-300 transition-colors group"
+                >
+                  {/* Thumbnail */}
+                  <div className="w-32 aspect-video bg-slate-100 rounded-lg overflow-hidden shrink-0 relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.snippet.thumbnails.medium.url}
+                      alt={item.snippet.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1 rounded">
+                      Playlist
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0 flex flex-col">
+                    <h4 className="font-semibold text-sm text-slate-900 line-clamp-2 leading-tight mb-1">
+                      {item.snippet.title}
+                    </h4>
+                    <p className="text-xs text-slate-500 mb-auto">
+                      {item.snippet.channelTitle}
+                    </p>
+
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="self-start h-7 mt-2 text-xs bg-red-50 text-red-700 hover:bg-red-100"
+                      onClick={() => handleSelect(item.id.playlistId)}
+                    >
+                      <Plus className="w-3 h-3 mr-1" /> Import
+                    </Button>
                   </div>
                 </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col">
-                  <h4 className="font-semibold text-sm text-slate-900 line-clamp-2 leading-tight mb-1">
-                    {item.snippet.title}
-                  </h4>
-                  <p className="text-xs text-slate-500 mb-auto">
-                    {item.snippet.channelTitle}
-                  </p>
-
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="self-start h-7 mt-2 text-xs bg-red-50 text-red-700 hover:bg-red-100"
-                    onClick={() => handleSelect(item.id.playlistId)}
-                  >
-                    <Plus className="w-3 h-3 mr-1" /> Import
-                  </Button>
+              ))}
+              {results.length === 0 && !loading && (
+                <div className="text-center py-10 text-slate-400 text-sm">
+                  Search for a topic to find playlists.
                 </div>
-              </div>
-            ))}
-            {results.length === 0 && !loading && (
-              <div className="text-center py-10 text-slate-400 text-sm">
-                Search for a topic to find playlists.
-              </div>
-            )}
-          </div>
-        </ScrollArea>
+              )}
+            </div>
+          </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

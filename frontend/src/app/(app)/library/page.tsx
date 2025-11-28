@@ -5,7 +5,7 @@ import { LibraryFilters } from "@/components/library/library-filters";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBooks } from "@/lib/hooks/queries/books";
-import { AlertCircle, RefreshCw, SearchX, Sparkles } from "lucide-react";
+import { AlertCircle, RefreshCw, SearchX } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LibraryPage() {
@@ -121,8 +121,8 @@ export default function LibraryPage() {
       </section>
 
       {/* Only show if no search/filters active, keeps homepage dynamic */}
-      {trendingBooks.length > 0 && !currentCategory && !searchQuery && (
-        <section>
+      {/* {trendingBooks.length > 0 && !currentCategory && !searchQuery && (
+        <section className="">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-purple-500" />
@@ -135,7 +135,7 @@ export default function LibraryPage() {
             ))}
           </div>
         </section>
-      )}
+      )} */}
 
       {/* SECTION 2: ALL BOOKS */}
       <section>

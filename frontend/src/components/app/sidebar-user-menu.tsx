@@ -3,6 +3,7 @@
 import {
   ChevronsUpDown,
   CreditCard,
+  LogIn,
   LogOut,
   Settings,
   Sparkles,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLogout } from "@/hooks/use-auth";
 import { useUser } from "@/lib/hooks/queries/auth";
+import { useRouter } from "next/navigation";
 
 export function SidebarUserMenu() {
   const { data: user, isLoading } = useUser();
@@ -30,6 +32,7 @@ export function SidebarUserMenu() {
   const displayName = user ? user.name : "Guest Student";
   const displayEmail = user ? user.email : "Sign in to save";
   const initials = user ? user.name[0] : "G";
+  const router = useRouter();
   // Mock User State (Replace with real auth logic later)
 
   return (
@@ -59,8 +62,8 @@ export function SidebarUserMenu() {
       <DropdownMenuContent
         className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
         side="top"
-        align="end"
-        sideOffset={4}
+        align="start"
+        sideOffset={6}
       >
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
@@ -107,13 +110,23 @@ export function SidebarUserMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          className="text-red-600 focus:text-red-600 focus:bg-red-50"
-          onClick={logout}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Log out
-        </DropdownMenuItem>
+        {user ? (
+          <DropdownMenuItem
+            className="text-red-600 focus:text-red-600 focus:bg-red-50"
+            onClick={logout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Log out
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem
+            className="text-slate-600 focus:text-slate-600 focus:bg-slate-50"
+            onClick={() => router.push("/login")}
+          >
+            <LogIn className="mr-2 h-4 w-4" />
+            Log in
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
