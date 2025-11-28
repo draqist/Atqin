@@ -46,3 +46,15 @@ func (app *application) getStudentStatsHandler(w http.ResponseWriter, r *http.Re
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(stats)
 }
+
+func (app *application) getSystemStatsHandler(w http.ResponseWriter, r *http.Request) {
+	stats, err := app.models.Analytics.GetDashboardData()
+	if err != nil {
+		app.logger.Println(err)
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to fetch system stats")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(stats)
+}

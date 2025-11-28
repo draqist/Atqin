@@ -105,6 +105,8 @@ mux.HandleFunc("POST /v1/roadmaps/{id}/join", app.requireAuth(app.joinCohortHand
 mux.HandleFunc("POST /v1/tools/youtube-playlist", app.requireAuth(app.requireAdmin(app.fetchYouTubePlaylistHandler)))
 // Admin Tool
 mux.HandleFunc("GET /v1/tools/youtube-search", app.requireAuth(app.requireAdmin(app.searchYouTubePlaylistsHandler)))
+// ... inside admin routes ...
+mux.HandleFunc("GET /v1/admin/stats", app.requireAuth(app.requireAdmin(app.getSystemStatsHandler)))
 	// WRAP the mux with the CORS middleware
 	return app.enableCORS(mux)
 }
