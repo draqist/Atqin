@@ -42,10 +42,3 @@ func (app *application) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
-
-// Helper to quickly send JSON errors
-func (app *application) errorResponse(w http.ResponseWriter, status int, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	w.Write([]byte(`{"error": "` + message + `"}`))
-}

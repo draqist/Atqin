@@ -84,28 +84,32 @@ func (m BookModel) Get(id string) (*Book, error) {
 }
 
 // GetAll returns a list of all books (for the main library page)
-func (m BookModel) GetAll() ([]*Book, error) {
+func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, error) {
 	// The SQL query: Select everything, order by ID
 	query := `
-		SELECT id, title, original_author, description, cover_image_url, metadata, is_public, created_at, version
+		SELECT count(*) OVER(), id, title, original_author, description, cover_image_url, metadata, is_public, created_at, version
 		FROM books
+		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
+		OR (to_tsvector('simple', original_author) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		ORDER BY id`
 
 	// Timeout context (3 seconds max)
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := m.DB.QueryContext(ctx, query, title)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 	defer rows.Close() // Important: Close the connection when done
 
+	totalRecords := 0
 	// Loop through the rows (like iterating through an array)
-	var books []*Book
+	books := []*Book{}
 	for rows.Next() {
 		var book Book
 		err := rows.Scan(
+			&totalRecords,
 			&book.ID,
 			&book.Title,
 			&book.OriginalAuthor,
@@ -117,17 +121,19 @@ func (m BookModel) GetAll() ([]*Book, error) {
 			&book.Version,
 		)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 		books = append(books, &book)
 	}
 
 	// Check if there were errors during iteration
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
-	return books, nil
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return books, metadata, nil
 }
 
 func (m BookModel) Update(book *Book) error {

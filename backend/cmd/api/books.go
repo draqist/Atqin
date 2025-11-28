@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/draqist/iqraa/backend/internal/data"
+	"github.com/draqist/iqraa/backend/internal/validator"
 )
 
 // createBookHandler handles POST /v1/books
@@ -73,8 +74,28 @@ func (app *application) showBookHandler(w http.ResponseWriter, r *http.Request) 
 
 // listBooksHandler handles GET /v1/books
 func (app *application) listBooksHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Title string
+		data.Filters
+	}
+
+	v := validator.New()
+
+	qs := r.URL.Query()
+
+	input.Title = app.readString(qs, "q", "")
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+	input.Filters.SortSafeList = []string{"id", "title", "created_at", "-id", "-title", "-created_at"}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
 	// 1. Call the Chef (Model)
-	books, err := app.models.Books.GetAll()
+	books, _, err := app.models.Books.GetAll(input.Title, input.Filters)
 	if err != nil {
 		app.logger.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

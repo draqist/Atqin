@@ -3,10 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 
 
 // Hook for all books
-export const useBooks = () => {
+export const useBooks = (searchQuery?: string) => {
   return useQuery({
-    queryKey: ['books'],
-    queryFn: fetchBooks,
+    queryKey: ['books', searchQuery],
+    queryFn: () => fetchBooks(searchQuery),
   });
 };
 

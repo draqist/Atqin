@@ -87,7 +87,7 @@ export default function DashboardPage() {
         </div>
 
         {/* RIGHT COLUMN (Social) */}
-        <div className="space-y-6">
+        <div className="space-y-10">
           <PartnerCard />
           <HalaqahWidget />
         </div>

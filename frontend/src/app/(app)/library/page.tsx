@@ -9,7 +9,6 @@ import { AlertCircle, RefreshCw, SearchX } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LibraryPage() {
-  const { data: books, isLoading, isError, refetch } = useBooks();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -18,6 +17,7 @@ export default function LibraryPage() {
   const currentCategory = searchParams.get("category");
   const currentLevel = searchParams.get("level");
   const currentSort = searchParams.get("sort") || "newest";
+  const { data: books, isLoading, isError, refetch } = useBooks(searchQuery);
 
   const filteredBooks =
     books

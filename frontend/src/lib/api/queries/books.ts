@@ -1,7 +1,11 @@
 import api from '@/lib/axios';
 import { Book } from '@/lib/types';
-export const fetchBooks = async (): Promise<Book[]> => {
-  const response = await api.get<Book[]>('/books');
+export const fetchBooks = async (searchQuery?: string): Promise<Book[]> => {
+  const response = await api.get<Book[]>('/books', {
+    params: {
+      q: searchQuery,
+    },
+  });
   return response.data;
 };
 

@@ -2,31 +2,87 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, X } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { MobileNav } from "./mobile-nav";
 
 export function Header() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  // Initialize with URL param ONLY if we are on the library page
+  const initialQuery =
+    pathname === "/library" ? searchParams.get("q") || "" : "";
+  const [term, setTerm] = useState(initialQuery);
+
+  // Sync input if URL changes externally (e.g. back button)
+  useEffect(() => {
+    if (pathname === "/library") {
+      setTerm(searchParams.get("q") || "");
+    }
+  }, [searchParams, pathname]);
+
+  const handleSearch = () => {
+    if (!term.trim()) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("q", term);
+
+    // Always navigate to library with the query
+    router.push(`/library?${params.toString()}`);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const clearSearch = () => {
+    setTerm("");
+    if (pathname === "/library") {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("q");
+      router.push(`/library?${params.toString()}`);
+    }
+  };
+
   return (
     <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between sticky top-0 z-40">
-      {/* Left: Breadcrumbs or Page Title (Dynamic later) */}
-      <div className="hidden md:block font-semibold text-slate-700">
-        Library
+      <div className="flex items-center gap-3">
+        <div className="md:hidden">
+          <MobileNav />
+        </div>
+        <div className="hidden md:block font-semibold text-slate-700">
+          {/* Dynamic Title based on Path could go here */}
+          {pathname === "/dashboard" ? "Dashboard" : "Library"}
+        </div>
       </div>
 
-      {/* Center/Right: Search & Actions */}
-      <MobileNav />
-      <div className="hidden md:flex items-center gap-4 w-full md:w-auto">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input
-            placeholder="Search books, authors, or topics... (Cmd+K)"
-            className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-emerald-500"
+      <div className="flex items-center gap-4 w-full md:w-auto">
+        <div className="relative w-full md:w-96 hidden md:block">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 cursor-pointer"
+            onClick={handleSearch}
           />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1">
-            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-white px-1.5 font-mono text-[10px] font-medium text-slate-500 opacity-100">
-              <span className="text-xs">⌘</span>K
-            </kbd>
-          </div>
+          <Input
+            placeholder="Search books, authors, or topics... (Enter)"
+            className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-emerald-500 pr-10"
+            value={term}
+            onChange={(e) => setTerm(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+
+          {term && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
         </div>
 
         <Button
