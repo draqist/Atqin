@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Brain, Mic, Sparkles } from "lucide-react";
+import { BookOpen, Brain, Mic } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -96,10 +96,10 @@ export function Navbar() {
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-1 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                   {/* Featured Book Callout */}
-                  <li className="row-span-3">
+                  {/* <li className="row-span-3">
                     <NavigationMenuLink asChild>
                       <a
-                        className="flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b from-emerald-50 to-emerald-100 p-6 no-underline outline-none focus:shadow-md select-none"
+                        className="flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b from-emerald-50 to-emerald-100 p-6 no-underline outline-none focus:shadow-md select-none"
                         href="/library/shatibiyyah"
                       >
                         <Sparkles className="h-6 w-6 text-emerald-600 mb-2" />
@@ -112,7 +112,7 @@ export function Navbar() {
                         </p>
                       </a>
                     </NavigationMenuLink>
-                  </li>
+                  </li> */}
 
                   {/* Category List */}
                   {libraryCategories.map((item) => (
@@ -129,7 +129,7 @@ export function Navbar() {
             </NavigationMenuItem>
 
             {/* MENU 2: FEATURES */}
-            <NavigationMenuItem>
+            {/* <NavigationMenuItem>
               <NavigationMenuTrigger className="bg-transparent text-slate-600 hover:text-emerald-700 focus:bg-emerald-50">
                 Features
               </NavigationMenuTrigger>
@@ -149,20 +149,30 @@ export function Navbar() {
                   ))}
                 </ul>
               </NavigationMenuContent>
-            </NavigationMenuItem>
+            </NavigationMenuItem> */}
 
             {/* MENU 3: SIMPLE LINKS */}
             <NavigationMenuItem>
-              <Link href="/pricing" legacyBehavior passHref>
-                <NavigationMenuLink
-                  className={cn(
-                    navigationMenuTriggerStyle(),
-                    "bg-transparent text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/50"
-                  )}
-                >
-                  Pricing
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuLink
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "bg-transparent text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/50"
+                )}
+                asChild
+              >
+                <Link href="/roadmaps">Roadmaps</Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "bg-transparent text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/50"
+                )}
+                asChild
+              >
+                <Link href="#">Pricing</Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
