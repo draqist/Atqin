@@ -1,7 +1,9 @@
 "use client";
 
+import { JoinTrackDialog } from "@/components/roadmaps/join-track-dialog";
 import { StudentTimeline } from "@/components/roadmaps/student-timeline"; // New
 import { TrackHero } from "@/components/roadmaps/track-hero"; // New
+import { Button } from "@/components/ui/button";
 import api from "@/lib/axios";
 import { useUser } from "@/lib/hooks/queries/auth";
 import { StudentNode } from "@/lib/types";
@@ -133,6 +135,16 @@ export default function RoadmapDetailPage({
           <div className="w-16 h-1.5 bg-slate-200 rounded-full mx-auto mb-12" />
 
           <StudentTimeline nodes={nodes} />
+        </div>
+        <div className="absolute bottom-8 right-8 z-30">
+          <JoinTrackDialog roadmapId={roadmap.id}>
+            <Button
+              size="lg"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl rounded-full px-8 h-14"
+            >
+              Start This Track
+            </Button>
+          </JoinTrackDialog>
         </div>
       </div>
     </div>

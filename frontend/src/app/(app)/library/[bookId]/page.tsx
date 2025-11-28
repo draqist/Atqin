@@ -30,8 +30,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useActiveResource } from "@/hooks/use-active-resources";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useStructuredResources } from "@/hooks/use-structured-response";
+import { useStudyTimer } from "@/hooks/use-study-timer";
 import { getVideoThumbnail } from "@/lib/helpers";
 import { useToggleBookmark } from "@/lib/hooks/mutations/bookmarks";
+import { useUser } from "@/lib/hooks/queries/auth";
 import { useBook } from "@/lib/hooks/queries/books";
 import { useBookResources } from "@/lib/hooks/queries/resources";
 import { cn } from "@/lib/utils";
@@ -106,6 +108,8 @@ export default function StudyPage({
   const { mutate: toggleBookmark, isPending: isToggling } = useToggleBookmark();
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { data: user } = useUser();
+  useStudyTimer(bookId, !!user);
 
   // --- REUSABLE RESOURCE LIST COMPONENT (For Drawer & Sidebar) ---
   const ResourceList = () => (

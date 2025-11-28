@@ -5,6 +5,7 @@ import { Roadmap } from "@/lib/types";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, Clock, Share2, Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface TrackHeroProps {
   roadmap: Roadmap;
@@ -45,7 +46,11 @@ export function TrackHero({
           <Button
             variant="outline"
             size="icon"
-            className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
+            className="rounded-full border-white/20 bg-transparent text-white hover:bg-white hover:text-emerald-900"
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              toast.success("Link copied to clipboard!");
+            }}
           >
             <Share2 className="w-4 h-4" />
           </Button>

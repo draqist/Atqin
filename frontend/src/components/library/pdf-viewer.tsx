@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import { PdfError } from "./pdf-error";
+import { PdfSkeleton } from "./pdf-skeleton";
 
 // Configure the worker (Required for react-pdf)
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -96,12 +98,8 @@ export function PdfViewer({ url, onClose }: PdfViewerProps) {
         <Document
           file={url}
           onLoadSuccess={onDocumentLoadSuccess}
-          loading={<div className="sr-only">Loading pdf!</div>}
-          error={
-            <div className="flex items-center justify-center h-96 w-full bg-red-50 text-red-500">
-              Failed to load PDF.
-            </div>
-          }
+          loading={<PdfSkeleton />}
+          error={<PdfError />}
         >
           <Page
             pageNumber={pageNumber}

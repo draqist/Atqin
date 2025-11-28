@@ -2,6 +2,7 @@
 
 import { RoadmapCard } from "@/components/roadmaps/roadmap-card2";
 import api from "@/lib/axios";
+import { useBooks } from "@/lib/hooks/queries/books";
 import { Roadmap } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { Compass, Loader2, Route } from "lucide-react";
@@ -16,6 +17,7 @@ export default function RoadmapsPage() {
     queryKey: ["roadmaps"],
     queryFn: fetchPublicRoadmaps,
   });
+  const { data: books } = useBooks();
 
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
@@ -51,7 +53,9 @@ export default function RoadmapsPage() {
                 </div>
               </div>
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center w-32">
-                <div className="text-3xl font-bold text-slate-900">120+</div>
+                <div className="text-3xl font-bold text-slate-900">
+                  {books?.length || 120}
+                </div>
                 <div className="text-xs text-slate-500 font-medium uppercase mt-1">
                   Total Books
                 </div>

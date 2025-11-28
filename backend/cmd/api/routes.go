@@ -96,6 +96,11 @@ mux.HandleFunc("POST /v1/uploads/sign", app.requireAuth(app.requireAdmin(app.gen
 	mux.HandleFunc("DELETE /v1/roadmaps/nodes/{node_id}", app.requireAuth(app.requireAdmin(app.deleteRoadmapNodeHandler)))
 	// PUT /v1/roadmaps/{id}/nodes/reorder
 mux.HandleFunc("PUT /v1/roadmaps/{id}/nodes/reorder", app.requireAuth(app.requireAdmin(app.batchUpdateRoadmapNodesHandler)))
+// ANALYTICS (Protected)
+mux.HandleFunc("POST /v1/analytics/heartbeat", app.requireAuth(app.trackActivityHandler))
+mux.HandleFunc("GET /v1/analytics/stats", app.requireAuth(app.getStudentStatsHandler))
+// SOCIAL (Protected)
+mux.HandleFunc("POST /v1/roadmaps/{id}/join", app.requireAuth(app.joinCohortHandler))
 	// WRAP the mux with the CORS middleware
 	return app.enableCORS(mux)
 }

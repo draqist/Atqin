@@ -1,6 +1,9 @@
 "use client";
 
 import { ActivityChart } from "@/components/dashboard/dashboard-activity";
+import { DashboardGuestView } from "@/components/dashboard/guest-view";
+import { HalaqahWidget } from "@/components/social/halaqah-widget";
+import { PartnerCard } from "@/components/social/partner-card";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,27 +13,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useStudentStats } from "@/lib/hooks/queries/analytics";
 import { useUser } from "@/lib/hooks/queries/auth";
-import {
-  ArrowUpRight,
-  BookOpen,
-  Clock,
-  Flame,
-  PlayCircle,
-  Trophy,
-} from "lucide-react";
-import Link from "next/link";
+import { BookOpen, Clock, Flame, Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const { data: user } = useUser();
   const { push } = useRouter();
+  const { data: stats } = useStudentStats();
 
+  if (!user) {
+    return (
+      <div className="p-8">
+        <DashboardGuestView />
+      </div>
+    );
+  }
   return (
     <div className="flex-1 space-y-8 bg-[#F8F9FA] min-h-screen">
-      {/* 1. HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* Greeting */}
         <div className="space-y-1">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
             Dashboard
@@ -69,7 +71,9 @@ export default function DashboardPage() {
                 <Flame className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-slate-900">4 Days</div>
+                <div className="text-2xl font-bold text-slate-900">
+                  {stats?.current_streak} Days
+                </div>
                 <p className="text-xs text-slate-500">+1 from yesterday</p>
               </CardContent>
             </Card>
@@ -84,9 +88,11 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-slate-900">
-                  12.5 Hrs
+                  {stats?.total_minutes ?? 0 / 60} Hrs
                 </div>
-                <p className="text-xs text-slate-500">+2.5 hrs this week</p>
+                <p className="text-xs text-slate-500">
+                  {stats?.total_minutes ?? 0 / 60} hrs this week
+                </p>
               </CardContent>
             </Card>
 
@@ -99,8 +105,12 @@ export default function DashboardPage() {
                 <BookOpen className="h-4 w-4 text-emerald-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-slate-900">8</div>
-                <p className="text-xs text-slate-500">3 active readings</p>
+                <div className="text-2xl font-bold text-slate-900">
+                  {stats?.books_opened}
+                </div>
+                <p className="text-xs text-slate-500">
+                  {stats?.books_opened} active readings
+                </p>
               </CardContent>
             </Card>
 
@@ -137,7 +147,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* RIGHT: CONTINUE READING (3 Cols) */}
-            <Card className="col-span-3 border-slate-200 shadow-sm">
+            {/* <Card className="col-span-3 border-slate-200 shadow-sm">
               <CardHeader>
                 <CardTitle className="text-lg font-bold text-slate-900">
                   Continue Reading
@@ -146,7 +156,6 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {/* Book Item 1 */}
                   <div className="flex items-center">
                     <div className="h-12 w-12 rounded bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg">
                       ش
@@ -158,7 +167,6 @@ export default function DashboardPage() {
                       <p className="text-xs text-slate-500">
                         Introduction • Verse 5
                       </p>
-                      {/* Progress Bar */}
                       <div className="w-full h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
                         <div className="h-full bg-emerald-500 w-[15%]" />
                       </div>
@@ -170,7 +178,6 @@ export default function DashboardPage() {
                     </Link>
                   </div>
 
-                  {/* Book Item 2 */}
                   <div className="flex items-center">
                     <div className="h-12 w-12 rounded bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-lg">
                       ن
@@ -193,7 +200,6 @@ export default function DashboardPage() {
                     </Link>
                   </div>
 
-                  {/* View All Link */}
                   <div className="pt-4 border-t border-slate-50">
                     <Link
                       href="/bookmarks"
@@ -205,7 +211,9 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
+            <HalaqahWidget />
+            <PartnerCard />
           </div>
         </TabsContent>
       </Tabs>
