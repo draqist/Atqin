@@ -45,8 +45,9 @@ const motairah = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Iqraa - The Digital Majlis",
-  description: "A modern platform for Mutuun memorization and study.",
+  title: "Iqraa | The Digital Majlis for Students of Knowledge",
+  description:
+    "Master the Mutuun. A unified platform to read, listen, and memorize classical Islamic texts and Mutuuns with AI-powered correction and structured roadmaps.",
 };
 
 export default function RootLayout({

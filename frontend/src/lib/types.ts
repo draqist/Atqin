@@ -154,3 +154,20 @@ export interface AdminDashboardData {
   recent_resources: Resource[];
   recent_users: User[];
 }
+
+// ... existing types ...
+
+export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error';
+
+// Ensure your Book type supports the nodes structure needed for the prompt
+export interface GeminiBook {
+  id: string;
+  title_en: string;
+  title_ar?: string;
+  // The AI needs the raw text to check against
+  nodes: {
+    id: string;
+    content_text: string; // This is the Arabic text
+    sequence_index: number;
+  }[];
+}

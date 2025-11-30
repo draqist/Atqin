@@ -1,3 +1,4 @@
+import { useBooks } from "@/lib/hooks/queries/books";
 import { motion } from "framer-motion";
 import { ArrowRight, Library, Mic } from "lucide-react";
 import Link from "next/link";
@@ -5,6 +6,7 @@ import { Button } from "../ui/button";
 import { WordRotator } from "./WordRotator";
 
 const HeroSection = () => {
+  const { data: books } = useBooks();
   return (
     <section className="pt-32 pb-20 px-6 w-full">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[550px]">
@@ -132,7 +134,9 @@ const HeroSection = () => {
                 <div className="w-12 h-12 bg-emerald-800/50 rounded-2xl flex items-center justify-center text-emerald-300 mb-4 border border-emerald-700">
                   <Library className="w-6 h-6" />
                 </div>
-                <div className="text-3xl font-bold text-white mb-1">120+</div>
+                <div className="text-3xl font-bold text-white mb-1">
+                  {books ? books?.length : "0"}
+                </div>
                 <div className="text-emerald-200 text-xs font-medium">
                   Verified Works
                 </div>

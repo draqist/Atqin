@@ -67,3 +67,41 @@ func (app *application) listBookNodesHandler(w http.ResponseWriter, r *http.Requ
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(nodes)
 }
+
+func (app *application) batchCreateNodesHandler(w http.ResponseWriter, r *http.Request) {
+	bookID := r.PathValue("id")
+	
+	var input struct {
+		Lines []struct {
+			Type          string `json:"type"`
+			ContentText   string `json:"content_text"`
+			SequenceIndex int    `json:"sequence_index"`
+		} `json:"lines"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		app.errorResponse(w, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	// Transaction to ensure all or nothing
+	tx, _ := app.db.Begin()
+	defer tx.Rollback()
+
+	// 1. Clear existing nodes (Optional: depends if you want to append or replace)
+	// tx.Exec("DELETE FROM content_nodes WHERE book_id = $1", bookID)
+
+	// 2. Insert new nodes
+	stmt, _ := tx.Prepare(`INSERT INTO content_nodes (book_id, node_type, content_text, sequence_index) VALUES ($1, $2, $3, $4)`)
+	defer stmt.Close()
+
+	for _, line := range input.Lines {
+		_, err := stmt.Exec(bookID, line.Type, line.ContentText, line.SequenceIndex)
+		if err != nil {
+			app.errorResponse(w, http.StatusInternalServerError, "Failed to insert node")
+			return
+		}
+	}
+
+	tx.Commit()
+	w.WriteHeader(http.StatusCreated)
+}
