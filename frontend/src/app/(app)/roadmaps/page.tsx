@@ -91,6 +91,7 @@ export default function RoadmapsPage() {
                 />
               ))} */}
               {roadmaps?.length === 0 ||
+                roadmaps === null ||
                 (isError && (
                   <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-2xl min-h-[300px] flex items-center justify-center">
                     <p className="text-slate-500 text-center text-xl">

@@ -132,6 +132,7 @@ export default function ReflectionsPage() {
           </div>
         )}
         {reflections?.length === 0 ||
+          reflections === null ||
           (isError && (
             <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-2xl">
               <p className="text-slate-500 text-center">No reflections found</p>
