@@ -21,6 +21,7 @@ interface PdfViewerProps {
 
 import { useResizeObserver } from "@/lib/hooks/use-resize-observer";
 import { useRef } from "react";
+import { PdfNoData } from "./no-pdf-data";
 
 export function PdfViewer({ url, onClose }: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
@@ -100,6 +101,7 @@ export function PdfViewer({ url, onClose }: PdfViewerProps) {
           onLoadSuccess={onDocumentLoadSuccess}
           loading={<PdfSkeleton />}
           error={<PdfError />}
+          noData={<PdfNoData />}
         >
           <Page
             pageNumber={pageNumber}

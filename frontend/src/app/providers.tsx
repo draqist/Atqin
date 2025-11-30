@@ -3,7 +3,6 @@
 import { AppStore, makeStore } from "@/lib/store";
 import {
   MutationCache,
-  QueryCache,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
@@ -19,14 +18,23 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     () =>
       new QueryClient({
         defaultOptions: { queries: { staleTime: 60 * 5 * 1000 } },
-        queryCache: new QueryCache({
-          onError: (error) => {
-            toast.error(`Something went wrong: ${error.message}`);
-          },
-        }),
+        // queryCache: new QueryCache({
+        //   onError: (error) => {
+        //     if (error.message === "Failed to fetch") {
+        //       console.log(error);
+        //       toast.error("Something went wrong: Network error");
+        //     } else {
+        //       toast.error(`Something went wrong: ${error.message}`);
+        //     }
+        //   },
+        // }),
         mutationCache: new MutationCache({
           onError: (error) => {
-            toast.error(`Error: ${error.message}`);
+            if (error.message === "Failed to fetch") {
+              toast.error("Something went wrong: Network error");
+            } else {
+              toast.error(`Something went wrong: ${error.message}`);
+            }
           },
         }),
       })

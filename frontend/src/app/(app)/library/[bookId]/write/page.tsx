@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useSaveNote } from "@/lib/hooks/mutations/notes";
+import { useUser } from "@/lib/hooks/queries/auth";
 import { useBookNote } from "@/lib/hooks/queries/notes";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Editor, EditorContent, useEditor } from "@tiptap/react";
@@ -39,13 +40,20 @@ export default function FullEditorPage({
 }) {
   const router = useRouter();
   const { bookId } = use(params);
-  const { data: note, isLoading } = useBookNote(bookId);
+  const { data: user, isLoading: isUserLoading } = useUser();
+  const { data: note, isLoading: isNoteLoading } = useBookNote(bookId);
   const { mutate: saveNote, isPending: isSaving } = useSaveNote();
 
   // Local state for Metadata (Only needed when publishing)
   const [title, setTitle] = useState(note?.title || "");
   const [description, setDescription] = useState(note?.description || "");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push(`/login?next=/library/${bookId}/write`);
+    }
+  }, [user, isUserLoading, router, bookId]);
 
   const debounceSave = useDebounce((editor: Editor) => {
     saveNote({
@@ -108,7 +116,7 @@ export default function FullEditorPage({
     );
   };
 
-  if (isLoading)
+  if (isNoteLoading || isUserLoading)
     return (
       <div className="h-screen flex items-center justify-center">
         <Loader2 className="animate-spin text-slate-400" />

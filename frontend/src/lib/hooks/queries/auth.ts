@@ -6,6 +6,5 @@ export const useUser = () => {
     queryKey: ["user", "me"],
     queryFn: fetchMe,
     retry: false, // Don't retry if 401 (not logged in)
-    staleTime: 1000 * 60 * 30, // User data rarely changes, cache for 30 mins
   });
 };

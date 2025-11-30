@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useSaveNote } from "@/lib/hooks/mutations/notes";
 import { useBookNote } from "@/lib/hooks/queries/notes";
+import { useUser } from "@/lib/hooks/queries/auth";
 import { Placeholder } from "@tiptap/extensions";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { CheckCircle2, Loader2, Maximize2 } from "lucide-react";
+import { CheckCircle2, Loader2, Maximize2, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -18,6 +19,7 @@ interface QuickNoteProps {
 
 export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
   const router = useRouter();
+  const { data: user, isLoading: isUserLoading } = useUser();
 
   // 1. Fetch existing note (if any)
   const { data: existingNote, isLoading: isLoadingNote } = useBookNote(bookId);
@@ -57,10 +59,32 @@ export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
     }
   }, [existingNote, editor]);
 
-  if (isLoadingNote) {
+  if (isUserLoading || isLoadingNote) {
     return (
       <div className="flex items-center justify-center h-40">
         <Loader2 className="animate-spin text-slate-300" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-6 text-center w-full bg-slate-50 rounded-lg border border-slate-100">
+        <div className="bg-white p-3 rounded-full shadow-sm mb-3">
+          <Lock className="w-5 h-5 text-slate-400" />
+        </div>
+        <h3 className="text-sm font-medium text-slate-900 mb-1">
+          Log in to take notes
+        </h3>
+        <p className="text-xs text-slate-500 mb-4 max-w-[200px]">
+          Save your reflections and access them from any device.
+        </p>
+        <Button
+          onClick={() => router.push(`/login?next=/library/${bookId}`)}
+          className="bg-slate-900 text-white hover:bg-slate-800 text-xs h-8"
+        >
+          Log In
+        </Button>
       </div>
     );
   }
