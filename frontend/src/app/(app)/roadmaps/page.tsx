@@ -1,6 +1,5 @@
 "use client";
 
-import { RoadmapCard } from "@/components/roadmaps/roadmap-card2";
 import api from "@/lib/axios";
 import { useBooks } from "@/lib/hooks/queries/books";
 import { Roadmap } from "@/lib/types";
@@ -17,7 +16,7 @@ export default function RoadmapsPage() {
     queryKey: ["roadmaps"],
     queryFn: fetchPublicRoadmaps,
   });
-  const { data: books } = useBooks();
+  const { data: books, isError } = useBooks();
 
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
@@ -81,7 +80,7 @@ export default function RoadmapsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-              {roadmaps?.map((map) => (
+              {/* {roadmaps?.map((map) => (
                 <RoadmapCard
                   key={map.id}
                   roadmap={map}
@@ -90,7 +89,15 @@ export default function RoadmapsPage() {
                   completedBooks={0}
                   estimatedHours="25h"
                 />
-              ))}
+              ))} */}
+              {roadmaps?.length === 0 ||
+                (isError && (
+                  <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-2xl min-h-[300px] flex items-center justify-center">
+                    <p className="text-slate-500 text-center text-xl">
+                      No tracks available yet
+                    </p>
+                  </div>
+                ))}
             </div>
           </div>
         )}

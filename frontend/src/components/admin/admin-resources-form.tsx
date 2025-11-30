@@ -30,6 +30,7 @@ import { Resource } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GripVertical, ListVideo, Loader2, Plus, Trash2 } from "lucide-react"; // New Icons
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Resolver, useFieldArray, useForm } from "react-hook-form"; // Import useFieldArray
 import { toast } from "sonner";
 import * as z from "zod";
@@ -63,6 +64,33 @@ export function ResourceForm({ resource }: { resource?: Resource }) {
   const { data: books, isLoading: loadingBooks } = useBooks();
   const createMutation = useCreateResource();
   const updateMutation = useUpdateResource(resource?.id || "");
+  const [importLoading, setImportLoading] = useState(false);
+  const [playlistInput, setPlaylistInput] = useState("");
+
+  const handleManualImport = async () => {
+    if (!playlistInput) return;
+
+    // Extract ID from URL if user pasted full link
+    let playlistId = playlistInput;
+    const urlMatch = playlistInput.match(/[?&]list=([^&]+)/);
+    if (urlMatch) {
+      playlistId = urlMatch[1];
+    }
+
+    setImportLoading(true);
+    try {
+      const { data: videos } = await api.post("/tools/youtube-playlist", {
+        playlist_id: playlistId,
+      });
+      form.setValue("children", videos);
+      toast.success(`Imported ${videos.length} videos!`);
+      setPlaylistInput(""); // Clear input
+    } catch (e) {
+      toast.error("Failed to fetch playlist. Check ID/Permissions.");
+    } finally {
+      setImportLoading(false);
+    }
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as Resolver<z.infer<typeof formSchema>>,
@@ -289,6 +317,27 @@ export function ResourceForm({ resource }: { resource?: Resource }) {
                     </div>
                   </div>
                 )}
+                <div className="flex gap-2 items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
+                  <Input
+                    placeholder="Paste YouTube Playlist URL or ID"
+                    className="bg-white h-9 text-sm"
+                    value={playlistInput}
+                    onChange={(e) => setPlaylistInput(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleManualImport}
+                    disabled={importLoading || !playlistInput}
+                  >
+                    {importLoading ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      "Import"
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>

@@ -23,7 +23,11 @@ export default function ReflectionsPage() {
     search: debouncedSearch,
   };
 
-  const { data: reflections, isLoading } = useGlobalReflections(filters);
+  const {
+    data: reflections,
+    isLoading,
+    isError,
+  } = useGlobalReflections(filters);
 
   if (isLoading) {
     return (
@@ -127,6 +131,12 @@ export default function ReflectionsPage() {
             ))}
           </div>
         )}
+        {reflections?.length === 0 ||
+          (isError && (
+            <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-2xl">
+              <p className="text-slate-500 text-center">No reflections found</p>
+            </div>
+          ))}
       </div>
     </div>
   );
