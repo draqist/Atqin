@@ -107,7 +107,7 @@ export default function RoadmapDetailPage({
   const progress = Math.round((completed / nodes.length) * 100) || 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 relative">
+    <div className="min-h-screen bg-slate-50 relative overflow-x-hidden">
       {/* 1. STICKY HERO LAYER */}
       {/* sticky top-0: Keeps it pinned to the top as you scroll.
            h-[80vh]: Gives it height.
@@ -126,11 +126,11 @@ export default function RoadmapDetailPage({
 
       {/* 2. SCROLLING CONTENT LAYER */}
       {/* relative z-10: Puts it in front of the hero.
-           -mt-[30vh]: Pulls it up to overlap the hero initially.
+           -mt-[27vh]: Pulls it up to overlap the hero initially.
        */}
       <div className="relative z-10 -mt-[27vh] 2xl:-mt-[30vh] w-full">
         {/* The "Card" that slides up */}
-        <div className="bg-white rounded-t-[3rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.2)] min-h-screen pt-12 pb-32 border-t border-white/20 backdrop-blur-sm px-10">
+        <div className="bg-white rounded-t-[3rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.2)] min-h-screen pt-12 pb-32 border-t border-white/20 backdrop-blur-sm px-0 md:px-10">
           {/* Optional: A visual "Handle" to suggest draggability/sliding */}
           <div className="w-16 h-1.5 bg-slate-200 rounded-full mx-auto mb-12" />
 

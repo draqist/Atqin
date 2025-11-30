@@ -18,7 +18,7 @@ const footerColumns = [
   {
     title: "Product",
     links: [
-      { label: "Pricing", href: "/pricing" },
+      { label: "Pricing", href: "#" },
       { label: "Gift Cards", href: "#" },
       { label: "Family Plan", href: "#" },
     ],
@@ -26,16 +26,16 @@ const footerColumns = [
   {
     title: "Company",
     links: [
-      { label: "Blog", href: "/blog" },
-      { label: "Careers", href: "/careers" },
-      { label: "Scholarship", href: "/scholarship" },
+      { label: "Blog", href: "#" },
+      { label: "Careers", href: "#" },
+      { label: "Scholarship", href: "#" },
     ],
   },
   {
     title: "Support",
     links: [
-      { label: "Support Center", href: "/support" },
-      { label: "Feature Requests", href: "/features" },
+      { label: "Support Center", href: "#" },
+      { label: "Feature Requests", href: "#" },
     ],
   },
   {

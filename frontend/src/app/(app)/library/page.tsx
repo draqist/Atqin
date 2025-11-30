@@ -3,21 +3,43 @@
 import { LibraryBookCard } from "@/components/library/library-book-card";
 import { LibraryFilters } from "@/components/library/library-filters";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDebounce } from "@/hooks/use-debounce-value";
 import { useBooks } from "@/lib/hooks/queries/books";
-import { AlertCircle, RefreshCw, SearchX } from "lucide-react";
+import { AlertCircle, RefreshCw, Search, SearchX } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function LibraryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [searchQ, setSearchQuery] = useState(searchParams.get("q") || "");
+  const debouncedSearch = useDebounce(searchQ, 500);
 
   // 1. Get Params
   const searchQuery = searchParams.get("q") || "";
   const currentCategory = searchParams.get("category");
   const currentLevel = searchParams.get("level");
   const currentSort = searchParams.get("sort") || "newest";
+
+  useEffect(() => {
+    if (debouncedSearch === searchQuery) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (debouncedSearch) {
+      params.set("q", debouncedSearch);
+    } else {
+      params.delete("q");
+    }
+    router.push(`/library?${params.toString()}`);
+  }, [debouncedSearch, searchQuery, router, searchParams]);
+
   const { data: books, isLoading, isError, refetch } = useBooks(searchQuery);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   const filteredBooks =
     books
@@ -119,6 +141,19 @@ export default function LibraryPage() {
       <section>
         <LibraryFilters />
       </section>
+
+      {/* MOBILE SEARCH TOGGLE */}
+      <div className="md:hidden mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            placeholder="Search library..."
+            className="pl-9 bg-white border-slate-200"
+            value={searchQ}
+            onChange={handleSearch}
+          />
+        </div>
+      </div>
 
       {/* Only show if no search/filters active, keeps homepage dynamic */}
       {/* {trendingBooks.length > 0 && !currentCategory && !searchQuery && (

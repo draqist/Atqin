@@ -13,6 +13,7 @@ import {
   Hash,
   LayoutDashboard,
   Library,
+  Map,
   Menu,
   MessageSquareQuote,
   Mic,
@@ -28,6 +29,7 @@ const mainNav = [
   { name: "Library", href: "/library", icon: Library },
   { name: "Reflections", href: "/reflections", icon: MessageSquareQuote },
   { name: "My Hifdh", href: "/hifdh", icon: Mic },
+  { name: "Roadmaps", href: "/roadmaps", icon: Map },
 ];
 
 const categories = [

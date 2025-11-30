@@ -25,12 +25,12 @@ export function StudentTimeline({ nodes }: StudentTimelineProps) {
   const [expandedId, setExpandedId] = useState<string | null>(initialId);
 
   return (
-    <div className="relative w-full max-w-7xl mx-auto pb-40 pt-12 px-4 md:px-0">
+    <div className="relative w-full max-w-7xl mx-auto pb-40 pt-5 md:pt-12 px-4 md:px-0">
       {/* THE CENTRAL SPINE (Only visible on Desktop) */}
       <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-100 -ml-px" />
 
       {/* MOBILE SPINE (Left aligned) */}
-      <div className="md:hidden absolute left-8 top-0 bottom-0 w-0.5 bg-slate-100" />
+      <div className="md:hidden absolute left-4 top-0 bottom-0 w-0.5 bg-slate-100" />
 
       <div className="space-y-12 md:space-y-24 relative z-10">
         {nodes.map((node, idx) => {
@@ -56,7 +56,7 @@ export function StudentTimeline({ nodes }: StudentTimelineProps) {
               {/* 1. THE CONTENT CARD (Takes 50% width on desktop) */}
               <div
                 className={cn(
-                  "w-full md:w-[45%] pl-20 md:pl-0", // Mobile padding for left spine
+                  "w-full md:w-[45%] pl-4 md:pl-0", // Mobile padding for left spine
                   isEven ? "md:pl-12" : "md:pr-12"
                 )}
               >
@@ -159,7 +159,7 @@ export function StudentTimeline({ nodes }: StudentTimelineProps) {
                 className={cn(
                   "absolute top-0 md:top-1/2 md:-translate-y-1/2 z-20 flex items-center justify-center",
                   // Mobile: Left aligned. Desktop: Center aligned.
-                  "left-0 md:left-1/2 md:-translate-x-1/2 w-16 md:w-auto h-full md:h-auto"
+                  "-left-8 md:left-1/2 md:-translate-x-1/2 w-16 md:w-auto h-full md:h-auto"
                 )}
               >
                 <div
@@ -167,7 +167,7 @@ export function StudentTimeline({ nodes }: StudentTimelineProps) {
                     !isLocked && setExpandedId(isExpanded ? null : node.id)
                   }
                   className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center border-4 cursor-pointer transition-all duration-300 shadow-sm bg-white relative",
+                    "md:w-12 md:h-12 w-4 h-4 rounded-full flex items-center justify-center border md:border-4 cursor-pointer transition-all duration-300 shadow-sm bg-white relative",
                     isCompleted
                       ? "border-emerald-500 text-emerald-500"
                       : isActive
@@ -180,10 +180,10 @@ export function StudentTimeline({ nodes }: StudentTimelineProps) {
                   ) : isActive ? (
                     <>
                       <div className="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-20" />
-                      <div className="w-4 h-4 bg-emerald-500 rounded-full" />
+                      <div className="md:w-4 md:h-4 w-2 h-2 bg-emerald-500 rounded-full" />
                     </>
                   ) : (
-                    <Lock className="w-5 h-5" />
+                    <Lock className="md:w-5 md:h-5 w-3 h-3" />
                   )}
                 </div>
               </div>

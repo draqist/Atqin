@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { PlayCircle, ArrowRight } from "lucide-react";
+import { PlayCircle } from "lucide-react";
 import Link from "next/link";
 
 export function ContinueReadingHero() {
@@ -20,9 +20,9 @@ export function ContinueReadingHero() {
         <p className="text-slate-400 text-sm">Introduction • Verse 5</p>
       </div>
 
-      <div className="relative z-10 flex items-center justify-between mt-auto pt-6">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 text-xs text-slate-300">
+      <div className="relative z-10 flex flex-col  md:flex-row  md:items-center  gap-1 items-start justify-start md:justify-between mt-auto pt-2.5 md:pt-6">
+        <div className="flex flex-col gap-1.5 flex-1">
+          <div className="flex items-center gap-2 justify-between text-xs text-slate-300 w-full">
             <div className="w-24 h-1.5 bg-slate-700 rounded-full overflow-hidden">
               <div className="h-full bg-emerald-500 w-[35%]" />
             </div>
