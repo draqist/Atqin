@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import {
-  Hash,
+  Bookmark,
   LayoutDashboard,
   Library,
   Map,
@@ -30,14 +30,15 @@ const mainNav = [
   { name: "Reflections", href: "/reflections", icon: MessageSquareQuote },
   { name: "My Hifdh", href: "/hifdh", icon: Mic },
   { name: "Roadmaps", href: "/roadmaps", icon: Map },
+  { name: "Bookmarks", href: "/bookmarks", icon: Bookmark },
 ];
 
-const categories = [
-  { name: "Tajweed & Qira'at", slug: "tajweed" },
-  { name: "Aqeedah", slug: "aqeedah" },
-  { name: "Hadith", slug: "hadith" },
-  { name: "Arabic Grammar", slug: "grammar" },
-];
+// const categories = [
+//   { name: "Tajweed & Qira'at", slug: "tajweed" },
+//   { name: "Aqeedah", slug: "aqeedah" },
+//   { name: "Hadith", slug: "hadith" },
+//   { name: "Arabic Grammar", slug: "grammar" },
+// ];
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -111,7 +112,7 @@ export function MobileNav() {
           </div>
 
           {/* Categories */}
-          <div>
+          {/* <div>
             <h3 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
               Categories
             </h3>
@@ -125,7 +126,7 @@ export function MobileNav() {
                 </Link>
               ))}
             </nav>
-          </div>
+          </div> */}
         </div>
 
         <div className="p-4 border-t border-slate-100">

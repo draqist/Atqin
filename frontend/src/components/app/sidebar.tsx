@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import {
+  Bookmark,
   LayoutDashboard,
   Library,
   Map,
@@ -23,6 +24,7 @@ const mainNav = [
   }, // NEW
   { name: "My Hifdh", href: "/hifdh", icon: Mic },
   { name: "Roadmaps", href: "/roadmaps", icon: Map },
+  { name: "Bookmarks", href: "/bookmarks", icon: Bookmark },
   // { name: "API Docs", href: "/docs", icon: FileText },
 ];
 
