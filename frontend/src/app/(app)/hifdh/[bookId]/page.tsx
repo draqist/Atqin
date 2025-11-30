@@ -26,7 +26,7 @@ export default function HifdhPage({ params }: { params: { bookId: string } }) {
       </header>
 
       <main className="flex-1">
-        <HifdhPlayer />
+        <HifdhPlayer bookTitle="Matn Ash-Shatibiyyah" verses={[]} />
       </main>
     </div>
   );
