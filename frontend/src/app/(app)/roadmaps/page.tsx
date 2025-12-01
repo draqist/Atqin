@@ -1,5 +1,6 @@
 "use client";
 
+import { RoadmapCard } from "@/components/roadmaps/roadmap-card2";
 import api from "@/lib/axios";
 import { useBooks } from "@/lib/hooks/queries/books";
 import { Roadmap } from "@/lib/types";
@@ -45,7 +46,7 @@ export default function RoadmapsPage() {
             <div className="hidden md:grid grid-cols-2 gap-4">
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center w-32">
                 <div className="text-3xl font-bold text-slate-900">
-                  {roadmaps?.length || 7}
+                  {roadmaps?.length || 0}
                 </div>
                 <div className="text-xs text-slate-500 font-medium uppercase mt-1">
                   Active Tracks
@@ -53,7 +54,7 @@ export default function RoadmapsPage() {
               </div>
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center w-32">
                 <div className="text-3xl font-bold text-slate-900">
-                  {books?.length || 120}
+                  {books?.length || 0}
                 </div>
                 <div className="text-xs text-slate-500 font-medium uppercase mt-1">
                   Total Books
@@ -80,16 +81,16 @@ export default function RoadmapsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-              {/* {roadmaps?.map((map) => (
+              {roadmaps?.map((map) => (
                 <RoadmapCard
                   key={map.id}
                   roadmap={map}
                   // In a real app, these would come from the backend:
-                  totalBooks={map.nodes_count || 5}
+                  totalBooks={map.nodes_count ?? 0}
                   completedBooks={0}
                   estimatedHours="25h"
                 />
-              ))} */}
+              ))}
               {roadmaps?.length === 0 ||
                 roadmaps === null ||
                 (isError && (

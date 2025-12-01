@@ -14,6 +14,7 @@ type Roadmap struct {
 	Description   string         `json:"description"`
 	CoverImageURL string         `json:"cover_image_url"`
 	Nodes         []*RoadmapNode `json:"nodes,omitempty"` // Nested nodes for the tree view
+	NodesCount    int            `json:"nodes_count"`     // Count of nodes
 	CreatedAt     time.Time      `json:"created_at"`
 	IsPublic      bool           `json:"is_public"`
 }
@@ -80,7 +81,70 @@ func (m RoadmapModel) GetAll(includeDrafts bool) ([]*Roadmap, error) {
         }
         roadmaps = append(roadmaps, &r)
     }
-    return roadmaps, nil
+    	// 2. Fetch Nodes for all these roadmaps
+	// We use the same filtering logic (is_public) to get relevant nodes
+	var queryNodes string
+	if includeDrafts {
+		queryNodes = `
+			SELECT 
+				rn.id, rn.roadmap_id, rn.book_id, rn.sequence_index, rn.level, rn.description,
+				b.title, b.original_author, b.cover_image_url
+			FROM roadmap_nodes rn
+			JOIN books b ON rn.book_id = b.id
+			JOIN roadmaps r ON rn.roadmap_id = r.id
+			ORDER BY rn.roadmap_id, rn.sequence_index ASC`
+	} else {
+		queryNodes = `
+			SELECT 
+				rn.id, rn.roadmap_id, rn.book_id, rn.sequence_index, rn.level, rn.description,
+				b.title, b.original_author, b.cover_image_url
+			FROM roadmap_nodes rn
+			JOIN books b ON rn.book_id = b.id
+			JOIN roadmaps r ON rn.roadmap_id = r.id
+			WHERE r.is_public = true
+			ORDER BY rn.roadmap_id, rn.sequence_index ASC`
+	}
+
+	rowsNodes, err := m.DB.QueryContext(ctx, queryNodes)
+	if err != nil {
+		return nil, err
+	}
+	defer rowsNodes.Close()
+
+	// Map roadmapID -> List of Nodes
+	nodesMap := make(map[string][]*RoadmapNode)
+
+	for rowsNodes.Next() {
+		var n RoadmapNode
+		var desc sql.NullString
+		
+		// We don't need user status for the list view, so we skip it or set default
+		n.UserStatus = "not_started" 
+
+		err := rowsNodes.Scan(
+			&n.ID, &n.RoadmapID, &n.BookID, &n.SequenceIndex, &n.Level, &desc,
+			&n.BookTitle, &n.BookAuthor, &n.BookCover,
+		)
+		if err != nil {
+			return nil, err
+		}
+		if desc.Valid { n.Description = desc.String }
+		
+		nodesMap[n.RoadmapID] = append(nodesMap[n.RoadmapID], &n)
+	}
+
+	// 3. Attach nodes to roadmaps
+	for _, r := range roadmaps {
+		if nodes, ok := nodesMap[r.ID]; ok {
+			r.Nodes = nodes
+			r.NodesCount = len(nodes)
+		} else {
+			r.Nodes = []*RoadmapNode{}
+			r.NodesCount = 0
+		}
+	}
+
+	return roadmaps, nil
 }
 
 // GetBySlug fetches a single roadmap AND all its nodes (with user progress if userID is provided)

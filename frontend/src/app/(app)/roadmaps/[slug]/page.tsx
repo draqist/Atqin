@@ -107,7 +107,7 @@ export default function RoadmapDetailPage({
   const progress = Math.round((completed / nodes.length) * 100) || 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 relative">
       {/* 1. STICKY HERO LAYER */}
       {/* sticky top-0: Keeps it pinned to the top as you scroll.
            h-[80vh]: Gives it height.
