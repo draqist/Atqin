@@ -8,7 +8,7 @@ import { HalaqahWidget } from "@/components/social/halaqah-widget";
 import { PartnerCard } from "@/components/social/partner-card";
 import { useStudentStats } from "@/lib/hooks/queries/analytics";
 import { useUser } from "@/lib/hooks/queries/auth";
-import { BookOpen, Clock, Flame } from "lucide-react";
+import { BookOpen, Clock, Flame, Trophy } from "lucide-react";
 
 export default function DashboardPage() {
   const { data: user } = useUser();
@@ -58,13 +58,13 @@ export default function DashboardPage() {
           icon={BookOpen}
           color="text-emerald-500"
         />
-        {/* <StatCard
+        <StatCard
           title="Mastery"
-          value="142"
+          value="0"
           subtitle="Verses Memorized"
           icon={Trophy}
           color="text-yellow-500"
-        /> */}
+        />
       </div>
 
       {/* 3. MAIN GRID */}
