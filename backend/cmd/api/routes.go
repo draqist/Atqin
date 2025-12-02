@@ -81,7 +81,7 @@ mux.HandleFunc("POST /v1/uploads/sign", app.requireAuth(app.requireAdmin(app.gen
     // We use a special wrapper or just let the handler check headers manually if you want hybrid auth
     // For now, let's assume we just use the handler and if no token, no progress shown.
     // You might need a middleware "authenticateIfExists"
-	// mux.HandleFunc("GET /v1/roadmaps/{slug}", app.authenticateIfExists(app.getRoadmapHandler))
+	mux.HandleFunc("GET /v1/roadmaps/{slug}", app.authenticateIfExists(app.getRoadmapHandler))
 
 	// ROADMAPS (Protected Write)
 	mux.HandleFunc("POST /v1/roadmaps/nodes/{node_id}/progress", app.requireAuth(app.updateRoadmapProgressHandler))
