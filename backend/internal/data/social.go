@@ -117,3 +117,92 @@ func (m SocialModel) GetCohortPeers(userID, roadmapID string) ([]*CohortMember, 
 
 	return members, nil
 }
+
+// --- PARTNER LOGIC ---
+
+type Partner struct {
+	ID            string    `json:"id"`
+	UserID        string    `json:"user_id"`
+	UserName      string    `json:"user_name"`
+	Status        string    `json:"status"` // 'pending', 'accepted'
+	Streak        int       `json:"streak"`
+	LastActive    time.Time `json:"last_active_at"`
+	InitiatedByMe bool      `json:"initiated_by_me"` // NEW
+}
+
+// 4. Invite Partner (by UserID)
+func (m SocialModel) InvitePartner(requesterID, targetUserID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	if targetUserID == requesterID {
+		return errors.New("cannot invite yourself")
+	}
+
+	// 2. Create Relationship (Pending)
+	// We store requester as user_id_1
+	query := `
+		INSERT INTO partners (user_id_1, user_id_2, status)
+		VALUES ($1, $2, 'pending')
+		ON CONFLICT (user_id_1, user_id_2) DO NOTHING`
+	
+	_, err := m.DB.ExecContext(ctx, query, requesterID, targetUserID)
+	return err
+}
+
+// 5. Accept Partner
+func (m SocialModel) AcceptPartner(userID, partnerID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	// Update status to accepted where user is the invitee (user_id_2)
+	query := `
+		UPDATE partners 
+		SET status = 'accepted', updated_at = NOW()
+		WHERE id = $1 AND user_id_2 = $2`
+
+	result, err := m.DB.ExecContext(ctx, query, partnerID, userID)
+	if err != nil {
+		return err
+	}
+	
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		return errors.New("invite not found or already accepted")
+	}
+	return nil
+}
+
+// 6. Get Partner Status
+func (m SocialModel) GetPartner(userID string) (*Partner, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	// Find any relationship where user is 1 or 2
+	query := `
+		SELECT p.id, p.status, p.user_id_1, u.id, u.name
+		FROM partners p
+		JOIN users u ON (CASE WHEN p.user_id_1 = $1 THEN p.user_id_2 ELSE p.user_id_1 END) = u.id
+		WHERE p.user_id_1 = $1 OR p.user_id_2 = $1
+		LIMIT 1`
+
+	var p Partner
+	var partnerUserID string
+	var initiatorID string
+	
+	err := m.DB.QueryRowContext(ctx, query, userID).Scan(&p.ID, &p.Status, &initiatorID, &partnerUserID, &p.UserName)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil // No partner
+		}
+		return nil, err
+	}
+	
+	p.UserID = partnerUserID
+	p.InitiatedByMe = (initiatorID == userID)
+
+	// Calculate Streak (Mock logic for now, or simple query)
+	p.Streak = 0 
+	
+	return &p, nil
+}

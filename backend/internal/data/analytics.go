@@ -7,10 +7,18 @@ import (
 )
 
 type StudentStats struct {
-	TotalMinutes      int `json:"total_minutes"`
-	CurrentStreak     int `json:"current_streak"`
-	BooksOpened       int `json:"books_opened"`
+	TotalMinutes      int             `json:"total_minutes"`
+	CurrentStreak     int             `json:"current_streak"`
+	BooksOpened       int             `json:"books_opened"`
 	ActivityLast7Days []DailyActivity `json:"activity_chart"`
+	LastBookOpened    *Book           `json:"last_book_opened"`
+	LastBookProgress  *BookProgress   `json:"last_book_progress"`
+}
+
+type BookProgress struct {
+	CurrentPage int `json:"current_page"`
+	TotalPages  int `json:"total_pages"`
+	Percentage  int `json:"percentage"`
 }
 type AdminStats struct {
 	TotalBooks     int `json:"total_books"`
@@ -37,10 +45,12 @@ type AnalyticsModel struct {
 func (m AnalyticsModel) LogActivity(userID, bookID string, minutes int) error {
 	// Upsert Logic: Insert 0 if missing, then Add minutes
 	query := `
-		INSERT INTO activity_logs (user_id, book_id, date, minutes_spent)
-		VALUES ($1, $2, CURRENT_DATE, $3)
+		INSERT INTO activity_logs (user_id, book_id, date, minutes_spent, updated_at)
+		VALUES ($1, $2, CURRENT_DATE, $3, NOW())
 		ON CONFLICT (user_id, book_id, date)
-		DO UPDATE SET minutes_spent = activity_logs.minutes_spent + EXCLUDED.minutes_spent`
+		DO UPDATE SET 
+			minutes_spent = activity_logs.minutes_spent + EXCLUDED.minutes_spent,
+			updated_at = NOW()`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -100,6 +110,48 @@ func (m AnalyticsModel) GetStudentStats(userID string) (*StudentStats, error) {
 	// (This is a simplified query for MVP. Real streak logic is complex in SQL)
 	// We just check if they studied today or yesterday to say "Active"
 	stats.CurrentStreak = 0 // Placeholder for now, can be improved later
+
+	// 4. Last Book Opened
+	queryLastBook := `
+		SELECT b.id, b.title, b.original_author, b.description, b.cover_image_url, b.metadata, b.is_public, b.created_at, b.version
+		FROM activity_logs a
+		JOIN books b ON a.book_id = b.id
+		WHERE a.user_id = $1
+		ORDER BY a.updated_at DESC
+		LIMIT 1`
+	
+	var lastBook Book
+	err = m.DB.QueryRowContext(ctx, queryLastBook, userID).Scan(
+		&lastBook.ID,
+		&lastBook.Title,
+		&lastBook.OriginalAuthor,
+		&lastBook.Description,
+		&lastBook.CoverImageURL,
+		&lastBook.Metadata,
+		&lastBook.IsPublic,
+		&lastBook.CreatedAt,
+		&lastBook.Version,
+	)
+
+	if err == nil {
+		stats.LastBookOpened = &lastBook
+		
+		// Fetch progress for this book
+		queryProgress := `
+			SELECT current_page, total_pages
+			FROM user_book_progress
+			WHERE user_id = $1 AND book_id = $2`
+		
+		var p BookProgress
+		err = m.DB.QueryRowContext(ctx, queryProgress, userID, lastBook.ID).Scan(&p.CurrentPage, &p.TotalPages)
+		if err == nil && p.TotalPages > 0 {
+			p.Percentage = int((float64(p.CurrentPage) / float64(p.TotalPages)) * 100)
+			stats.LastBookProgress = &p
+		}
+	} else if err != sql.ErrNoRows {
+		// If it's a real error (not just "no books found"), return it
+		return nil, err
+	}
 
 	return stats, nil
 }

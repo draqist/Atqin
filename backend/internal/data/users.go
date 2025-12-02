@@ -17,6 +17,7 @@ type User struct {
 	ID           string    `json:"id"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
+	Username     string    `json:"username"`       // Added
 	Password     string    `json:"-"`              // Never output this to JSON
 	PasswordHash []byte    `json:"-"`              // Never output this to JSON
 	CreatedAt    time.Time `json:"created_at"`
@@ -38,29 +39,26 @@ func (m UserModel) Insert(user *User) error {
 
 	// 2. Insert into DB
 	query := `
-		INSERT INTO users (name, email, password_hash)
-		VALUES ($1, $2, $3)
+		INSERT INTO users (name, email, username, password_hash)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err = m.DB.QueryRowContext(ctx, query, user.Name, user.Email, user.PasswordHash).Scan(&user.ID, &user.CreatedAt)
+	err = m.DB.QueryRowContext(ctx, query, user.Name, user.Email, user.Username, user.PasswordHash).Scan(&user.ID, &user.CreatedAt)
 	if err != nil {
-		// Check for unique violation (Postgres error code 23505)
-		// For simplicity here we return generic error, but you can check pq errors
 		return err 
 	}
 	return nil
 }
 
 // GetByEmail fetches a user to verify login
-// GetByEmail fetches a user to verify login
 func (m UserModel) GetByEmail(email string) (*User, error) {
-	// CHANGED: Added 'role' to the SELECT statement
-	query := `SELECT id, name, email, password_hash, role, created_at FROM users WHERE email = $1`
+	query := `SELECT id, name, email, username, password_hash, role, created_at FROM users WHERE email = $1`
 
 	var user User
+	var username sql.NullString // Handle NULL
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -68,15 +66,45 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 		&user.ID,
 		&user.Name,
 		&user.Email,
+		&username, 
 		&user.PasswordHash,
-		&user.Role, // CHANGED: Added scan for role
+		&user.Role,
 		&user.CreatedAt,
 	)
 
 	if err != nil {
 		return nil, err
 	}
+	user.Username = username.String
+	return &user, nil
+}
 
+// GetByEmailOrUsername fetches a user by email OR username
+func (m UserModel) GetByEmailOrUsername(identifier string) (*User, error) {
+	query := `
+		SELECT id, name, email, username, password_hash, role, created_at 
+		FROM users 
+		WHERE email = $1 OR username = $1`
+
+	var user User
+	var username sql.NullString // Handle NULL
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, identifier).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&username, 
+		&user.PasswordHash,
+		&user.Role,
+		&user.CreatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	user.Username = username.String
 	return &user, nil
 }
 
@@ -93,24 +121,23 @@ func (u *User) PasswordMatches(plaintextPassword string) (bool, error) {
 }
 
 // GetByID fetches a user by their UUID
-// GetByID fetches a user by their UUID
 func (m UserModel) GetByID(id string) (*User, error) {
-    // 1. Ensure we SELECT 'role' here
     query := `
-        SELECT id, name, email, role, created_at 
+        SELECT id, name, email, username, role, created_at 
         FROM users 
         WHERE id = $1`
 
     var user User
+    var username sql.NullString // Handle NULL
     ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
     defer cancel()
 
-    // 2. Ensure we SCAN 'role' here (Total 5 variables for 5 columns)
     err := m.DB.QueryRowContext(ctx, query, id).Scan(
         &user.ID,
         &user.Name,
         &user.Email,
-        &user.Role, // <--- Make sure this matches the position in SELECT
+        &username,
+        &user.Role,
         &user.CreatedAt,
     )
 
@@ -118,10 +145,40 @@ func (m UserModel) GetByID(id string) (*User, error) {
         if errors.Is(err, sql.ErrNoRows) {
             return nil, ErrRecordNotFound
         }
-        // If this returns an error like "expected 4 destination args", 
-        // it will bubble up and cause your 500/404 issue.
         return nil, err
     }
-
+    user.Username = username.String
     return &user, nil
+}
+
+// Search finds users by username or name
+func (m UserModel) Search(query string) ([]*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	// Simple ILIKE search
+	sqlQuery := `
+		SELECT id, name, username 
+		FROM users 
+		WHERE username ILIKE $1 OR name ILIKE $1
+		LIMIT 10`
+
+	rows, err := m.DB.QueryContext(ctx, sqlQuery, "%"+query+"%")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	for rows.Next() {
+		var u User
+		// We only scan public fields
+		var username sql.NullString // Handle nulls if migration didn't backfill
+		if err := rows.Scan(&u.ID, &u.Name, &username); err != nil {
+			return nil, err
+		}
+		u.Username = username.String
+		users = append(users, &u)
+	}
+	return users, nil
 }

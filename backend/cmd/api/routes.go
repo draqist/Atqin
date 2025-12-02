@@ -38,6 +38,7 @@ mux.HandleFunc("POST /v1/users/register", app.registerUserHandler)
 // Only Admins can WRITE (POST/PUT)
 	mux.HandleFunc("POST /v1/books", app.requireAuth(app.requireAdmin(app.createBookHandler)))
 	mux.HandleFunc("PUT /v1/books/{id}", app.requireAuth(app.requireAdmin(app.updateBookHandler)))
+	mux.HandleFunc("POST /v1/books/{id}/progress", app.requireAuth(app.saveProgressHandler))
 	// ... other book routes ...
 	
 	// Only Admins can DELETE
@@ -60,7 +61,8 @@ mux.HandleFunc("POST /v1/users/register", app.registerUserHandler)
 	mux.HandleFunc("POST /v1/books/{id}/bookmark", app.requireAuth(app.toggleBookmarkHandler))
 	mux.HandleFunc("GET /v1/bookmarks", app.requireAuth(app.listBookmarksHandler))
 	// User Profile
-mux.HandleFunc("GET /v1/users/me", app.requireAuth(app.getMeHandler))
+	mux.HandleFunc("GET /v1/users/me", app.requireAuth(app.getMeHandler))
+	mux.HandleFunc("GET /v1/users/search", app.requireAuth(app.searchUsersHandler))
 // Inside protected routes, or public if you prefer
 mux.HandleFunc("GET /v1/resources/{id}", app.requireAuth(app.getResourceHandler))
 // In routes.go
@@ -79,7 +81,7 @@ mux.HandleFunc("POST /v1/uploads/sign", app.requireAuth(app.requireAdmin(app.gen
     // We use a special wrapper or just let the handler check headers manually if you want hybrid auth
     // For now, let's assume we just use the handler and if no token, no progress shown.
     // You might need a middleware "authenticateIfExists"
-	mux.HandleFunc("GET /v1/roadmaps/{slug}", app.authenticateIfExists(app.getRoadmapHandler))
+	// mux.HandleFunc("GET /v1/roadmaps/{slug}", app.authenticateIfExists(app.getRoadmapHandler))
 
 	// ROADMAPS (Protected Write)
 	mux.HandleFunc("POST /v1/roadmaps/nodes/{node_id}/progress", app.requireAuth(app.updateRoadmapProgressHandler))
@@ -101,6 +103,14 @@ mux.HandleFunc("POST /v1/analytics/heartbeat", app.requireAuth(app.trackActivity
 mux.HandleFunc("GET /v1/analytics/stats", app.requireAuth(app.getStudentStatsHandler))
 // SOCIAL (Protected)
 mux.HandleFunc("POST /v1/roadmaps/{id}/join", app.requireAuth(app.joinCohortHandler))
+mux.HandleFunc("GET /v1/partners", app.requireAuth(app.getPartnerHandler))
+mux.HandleFunc("POST /v1/partners/invite", app.requireAuth(app.invitePartnerHandler))
+mux.HandleFunc("POST /v1/partners/accept", app.requireAuth(app.acceptPartnerHandler))
+
+// NOTIFICATIONS (Protected)
+mux.HandleFunc("GET /v1/notifications", app.requireAuth(app.listNotificationsHandler))
+mux.HandleFunc("PUT /v1/notifications/{id}/read", app.requireAuth(app.markNotificationReadHandler))
+mux.HandleFunc("POST /v1/notifications/read-all", app.requireAuth(app.markAllNotificationsReadHandler))
 // Admin Only
 mux.HandleFunc("POST /v1/tools/youtube-playlist", app.requireAuth(app.requireAdmin(app.fetchYouTubePlaylistHandler)))
 // Admin Tool

@@ -21,6 +21,7 @@ type Book struct {
 	Version        int             `json:"version"`
 	TitleAr       *string `json:"title_ar"`       // Use pointer to handle nulls safely
     OriginalAuthorAr *string `json:"author_ar"`
+	ResourceCount  int             `json:"resource_count"` // Added
 }
 
 // BookModel wraps the connection pool
@@ -87,7 +88,8 @@ func (m BookModel) Get(id string) (*Book, error) {
 func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, error) {
 	// The SQL query: Select everything, order by ID
 	query := `
-		SELECT count(*) OVER(), id, title, original_author, description, cover_image_url, metadata, is_public, created_at, version
+		SELECT count(*) OVER(), id, title, original_author, description, cover_image_url, metadata, is_public, created_at, version,
+		(SELECT COUNT(*) FROM resources WHERE book_id = books.id) as resource_count
 		FROM books
 		WHERE (title ILIKE '%' || $1 || '%' OR $1 = '')
 		OR (original_author ILIKE '%' || $1 || '%' OR $1 = '')
@@ -119,6 +121,7 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 			&book.IsPublic,
 			&book.CreatedAt,
 			&book.Version,
+			&book.ResourceCount, // Added
 		)
 		if err != nil {
 			return nil, Metadata{}, err
@@ -185,4 +188,41 @@ func (m BookModel) Delete(id string) error {
 	}
 
 	return nil
+}
+
+func (m BookModel) UpdateProgress(userID, bookID string, currentPage, totalPages int) error {
+	query := `
+		INSERT INTO user_book_progress (user_id, book_id, current_page, total_pages, updated_at)
+		VALUES ($1, $2, $3, $4, NOW())
+		ON CONFLICT (user_id, book_id)
+		DO UPDATE SET 
+			current_page = EXCLUDED.current_page,
+			total_pages = EXCLUDED.total_pages,
+			updated_at = NOW()`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, userID, bookID, currentPage, totalPages)
+	return err
+}
+
+func (m BookModel) GetProgress(userID, bookID string) (int, int, error) {
+	query := `
+		SELECT current_page, total_pages
+		FROM user_book_progress
+		WHERE user_id = $1 AND book_id = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var currentPage, totalPages int
+	err := m.DB.QueryRowContext(ctx, query, userID, bookID).Scan(&currentPage, &totalPages)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 1, 0, nil // Default to page 1 if no progress
+		}
+		return 0, 0, err
+	}
+	return currentPage, totalPages, nil
 }

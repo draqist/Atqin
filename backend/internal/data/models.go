@@ -22,6 +22,7 @@ type Models struct {
 	Analytics AnalyticsModel
 	Social SocialModel
 	Waitlist WaitlistModel
+	Notifications NotificationModel
 	// We will add Nodes, Users, Resources here later
 }
 
@@ -38,5 +39,6 @@ func NewModels(db *sql.DB) Models {
 		Analytics: AnalyticsModel{DB: db},
 		Social: SocialModel{DB: db},
 		Waitlist: WaitlistModel{DB: db},
+		Notifications: NotificationModel{DB: db},
 	}
 }

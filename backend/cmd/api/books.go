@@ -174,3 +174,32 @@ func (app *application) deleteBookHandler(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{"message": "book deleted successfully"}`))
 }
+
+func (app *application) saveProgressHandler(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(UserContextKey).(string)
+	if !ok || userID == "" {
+		app.errorResponse(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	bookID := r.PathValue("id")
+
+	var input struct {
+		CurrentPage int `json:"current_page"`
+		TotalPages  int `json:"total_pages"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		app.errorResponse(w, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	err := app.models.Books.UpdateProgress(userID, bookID, input.CurrentPage, input.TotalPages)
+	if err != nil {
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to save progress")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"message": "progress saved"}`))
+}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/draqist/iqraa/backend/internal/auth"
@@ -13,10 +14,17 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Name     string `json:"name"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
+		Username string `json:"username"` // Added
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		app.errorResponse(w, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	// Basic validation
+	if input.Name == "" || input.Email == "" || len(input.Password) < 8 {
+		app.errorResponse(w, http.StatusBadRequest, "Invalid name, email, or password (min 8 chars)")
 		return
 	}
 
@@ -24,27 +32,39 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: input.Password,
+		Username: input.Username, // Added
 	}
 
-	// Insert user (hashes password inside model)
 	err := app.models.Users.Insert(user)
 	if err != nil {
-		app.logger.Println(err)
-		app.errorResponse(w, http.StatusInternalServerError, "Could not create user")
+		if errors.Is(err, data.ErrDuplicateEmail) {
+			app.errorResponse(w, http.StatusConflict, "Email already in use")
+		} else {
+			app.errorResponse(w, http.StatusInternalServerError, "Failed to register user")
+		}
 		return
 	}
 
-	// Generate Token immediately so they are logged in
-	token, _ := auth.GenerateToken(user.ID)
+	// Generate Token immediately
+	token, err := app.generateToken(user.ID)
+	if err != nil {
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to generate token")
+		return
+	}
 
+	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"token": token, "user_id": user.ID, "name": user.Name})
+	json.NewEncoder(w).Encode(map[string]any{
+		"token": token,
+		"user":  user,
+	})
 }
 
 func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
+		// We will allow Email field to be username or email
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -52,55 +72,67 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// 1. Find User
-	user, err := app.models.Users.GetByEmail(input.Email)
+	// Use GetByEmailOrUsername (to be implemented)
+	user, err := app.models.Users.GetByEmailOrUsername(input.Email)
 	if err != nil {
 		app.errorResponse(w, http.StatusUnauthorized, "Invalid credentials")
 		return
 	}
 
-	// 2. Check Password
 	match, err := user.PasswordMatches(input.Password)
-	if err != nil || !match {
+	if err != nil {
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to verify password")
+		return
+	}
+
+	if !match {
 		app.errorResponse(w, http.StatusUnauthorized, "Invalid credentials")
 		return
 	}
 
-	// 3. Generate Token
-	token, err := auth.GenerateToken(user.ID)
-    if err != nil {
-        app.errorResponse(w, http.StatusInternalServerError, "Token generation failed")
-        return
-    }
+	token, err := app.generateToken(user.ID)
+	if err != nil {
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to generate token")
+		return
+	}
 
-    w.Header().Set("Content-Type", "application/json")
-    // ADD "role": user.Role HERE
-    json.NewEncoder(w).Encode(map[string]string{
-        "token": token, 
-        "user_id": user.ID, 
-        "name": user.Name,
-        "role": user.Role, 
-    })
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"token": token,
+		"user":  user,
+	})
 }
 
 func (app *application) getMeHandler(w http.ResponseWriter, r *http.Request) {
-    userID, ok := r.Context().Value(UserContextKey).(string)
-    if !ok || userID == "" {
-        app.errorResponse(w, http.StatusUnauthorized, "Invalid user context")
-        return
-    }
+	userID := r.Context().Value(UserContextKey).(string)
 
-    // DEBUG LOG: Print the ID we are looking for
-    app.logger.Printf("DEBUG: Looking for User ID: %s", userID) 
+	user, err := app.models.Users.GetByID(userID)
+	if err != nil {
+		app.errorResponse(w, http.StatusNotFound, "User not found")
+		return
+	}
 
-    user, err := app.models.Users.GetByID(userID)
-    if err != nil {
-        // DEBUG LOG: Print the error
-        app.logger.Printf("DEBUG: Error finding user: %v", err)
-        app.errorResponse(w, http.StatusNotFound, "User not found")
-        return
-    }
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+}
 
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(user)
+func (app *application) searchUsersHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		app.errorResponse(w, http.StatusBadRequest, "Query parameter 'q' is required")
+		return
+	}
+
+	users, err := app.models.Users.Search(query)
+	if err != nil {
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to search users")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
+}
+
+func (app *application) generateToken(userID string) (string, error) {
+	return auth.GenerateToken(userID)
 }
