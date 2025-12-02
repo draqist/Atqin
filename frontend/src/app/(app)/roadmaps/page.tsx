@@ -1,11 +1,21 @@
 "use client";
 
 import { RoadmapCard } from "@/components/roadmaps/roadmap-card2";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import api from "@/lib/axios";
 import { useBooks } from "@/lib/hooks/queries/books";
 import { Roadmap } from "@/lib/types";
+import { getCategoryLabel } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Compass, Loader2, Route } from "lucide-react";
+import { ChevronDown, Compass, Filter, Loader2, Route } from "lucide-react";
+import { useState } from "react";
 
 const fetchPublicRoadmaps = async () => {
   const { data } = await api.get<Roadmap[]>("/roadmaps");
@@ -18,6 +28,34 @@ export default function RoadmapsPage() {
     queryFn: fetchPublicRoadmaps,
   });
   const { data: books, isError } = useBooks();
+
+  // Filter State
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedLevel, setSelectedLevel] = useState<string>("all");
+
+  // Derived Filters
+  const filteredRoadmaps = roadmaps?.filter((map) => {
+    // 1. Category Filter
+    if (selectedCategory !== "all") {
+      const category = getCategoryLabel(map.slug).toLowerCase();
+      if (category !== selectedCategory.toLowerCase()) return false;
+    }
+
+    // 2. Level Filter (Check if any node matches the level)
+    if (selectedLevel !== "all") {
+      const hasLevel = map.nodes?.some(
+        (n) => n.level.toLowerCase() === selectedLevel.toLowerCase()
+      );
+      if (!hasLevel) return false;
+    }
+
+    return true;
+  });
+
+  // Unique Categories for Dropdown
+  const categories = Array.from(
+    new Set(roadmaps?.map((r) => getCategoryLabel(r.slug)) || [])
+  ).sort();
 
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
@@ -73,15 +111,86 @@ export default function RoadmapsPage() {
           </div>
         ) : (
           <div className="space-y-12">
-            {/* Section Header */}
-            <div className="flex items-center justify-between">
+            {/* Section Header & Filters */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
                 <Route className="w-6 h-6 text-slate-400" /> Available Tracks
               </h2>
+
+              <div className="flex items-center gap-2">
+                {/* Category Filter */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2 h-9">
+                      <Filter className="w-3.5 h-3.5 text-slate-500" />
+                      {selectedCategory === "all"
+                        ? "All Topics"
+                        : selectedCategory}
+                      <ChevronDown className="w-3 h-3 text-slate-400" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem
+                      onClick={() => setSelectedCategory("all")}
+                    >
+                      All Topics
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {categories.map((cat) => (
+                      <DropdownMenuItem
+                        key={cat}
+                        onClick={() => setSelectedCategory(cat)}
+                      >
+                        {cat}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Level Filter */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2 h-9">
+                      {selectedLevel === "all" ? "All Levels" : selectedLevel}
+                      <ChevronDown className="w-3 h-3 text-slate-400" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => setSelectedLevel("all")}>
+                      All Levels
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {["Beginner", "Intermediate", "Advanced", "Expert"].map(
+                      (level) => (
+                        <DropdownMenuItem
+                          key={level}
+                          onClick={() => setSelectedLevel(level)}
+                        >
+                          {level}
+                        </DropdownMenuItem>
+                      )
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {(selectedCategory !== "all" || selectedLevel !== "all") && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCategory("all");
+                      setSelectedLevel("all");
+                    }}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    Reset
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-              {roadmaps?.map((map) => (
+              {filteredRoadmaps?.map((map) => (
                 <RoadmapCard
                   key={map.id}
                   roadmap={map}
@@ -91,15 +200,23 @@ export default function RoadmapsPage() {
                   estimatedHours="25h"
                 />
               ))}
-              {roadmaps?.length === 0 ||
-                roadmaps === null ||
-                (isError && (
-                  <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-2xl min-h-[300px] flex items-center justify-center">
-                    <p className="text-slate-500 text-center text-xl">
-                      No tracks available yet
-                    </p>
-                  </div>
-                ))}
+              {filteredRoadmaps?.length === 0 && (
+                <div className="col-span-full text-center py-20 border-2 border-dashed border-slate-200 rounded-2xl min-h-[300px] flex flex-col items-center justify-center gap-2">
+                  <p className="text-slate-900 font-medium text-lg">
+                    No tracks found
+                  </p>
+                  <p className="text-slate-500">Try adjusting your filters</p>
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      setSelectedCategory("all");
+                      setSelectedLevel("all");
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}
