@@ -53,7 +53,7 @@ func (m BookModel) Get(id string) (*Book, error) {
 	}
 
 	query := `
-		SELECT id, title, original_author, description, cover_image_url, metadata, is_public, created_at, version
+		SELECT id, title, original_author, COALESCE(description, ''), COALESCE(cover_image_url, ''), COALESCE(metadata, '{}'), is_public, created_at, version
 		FROM books
 		WHERE id = $1`
 
@@ -88,7 +88,7 @@ func (m BookModel) Get(id string) (*Book, error) {
 func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, error) {
 	// The SQL query: Select everything, order by ID
 	query := `
-		SELECT count(*) OVER(), id, title, original_author, description, cover_image_url, metadata, is_public, created_at, version,
+		SELECT count(*) OVER(), id, title, original_author, COALESCE(description, ''), COALESCE(cover_image_url, ''), COALESCE(metadata, '{}'), is_public, created_at, version,
 		(SELECT COUNT(*) FROM resources WHERE book_id = books.id) as resource_count
 		FROM books
 		WHERE (title ILIKE '%' || $1 || '%' OR $1 = '')

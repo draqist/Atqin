@@ -113,7 +113,7 @@ func (m AnalyticsModel) GetStudentStats(userID string) (*StudentStats, error) {
 
 	// 4. Last Book Opened
 	queryLastBook := `
-		SELECT b.id, b.title, b.original_author, b.description, b.cover_image_url, b.metadata, b.is_public, b.created_at, b.version
+		SELECT b.id, b.title, b.original_author, COALESCE(b.description, ''), COALESCE(b.cover_image_url, ''), COALESCE(b.metadata, '{}'), b.is_public, b.created_at, b.version
 		FROM activity_logs a
 		JOIN books b ON a.book_id = b.id
 		WHERE a.user_id = $1

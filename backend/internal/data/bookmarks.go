@@ -41,7 +41,7 @@ func (m BookmarkModel) Toggle(userID, bookID string) (bool, error) {
 // We reuse the 'Book' struct from books.go
 func (m BookmarkModel) GetUserBookmarks(userID string) ([]*Book, error) {
 	query := `
-		SELECT b.id, b.title, b.original_author, b.description, b.cover_image_url, b.metadata, b.is_public, b.created_at, b.version
+		SELECT b.id, b.title, b.original_author, COALESCE(b.description, ''), COALESCE(b.cover_image_url, ''), COALESCE(b.metadata, '{}'), b.is_public, b.created_at, b.version
 		FROM books b
 		JOIN bookmarks bm ON b.id = bm.book_id
 		WHERE bm.user_id = $1
