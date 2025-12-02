@@ -50,7 +50,7 @@ export function MobileNav() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <div className="md:hidden flex items-center justify-between w-full h-16 px-4 border-b border-slate-100 bg-white">
+        <div className="md:hidden flex items-center justify-between w-full h-16 border-b border-slate-100 bg-white">
           <Link href="/">
             <Image
               src={"/iqr_mob.png"}

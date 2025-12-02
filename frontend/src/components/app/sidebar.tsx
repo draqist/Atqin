@@ -12,7 +12,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { NotificationBell } from "./notification-bell";
 import { SidebarUserMenu } from "./sidebar-user-menu";
 
 const mainNav = [
@@ -56,9 +55,6 @@ export function Sidebar() {
             className="block lg:hidden"
           />
         </Link>
-        <div className="hidden lg:block">
-          <NotificationBell />
-        </div>
       </div>
 
       {/* 2. MAIN NAVIGATION */}
