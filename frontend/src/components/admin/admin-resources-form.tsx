@@ -29,7 +29,7 @@ import { useBooks } from "@/lib/hooks/queries/books";
 import { Resource } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GripVertical, ListVideo, Loader2, Plus, Trash2 } from "lucide-react"; // New Icons
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Resolver, useFieldArray, useForm } from "react-hook-form"; // Import useFieldArray
 import { toast } from "sonner";
@@ -61,6 +61,9 @@ const formSchema = z.object({
 
 export function ResourceForm({ resource }: { resource?: Resource }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const preselectedBookId = searchParams.get("bookId");
+
   const { data: books, isLoading: loadingBooks } = useBooks();
   const createMutation = useCreateResource();
   const updateMutation = useUpdateResource(resource?.id || "");
@@ -98,7 +101,7 @@ export function ResourceForm({ resource }: { resource?: Resource }) {
       title: resource?.title || "",
       url: resource?.url || "",
       type: (resource?.type as any) || "youtube_video",
-      book_id: resource?.book_id || "",
+      book_id: resource?.book_id || preselectedBookId || "",
       is_official: resource?.is_official ?? true,
       children:
         resource?.children?.map((c) => ({ title: c.title, url: c.url })) || [],
@@ -355,7 +358,7 @@ export function ResourceForm({ resource }: { resource?: Resource }) {
                       <FormLabel>Linked Book</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        defaultValue={preselectedBookId ?? field.value}
                       >
                         <FormControl>
                           <SelectTrigger>

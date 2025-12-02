@@ -201,7 +201,7 @@ export const columns: ColumnDef<Book>[] = [
                   Details
                 </DropdownMenuItem>
               </Link>
-              <Link href={`/admin/resources/new`}>
+              <Link href={`/admin/resources/new?bookId=${book.id}`}>
                 <DropdownMenuItem>
                   <FileText className="mr-2 h-4 w-4 text-slate-400" /> Add
                   resource
