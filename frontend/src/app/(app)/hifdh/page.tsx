@@ -21,7 +21,7 @@ export default function HifdhPage() {
   };
 
   return (
-    <div className="bg-slate-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="bg-slate-50 flex flex-col items-center justify-center p-4 px-6 relative overflow-hidden -mx-6 md:mx-0">
       {/* Background FX */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px]" />

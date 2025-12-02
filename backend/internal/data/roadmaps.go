@@ -154,10 +154,13 @@ func (m RoadmapModel) GetBySlug(slug string, userID string) (*Roadmap, error) {
 
 	// 1. Fetch Roadmap Metadata
 	var r Roadmap
-	queryRoadmap := `SELECT id, title, slug, description, cover_image_url, created_at FROM roadmaps WHERE slug = $1`
+	queryRoadmap := `
+		SELECT id, title, slug, COALESCE(description, ''), COALESCE(cover_image_url, ''), is_public, created_at 
+		FROM roadmaps 
+		WHERE slug = $1`
 	
 	err := m.DB.QueryRowContext(ctx, queryRoadmap, slug).Scan(
-		&r.ID, &r.Title, &r.Slug, &r.Description, &r.CoverImageURL, &r.CreatedAt,
+		&r.ID, &r.Title, &r.Slug, &r.Description, &r.CoverImageURL, &r.IsPublic, &r.CreatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -172,7 +175,7 @@ func (m RoadmapModel) GetBySlug(slug string, userID string) (*Roadmap, error) {
 	queryNodes := `
 		SELECT 
 			rn.id, rn.roadmap_id, rn.book_id, rn.sequence_index, rn.level, rn.description,
-			b.title, b.original_author, b.cover_image_url,
+			b.title, COALESCE(b.original_author, ''), COALESCE(b.cover_image_url, ''),
 			COALESCE(up.status, 'not_started') as user_status
 		FROM roadmap_nodes rn
 		JOIN books b ON rn.book_id = b.id
@@ -181,8 +184,12 @@ func (m RoadmapModel) GetBySlug(slug string, userID string) (*Roadmap, error) {
 		ORDER BY rn.sequence_index ASC`
 
 	// If userID is empty (guest), $1 will match nothing, so COALESCE returns 'not_started' (Safe)
+	var userIDParam interface{} = userID
+	if userID == "" {
+		userIDParam = nil
+	}
 	
-	rows, err := m.DB.QueryContext(ctx, queryNodes, userID, r.ID)
+	rows, err := m.DB.QueryContext(ctx, queryNodes, userIDParam, r.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -321,10 +328,13 @@ func (m RoadmapModel) GetByID(id string) (*Roadmap, error) {
 
 	// 1. Fetch Roadmap Metadata
 	var r Roadmap
-	queryRoadmap := `SELECT id, title, slug, description, cover_image_url, created_at FROM roadmaps WHERE id = $1`
+	queryRoadmap := `
+		SELECT id, title, slug, COALESCE(description, ''), COALESCE(cover_image_url, ''), is_public, created_at 
+		FROM roadmaps 
+		WHERE id = $1`
 	
 	err := m.DB.QueryRowContext(ctx, queryRoadmap, id).Scan(
-		&r.ID, &r.Title, &r.Slug, &r.Description, &r.CoverImageURL, &r.CreatedAt,
+		&r.ID, &r.Title, &r.Slug, &r.Description, &r.CoverImageURL, &r.IsPublic, &r.CreatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -338,7 +348,7 @@ func (m RoadmapModel) GetByID(id string) (*Roadmap, error) {
 	queryNodes := `
 		SELECT 
 			rn.id, rn.roadmap_id, rn.book_id, rn.sequence_index, rn.level, rn.description,
-			b.title, b.original_author, b.cover_image_url,
+			b.title, COALESCE(b.original_author, ''), COALESCE(b.cover_image_url, ''),
 			'not_started' as user_status -- Admin doesn't need progress status
 		FROM roadmap_nodes rn
 		JOIN books b ON rn.book_id = b.id

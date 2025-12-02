@@ -19,7 +19,7 @@ export default function LibraryLayout({
         <Header />
 
         {/* Scrollable Content Area */}
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="max-w-screen p-6">{children}</main>
       </div>
     </div>
   );

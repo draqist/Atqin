@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { PdfError } from "./pdf-error";
 import { PdfSkeleton } from "./pdf-skeleton";
@@ -34,6 +34,13 @@ export function PdfViewer({ url, onClose }: PdfViewerProps) {
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
   }
+
+  useEffect(() => {
+    if (containerWidth) {
+      // Optional: Force scale back to 1 on resize to "fit width" again
+      setScale(1.0);
+    }
+  }, [containerWidth]);
 
   return (
     <div className="flex flex-col items-center w-full">
@@ -94,7 +101,7 @@ export function PdfViewer({ url, onClose }: PdfViewerProps) {
       {/* The Document */}
       <div
         ref={containerRef}
-        className="border border-slate-200 shadow-md rounded-sm overflow-hidden bg-white w-full"
+        className="border border-slate-200 shadow-md rounded-sm overflow-auto bg-white w-full"
       >
         <Document
           file={url}
@@ -106,10 +113,10 @@ export function PdfViewer({ url, onClose }: PdfViewerProps) {
           <Page
             pageNumber={pageNumber}
             scale={scale}
-            width={containerWidth ? containerWidth : undefined}
+            width={containerWidth ? containerWidth * scale : 600}
             renderTextLayer={false} // Set to true if you want selectable text
             renderAnnotationLayer={false}
-            className="max-w-full w-full flex justify-center"
+            className="w-full min-w-full flex justify-center"
           />
         </Document>
       </div>

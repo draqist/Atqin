@@ -89,8 +89,8 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 	query := `
 		SELECT count(*) OVER(), id, title, original_author, description, cover_image_url, metadata, is_public, created_at, version
 		FROM books
-		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
-		OR (to_tsvector('simple', original_author) @@ plainto_tsquery('simple', $1) OR $1 = '')
+		WHERE (title ILIKE '%' || $1 || '%' OR $1 = '')
+		OR (original_author ILIKE '%' || $1 || '%' OR $1 = '')
 		ORDER BY id`
 
 	// Timeout context (3 seconds max)
