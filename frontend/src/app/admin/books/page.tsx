@@ -3,6 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table"; // Ensure this is your clean version
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useBooks } from "@/lib/hooks/queries/books";
 import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
@@ -12,6 +19,9 @@ import { columns } from "./columns";
 export default function AdminBooksPage() {
   const { data: books, isLoading } = useBooks();
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
+  const [resourceFilter, setResourceFilter] = useState<
+    "all" | "with_resources" | "no_resources"
+  >("all");
   const [search, setSearch] = useState("");
 
   // --- CLIENT SIDE FILTERING LOGIC ---
@@ -21,7 +31,16 @@ export default function AdminBooksPage() {
       if (filter === "published" && !book.is_public) return false;
       if (filter === "draft" && book.is_public) return false;
 
-      // 2. Search Filter
+      // 2. Resource Filter
+      if (
+        resourceFilter === "with_resources" &&
+        (book.resource_count || 0) === 0
+      )
+        return false;
+      if (resourceFilter === "no_resources" && (book.resource_count || 0) > 0)
+        return false;
+
+      // 3. Search Filter
       if (search) {
         const searchLower = search.toLowerCase();
         return (
@@ -66,6 +85,21 @@ export default function AdminBooksPage() {
 
         {/* Divider */}
         <div className="hidden sm:block w-px h-6 bg-slate-200 mx-2" />
+
+        {/* Resource Filter */}
+        <Select
+          value={resourceFilter}
+          onValueChange={(value) => setResourceFilter(value as any)}
+        >
+          <SelectTrigger className="w-[140px] h-8 text-xs font-medium bg-slate-100 border-none shadow-none text-slate-600">
+            <SelectValue placeholder="Filter Resources" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Resources</SelectItem>
+            <SelectItem value="with_resources">Has Resources</SelectItem>
+            <SelectItem value="no_resources">No Resources</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Segmented Filter Controls */}
         <div className="flex bg-slate-100 p-1 rounded-lg w-full sm:w-auto">

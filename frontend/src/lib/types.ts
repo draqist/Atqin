@@ -21,6 +21,7 @@ export interface Book {
   is_public: boolean;
   created_at: string; // ISO Date string coming from Go
   version: number;
+  resource_count?: number; // Added
 }
 
 // Optional: Type for the Tree Nodes (Chapters/Verses) if you need it again

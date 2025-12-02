@@ -16,6 +16,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import {
   Calendar,
   ExternalLink,
+  FileText,
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -198,6 +199,12 @@ export const columns: ColumnDef<Book>[] = [
                 <DropdownMenuItem>
                   <Pencil className="mr-2 h-4 w-4 text-slate-400" /> Edit
                   Details
+                </DropdownMenuItem>
+              </Link>
+              <Link href={`/admin/resources/new`}>
+                <DropdownMenuItem>
+                  <FileText className="mr-2 h-4 w-4 text-slate-400" /> Add
+                  resource
                 </DropdownMenuItem>
               </Link>
               <DropdownMenuSeparator />
