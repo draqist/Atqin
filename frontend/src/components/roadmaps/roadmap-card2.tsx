@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Roadmap } from "@/lib/types";
+import { generateTheme, getCategoryLabel, getLevelRange } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -34,7 +35,10 @@ export function RoadmapCard({
   completedBooks = 0,
   estimatedHours = "40h",
 }: RoadmapCardProps) {
-  const theme = getTheme(roadmap.slug);
+  const theme = generateTheme(roadmap.slug);
+  const categoryLabel = getCategoryLabel(roadmap.slug);
+  const levelRange = getLevelRange(roadmap.nodes);
+
   const progress = Math.round((completedBooks / totalBooks) * 100);
   const isStarted = completedBooks > 0;
 
@@ -53,7 +57,7 @@ export function RoadmapCard({
 
           <div className="flex justify-between items-start z-10">
             <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm uppercase tracking-wider text-[10px]">
-              Curriculum
+              {categoryLabel}
             </Badge>
             {isStarted && (
               <Badge className="bg-emerald-500 text-white border-0 text-[10px] gap-1">
@@ -102,7 +106,7 @@ export function RoadmapCard({
           <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-50">
             <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
               <BarChart className="w-3.5 h-3.5" />
-              <span>Beginner to Advanced</span>
+              <span>{levelRange}</span>
             </div>
             <div className="flex items-center gap-1 text-sm font-bold text-indigo-600 group-hover:translate-x-1 transition-transform">
               {isStarted ? "Continue" : "Start Track"}{" "}

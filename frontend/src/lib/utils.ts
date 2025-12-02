@@ -1,5 +1,6 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { Roadmap } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -70,3 +71,62 @@ export function pcmToAudioBuffer(
 
   return audioBuffer;
 }
+
+export const generateTheme = (slug: string) => {
+  const gradients = [
+    "from-rose-500 to-orange-500",
+    "from-emerald-500 to-teal-600",
+    "from-blue-600 to-violet-600",
+    "from-amber-400 to-orange-600",
+    "from-fuchsia-600 to-pink-600",
+    "from-sky-500 to-indigo-500",
+    "from-lime-500 to-emerald-600",
+    "from-violet-600 to-purple-600",
+  ];
+
+  // Simple hash function to pick a consistent index
+  const hash = slug.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return gradients[hash % gradients.length];
+};
+
+export const getCategoryLabel = (slug: string) => {
+  if (slug.includes("aqeedah")) return "Aqeedah";
+  if (slug.includes("tajweed")) return "Tajweed";
+  if (slug.includes("fiqh")) return "Fiqh";
+  if (slug.includes("hadith")) return "Hadith";
+  if (slug.includes("seerah")) return "Seerah";
+  if (slug.includes("quran")) return "Qur'an";
+  if (slug.includes("grammar")) return "Arabic Grammar";
+  if (slug.includes("tafsir")) return "Tafsir";
+
+  return "Curriculum";
+};
+
+export const LEVEL_ORDER: Record<string, number> = {
+  beginner: 1,
+  intermediate: 2,
+  advanced: 3,
+  expert: 4,
+};
+
+export const getLevelRange = (nodes: Roadmap["nodes"] = []) => {
+  if (!nodes || nodes.length === 0) return "Beginner to Advanced";
+
+  let min = 5;
+  let max = 0;
+
+  nodes.forEach((node) => {
+    const val = LEVEL_ORDER[node.level?.toLowerCase()] || 0;
+    if (val > 0) {
+      if (val < min) min = val;
+      if (val > max) max = val;
+    }
+  });
+
+  if (max === 0) return "Beginner to Advanced"; // Fallback
+
+  const levels = ["", "Beginner", "Intermediate", "Advanced", "Expert"];
+
+  if (min === max) return levels[min];
+  return `${levels[min]} to ${levels[max]}`;
+};
