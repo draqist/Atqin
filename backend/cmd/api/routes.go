@@ -108,7 +108,11 @@ mux.HandleFunc("GET /v1/tools/youtube-search", app.requireAuth(app.requireAdmin(
 // ... inside admin routes ...
 mux.HandleFunc("GET /v1/admin/stats", app.requireAuth(app.requireAdmin(app.getSystemStatsHandler)))
 mux.HandleFunc("POST /v1/admin/tools/extract-pdf", app.requireAuth(app.requireAdmin(app.extractPdfContentHandler)))
-mux.HandleFunc("POST /v1/books/{id}/nodes/batch", app.requireAuth(app.requireAdmin(app.batchCreateNodesHandler)))
+	mux.HandleFunc("POST /v1/books/{id}/nodes/batch", app.requireAuth(app.requireAdmin(app.batchCreateNodesHandler)))
+	
+	// Waitlist
+	mux.HandleFunc("POST /v1/waitlist", app.subscribeHandler)
+
 	// WRAP the mux with the CORS middleware
 	return app.enableCORS(mux)
 }

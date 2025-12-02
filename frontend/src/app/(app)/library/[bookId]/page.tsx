@@ -349,7 +349,9 @@ export default function StudyPage({
           resources={structuredResources}
           onResourceSelect={setActiveResource}
           onClose={() => setActiveResource(null)}
+          bookId={bookId}
         />
+        {/* <MobileNotesDrawer bookId={bookId} /> */}
       </div>
     );
   }

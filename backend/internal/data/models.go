@@ -21,6 +21,7 @@ type Models struct {
 	Roadmaps RoadmapModel
 	Analytics AnalyticsModel
 	Social SocialModel
+	Waitlist WaitlistModel
 	// We will add Nodes, Users, Resources here later
 }
 
@@ -36,5 +37,6 @@ func NewModels(db *sql.DB) Models {
 		Roadmaps: RoadmapModel{DB: db},
 		Analytics: AnalyticsModel{DB: db},
 		Social: SocialModel{DB: db},
+		Waitlist: WaitlistModel{DB: db},
 	}
 }

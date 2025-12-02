@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useSaveNote } from "@/lib/hooks/mutations/notes";
-import { useBookNote } from "@/lib/hooks/queries/notes";
 import { useUser } from "@/lib/hooks/queries/auth";
+import { useBookNote } from "@/lib/hooks/queries/notes";
 import { Placeholder } from "@tiptap/extensions";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { CheckCircle2, Loader2, Maximize2, Lock } from "lucide-react";
+import { CheckCircle2, Loader2, Lock, Maximize2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -41,7 +41,7 @@ export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm focus:outline-none min-h-[268px] p-4 text-slate-700 text-left placeholder:text-black text-sm",
+          "prose prose-sm focus:outline-none min-h-[260px] p-4 text-slate-700 text-left placeholder:text-black text-sm",
       },
     },
     onUpdate: ({ editor }) => {
@@ -117,7 +117,7 @@ export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
       </div>
 
       <div
-        className="flex-1 overflow-y-auto bg-white cursor-text"
+        className="bg-white cursor-text"
         onClick={() => editor?.chain().focus().run()}
       >
         <EditorContent editor={editor} />

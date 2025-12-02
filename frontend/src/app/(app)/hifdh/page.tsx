@@ -3,21 +3,20 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useJoinWaitlist } from "@/lib/hooks/mutations/waitlist";
 import { Bell, Brain, Mic, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 export default function HifdhPage() {
   const [email, setEmail] = useState("");
   const [notified, setNotified] = useState(false);
+  const { mutate: joinWaitlist, isPending } = useJoinWaitlist();
 
   const handleNotify = () => {
     if (!email) return;
-    // In a real app, send this to your DB or Newsletter API
-    setNotified(true);
-    toast.success(
-      "You're on the list! We'll notify you when AI Tasm'i is live."
-    );
+    joinWaitlist(email, {
+      onSuccess: () => setNotified(true),
+    });
   };
 
   return (
@@ -83,12 +82,14 @@ export default function HifdhPage() {
                 className="bg-white h-11 shadow-sm border-slate-200"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isPending}
               />
               <Button
                 onClick={handleNotify}
                 className="bg-slate-900 hover:bg-slate-800 h-11 px-6"
+                disabled={isPending}
               >
-                Notify Me
+                {isPending ? "Joining..." : "Notify Me"}
               </Button>
             </div>
           ) : (

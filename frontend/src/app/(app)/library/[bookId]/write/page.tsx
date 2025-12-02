@@ -126,14 +126,15 @@ export default function FullEditorPage({
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* 1. HEADER */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 px-2 lg:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={() => router.back()}
-            className="gap-2 text-slate-500 hover:text-slate-900"
+            className="gap-2 text-slate-500 px-0 hover:text-slate-900"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className="w-4 h-4" />{" "}
+            <span className="hidden md:inline">Back</span>
           </Button>
           <div className="h-4 w-px bg-slate-200" />
           <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
@@ -251,7 +252,7 @@ export default function FullEditorPage({
       )}
 
       {/* 3. EDITOR CANVAS */}
-      <main className="flex-1 mx-auto w-full px-10">
+      <main className="flex-1 mx-auto w-full px-4 lg:px-10">
         <EditorContent editor={editor} />
       </main>
     </div>

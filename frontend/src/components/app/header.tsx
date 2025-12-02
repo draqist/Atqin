@@ -61,7 +61,7 @@ export function Header() {
         </div>
       </div>
 
-      <div className="items-center gap-4 w-full hidden md:flex md:w-auto">
+      <div className="h-16 items-center gap-4 w-full hidden md:flex md:w-auto">
         <div className="relative w-full md:w-96 lg:block">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 cursor-pointer"

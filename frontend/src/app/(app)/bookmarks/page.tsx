@@ -82,8 +82,8 @@ export default function BookmarksPage() {
           </div>
 
           {/* 3. The "Stat" Block */}
-          <div className="flex items-center gap-4 bg-white/60 backdrop-blur-sm border border-amber-200/50 p-3 rounded-xl shadow-sm">
-            <div className="text-right">
+          <div className="w-fit flex flex-row-reverse md:flex-row items-center gap-4 bg-white/60 backdrop-blur-sm border border-amber-200/50 p-3 rounded-xl shadow-sm">
+            <div className="md:text-right">
               <span className="block text-2xl font-bold text-slate-900 leading-none">
                 {books.length}
               </span>

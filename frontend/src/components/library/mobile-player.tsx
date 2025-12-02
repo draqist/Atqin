@@ -1,5 +1,6 @@
 "use client";
 
+import { QuickNote } from "@/components/editor/quick-note"; // New Import
 import {
   Accordion,
   AccordionContent,
@@ -8,9 +9,10 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; // New Import
 import { Resource } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { ChevronUp, ListVideo, PlayCircle, X } from "lucide-react";
+import { AlignLeft, ChevronUp, ListVideo, PlayCircle, X } from "lucide-react";
 import { useState } from "react";
 import { Drawer } from "vaul";
 
@@ -20,6 +22,7 @@ interface MobilePlayerProps {
   resources: Resource[];
   onResourceSelect: (id: string) => void;
   onClose: () => void;
+  bookId: string; // Added prop
 }
 
 export function MobilePlayer({
@@ -28,10 +31,11 @@ export function MobilePlayer({
   resources,
   onResourceSelect,
   onClose,
+  bookId,
 }: MobilePlayerProps) {
   const [snap, setSnap] = useState<number | string | null>("140px");
+  const [activeTab, setActiveTab] = useState("resources"); // Track active tab
 
-  // Helper to toggle snap position reliably
   const toggleSnap = () => {
     setSnap((prev) => (prev === 0.85 ? "140px" : 0.85));
   };
@@ -40,17 +44,17 @@ export function MobilePlayer({
 
   return (
     <Drawer.Root
-      open={true} // Always open
+      open={true}
       snapPoints={["140px", 0.85]}
       activeSnapPoint={snap}
       setActiveSnapPoint={setSnap}
-      modal={false} // Allows interacting with the background text
-      dismissible={false} // Prevents dragging it completely off-screen
+      modal={false}
+      dismissible={false}
     >
       <Drawer.Portal>
         <Drawer.Title className="sr-only">Mobile Player</Drawer.Title>
         <Drawer.Content className="fixed flex flex-col bg-white border-t border-slate-200 border-b-none rounded-t-[20px] bottom-0 left-0 right-0 h-full max-h-[97%] -mx-px shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)] z-50 focus:outline-none">
-          {/* HANDLE BAR (Clickable to toggle) */}
+          {/* HANDLE BAR */}
           <div
             className="w-full flex justify-center pt-4 pb-2 cursor-pointer"
             onClick={toggleSnap}
@@ -59,14 +63,14 @@ export function MobilePlayer({
           </div>
 
           <div className="flex-1 flex flex-col h-full w-full max-w-md mx-auto overflow-hidden">
-            {/* 1. HEADER AREA (The Visible Bar) */}
+            {/* 1. HEADER AREA (Visible Bar + Tabs) */}
             <div
               className={cn(
-                "px-6 transition-all duration-300",
-                isExpanded ? "mb-4" : "mb-0"
+                "px-6 transition-all duration-300 shrink-0 bg-white z-20",
+                isExpanded ? "mb-0" : "mb-0"
               )}
             >
-              {/* SCENARIO A: NOTHING PLAYING (Show Resource Trigger) */}
+              {/* MINI PLAYER / HEADER CONTENT */}
               {!activeVideo && !isExpanded && (
                 <div
                   className="flex items-center gap-4 cursor-pointer"
@@ -85,7 +89,6 @@ export function MobilePlayer({
                 </div>
               )}
 
-              {/* SCENARIO B: VIDEO IS ACTIVE OR EXPANDED */}
               {(activeVideo || isExpanded) && (
                 <div className="flex items-center gap-4">
                   {/* Thumbnail / Player */}
@@ -97,7 +100,6 @@ export function MobilePlayer({
                         : "w-16 h-16 shrink-0"
                     )}
                   >
-                    {/* The Iframe is ALWAYS here, just resized. Keeps audio alive. */}
                     {embedUrl && (
                       <iframe
                         src={embedUrl}
@@ -106,8 +108,6 @@ export function MobilePlayer({
                         allowFullScreen
                       />
                     )}
-
-                    {/* Click overlay for expanding when minimized */}
                     {!isExpanded && (
                       <button
                         className="absolute inset-0 z-10 bg-transparent"
@@ -116,7 +116,7 @@ export function MobilePlayer({
                     )}
                   </div>
 
-                  {/* Mini Player Text (Only visible when minimized) */}
+                  {/* Text Info (Only minimized) */}
                   <div
                     className={cn(
                       "flex-1 min-w-0 transition-opacity duration-200 cursor-pointer",
@@ -139,7 +139,7 @@ export function MobilePlayer({
                     </p>
                   </div>
 
-                  {/* Close Button (Only when minimized and playing) */}
+                  {/* Close Button */}
                   {!isExpanded && activeVideo && (
                     <Button
                       variant="ghost"
@@ -153,12 +153,12 @@ export function MobilePlayer({
                 </div>
               )}
 
-              {/* Full Title (Only when expanded) */}
+              {/* Full Title (Expanded Only) */}
               <div
                 className={cn(
                   "transition-all duration-300 delay-100",
                   isExpanded
-                    ? "opacity-100 h-auto"
+                    ? "opacity-100 h-auto mb-4"
                     : "opacity-0 h-0 overflow-hidden"
                 )}
               >
@@ -175,101 +175,156 @@ export function MobilePlayer({
                   </h3>
                 )}
               </div>
+
+              {/* TAB SWITCHER (Expanded Only) */}
+              <div
+                className={cn(
+                  "transition-all duration-300 mb-2",
+                  isExpanded
+                    ? "opacity-100 h-auto"
+                    : "opacity-0 h-0 overflow-hidden"
+                )}
+              >
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-2 bg-slate-100/80 h-10 p-1">
+                    <TabsTrigger
+                      value="resources"
+                      className="text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                    >
+                      <ListVideo className="w-3.5 h-3.5 mr-2" /> Resources
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="notes"
+                      className="text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                    >
+                      <AlignLeft className="w-3.5 h-3.5 mr-2" /> My Notes
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
             </div>
 
-            {/* 2. RESOURCE LIST (Visible when expanded) */}
+            {/* 2. CONTENT AREA (Scrollable) */}
             <div
               className={cn(
-                "flex-1 overflow-hidden bg-slate-50 border-t border-slate-100 transition-opacity duration-300",
+                "flex-1 bg-slate-50 border-t border-slate-100 transition-opacity duration-300 relative overflow-hidden",
                 isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >
-              <ScrollArea className="h-full p-4">
-                <div className="space-y-3 pb-20">
-                  {resources.map((resource: any) => {
-                    if (resource.type === "playlist") {
-                      return (
-                        <Accordion
-                          type="single"
-                          collapsible
-                          key={resource.id}
-                          className="w-full bg-white rounded-xl border border-slate-200 shadow-sm"
-                        >
-                          <AccordionItem
-                            value={resource.id}
-                            className="border-none"
+              {/* TAB 1: RESOURCES LIST */}
+              <div
+                className={cn(
+                  "absolute inset-0",
+                  activeTab === "resources" ? "z-10" : "z-0 hidden"
+                )}
+              >
+                <ScrollArea className="h-full p-4 pb-24">
+                  <div className="space-y-3">
+                    {resources.map((resource: any) => {
+                      // ... (Your existing mapping logic) ...
+                      if (resource.type === "playlist") {
+                        return (
+                          <Accordion
+                            type="single"
+                            collapsible
+                            key={resource.id}
+                            className="w-full bg-white rounded-xl border border-slate-200 shadow-sm"
                           >
-                            <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                              <div className="flex items-center gap-3 text-left">
-                                <div className="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                  <ListVideo className="w-4 h-4" />
+                            <AccordionItem
+                              value={resource.id}
+                              className="border-none"
+                            >
+                              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                                <div className="flex items-center gap-3 text-left">
+                                  <div className="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                    <ListVideo className="w-4 h-4" />
+                                  </div>
+                                  <div className="flex-1 text-sm font-semibold text-slate-700 line-clamp-1">
+                                    {resource.title}
+                                  </div>
                                 </div>
-                                <div className="flex-1 text-sm font-semibold text-slate-700 line-clamp-1">
-                                  {resource.title}
-                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent className="bg-slate-50/50 border-t border-slate-100">
+                                {resource.children?.map(
+                                  (child: any, idx: number) => (
+                                    <button
+                                      key={child.id}
+                                      onClick={() => onResourceSelect(child.id)}
+                                      className={cn(
+                                        "w-full flex items-center gap-3 px-4 py-3 text-left border-b border-slate-100 last:border-0",
+                                        activeVideo?.id === child.id
+                                          ? "bg-emerald-50 text-emerald-700"
+                                          : "text-slate-600"
+                                      )}
+                                    >
+                                      <div className="text-[10px] font-mono opacity-40 w-4">
+                                        {idx + 1}
+                                      </div>
+                                      <div className="text-xs font-medium line-clamp-1 flex-1">
+                                        {child.title}
+                                      </div>
+                                      {activeVideo?.id === child.id && (
+                                        <PlayCircle className="w-3 h-3" />
+                                      )}
+                                    </button>
+                                  )
+                                )}
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        );
+                      }
+                      // Single Video
+                      if (resource.type === "youtube_video") {
+                        return (
+                          <div
+                            key={resource.id}
+                            className={cn(
+                              "flex items-center gap-3 p-3 rounded-xl bg-white border cursor-pointer shadow-sm",
+                              activeVideo?.id === resource.id
+                                ? "border-emerald-200 bg-emerald-50/30"
+                                : "border-slate-200"
+                            )}
+                            onClick={() => onResourceSelect(resource.id)}
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
+                              <PlayCircle className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <div className="text-sm font-semibold text-slate-900 line-clamp-1">
+                                {resource.title}
                               </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="bg-slate-50/50 border-t border-slate-100">
-                              {resource.children?.map(
-                                (child: any, idx: number) => (
-                                  <button
-                                    key={child.id}
-                                    onClick={() => onResourceSelect(child.id)}
-                                    className={cn(
-                                      "w-full flex items-center gap-3 px-4 py-3 text-left border-b border-slate-100 last:border-0",
-                                      activeVideo?.id === child.id
-                                        ? "bg-emerald-50 text-emerald-700"
-                                        : "text-slate-600"
-                                    )}
-                                  >
-                                    <div className="text-[10px] font-mono opacity-40 w-4">
-                                      {idx + 1}
-                                    </div>
-                                    <div className="text-xs font-medium line-clamp-1 flex-1">
-                                      {child.title}
-                                    </div>
-                                    {activeVideo?.id === child.id && (
-                                      <PlayCircle className="w-3 h-3" />
-                                    )}
-                                  </button>
-                                )
-                              )}
-                            </AccordionContent>
-                          </AccordionItem>
-                        </Accordion>
-                      );
-                    }
-                    // Single Video
-                    if (resource.type === "youtube_video") {
-                      return (
-                        <div
-                          key={resource.id}
-                          className={cn(
-                            "flex items-center gap-3 p-3 rounded-xl bg-white border cursor-pointer shadow-sm",
-                            activeVideo?.id === resource.id
-                              ? "border-emerald-200 bg-emerald-50/30"
-                              : "border-slate-200"
-                          )}
-                          onClick={() => onResourceSelect(resource.id)}
-                        >
-                          <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
-                            <PlayCircle className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-semibold text-slate-900 line-clamp-1">
-                              {resource.title}
-                            </div>
-                            <div className="text-[10px] text-slate-500">
-                              Single Video
+                              <div className="text-[10px] text-slate-500">
+                                Single Video
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })}
+                        );
+                      }
+                      return null;
+                    })}
+                  </div>
+                </ScrollArea>
+              </div>
+
+              {/* TAB 2: NOTES EDITOR */}
+              <div
+                className={cn(
+                  "absolute inset-0 flex flex-col bg-white",
+                  activeTab === "notes" ? "z-10" : "z-0 hidden"
+                )}
+              >
+                <div className="flex-1 p-4 pb-24 overflow-y-auto">
+                  <div className="border rounded-xl p-1 shadow-sm bg-white h-full min-h-[108px]">
+                    {/* Reuse the QuickNote Editor */}
+                    <QuickNote bookId={bookId} />
+                  </div>
                 </div>
-              </ScrollArea>
+              </div>
             </div>
           </div>
         </Drawer.Content>
