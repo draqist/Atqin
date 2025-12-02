@@ -44,12 +44,12 @@ func (m RoadmapModel) GetAll(includeDrafts bool) ([]*Roadmap, error) {
     
     if includeDrafts {
         // Admin Query: No WHERE clause for is_public
-        query = `SELECT id, title, slug, description, cover_image_url, is_public, created_at 
+        query = `SELECT id, title, slug, COALESCE(description, ''), COALESCE(cover_image_url, ''), is_public, created_at 
                  FROM roadmaps 
                  ORDER BY title ASC`
     } else {
         // Student Query: Strict filtering
-        query = `SELECT id, title, slug, description, cover_image_url, is_public, created_at 
+        query = `SELECT id, title, slug, COALESCE(description, ''), COALESCE(cover_image_url, ''), is_public, created_at 
                  FROM roadmaps 
                  WHERE is_public = true 
                  ORDER BY title ASC`
