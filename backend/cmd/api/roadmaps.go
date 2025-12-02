@@ -40,7 +40,7 @@ func (app *application) listRoadmapsHandler(w http.ResponseWriter, r *http.Reque
 
 // GET /v1/roadmaps/{slug} (Handles both Slugs and UUIDs)
 func (app *application) getRoadmapHandler(w http.ResponseWriter, r *http.Request) {
-	param := r.PathValue("slug") // This grabs whatever is after /roadmaps/
+	param := r.PathValue("id") // This grabs whatever is after /roadmaps/
 
 	// Try to get UserID context (might be guest)
 	userID := ""
