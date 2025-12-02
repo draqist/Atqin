@@ -29,16 +29,18 @@ export function ContinueReadingHero({
         <p className="text-slate-400 text-sm">{book.original_author}</p>
       </div>
 
-      <div className="relative z-10 flex flex-col  md:flex-row  md:items-center  gap-1 items-start justify-start md:justify-between mt-auto pt-2.5 md:pt-6">
-        <div className="flex flex-col gap-1.5 flex-1">
-          <div className="flex items-center gap-2 justify-between text-xs text-slate-300 w-full">
-            <div className="w-24 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+      <div className="relative z-10 flex flex-col  md:flex-row  md:items-center  gap-2 lg:gap-10 items-start justify-start md:justify-between mt-auto pt-2.5 md:pt-6">
+        <div className="flex flex-col gap-1.5 flex-1 w-full">
+          <div className="flex-col items-center md:items-start gap-2 justify-between text-xs text-slate-300">
+            <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-emerald-500 transition-all duration-500"
+                className="h-full w-full bg-emerald-500 transition-all duration-500"
                 style={{ width: `${progress?.percentage || 0}%` }}
               />
             </div>
-            <span>{progress?.percentage || 0}% Complete</span>
+            <span className="text-xs text-slate-300">
+              {progress?.percentage || 0}% Complete
+            </span>
           </div>
         </div>
 
