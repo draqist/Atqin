@@ -23,7 +23,8 @@ export function useStudyTimer(bookId: string, isUserLoggedIn: boolean) {
       if (activityRef.current && document.hasFocus()) {
         // User moved mouse AND tab is focused -> Send Ping
         // We send "1 minute" of credit
-        api.post("/analytics/heartbeat", { bookId, minutes: 1 }).catch(e => console.error("Ping failed", e));
+        console.log("Sending ping");
+        api.post("/analytics/heartbeat", { book_id: bookId, minutes: 1 }).catch(e => console.error("Ping failed", e));
 
         // Reset flag
         activityRef.current = false;

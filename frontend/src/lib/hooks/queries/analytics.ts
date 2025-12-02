@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { Book, BookProgress } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 
 export interface StudentStats {
@@ -6,6 +7,8 @@ export interface StudentStats {
   current_streak: number;
   books_opened: number;
   activity_chart: { date: string; minutes: number }[];
+  last_book_opened: Book;
+  last_book_progress: BookProgress;
 }
 
 export const useStudentStats = () => {

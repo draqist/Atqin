@@ -1,5 +1,6 @@
 "use client";
 
+import { DailyActivity } from "@/lib/types";
 import {
   Area,
   AreaChart,
@@ -9,17 +10,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-// Mock data that looks dynamic
-const data = [
-  { name: "Sat", minutes: 45 },
-  { name: "Sun", minutes: 30 },
-  { name: "Mon", minutes: 60 },
-  { name: "Tue", minutes: 25 },
-  { name: "Wed", minutes: 45 },
-  { name: "Thu", minutes: 90 },
-  { name: "Fri", minutes: 120 },
-];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -33,7 +23,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export function ActivityChart() {
+export function ActivityChart({ data }: { data: DailyActivity[] }) {
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -55,7 +45,7 @@ export function ActivityChart() {
           />
 
           <XAxis
-            dataKey="name"
+            dataKey="date"
             stroke="#94a3b8"
             fontSize={12}
             tickLine={false}

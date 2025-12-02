@@ -40,28 +40,35 @@ const mainNav = [
 //   { name: "Arabic Grammar", slug: "grammar" },
 // ];
 
+import { NotificationBell } from "./notification-bell";
+
+// ...
+
 export function MobileNav() {
   const pathname = usePathname();
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <div className="md:hidden flex items-center justify-between w-full h-16">
+        <div className="md:hidden flex items-center justify-between w-full h-16 px-4 border-b border-slate-100 bg-white">
           <Link href="/">
             <Image
               src={"/iqr_mob.png"}
               alt="mobile-logo"
-              height={20}
-              width={20}
+              height={24}
+              width={24}
             />
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-slate-500 hover:bg-slate-100"
-          >
-            <Menu className="w-12 h-12" size={10} />
-          </Button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-slate-500 hover:bg-slate-100"
+            >
+              <Menu className="w-6 h-6" />
+            </Button>
+          </div>
         </div>
       </SheetTrigger>
       <SheetContent className="w-[300px] p-0 flex flex-col bg-white">

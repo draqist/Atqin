@@ -51,7 +51,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
 
 const PdfViewer = dynamic(
@@ -68,6 +68,9 @@ export default function StudyPage({
   params: Promise<{ bookId: string }>;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialPage = Number(searchParams.get("page")) || 1;
+
   const { bookId } = use(params);
   const [activeResource, setActiveResource] = useState<string | null>(null);
 
@@ -339,7 +342,12 @@ export default function StudyPage({
         {/* 2. The Text (Full Height Reader) */}
         <div className="flex-1 overflow-y-auto bg-[#F3F4F6]">
           <div className="p-4">
-            <PdfViewer url={pdfUrl ?? ""} onClose={() => setViewMode("text")} />
+            <PdfViewer
+              bookId={bookId}
+              initialPage={initialPage}
+              url={pdfUrl ?? ""}
+              onClose={() => setViewMode("text")}
+            />
           </div>
         </div>
 
@@ -439,6 +447,8 @@ export default function StudyPage({
                   <div className="w-full max-w-4xl pb-8">
                     <PdfViewer
                       url={pdfUrl ?? ""}
+                      bookId={bookId}
+                      initialPage={initialPage}
                       onClose={() => setViewMode("text")}
                     />
                   </div>

@@ -21,6 +21,10 @@ import * as z from "zod";
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.email("Invalid email address."),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters.")
+    .optional(), // Optional for now to avoid breaking if user skips
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
@@ -33,6 +37,7 @@ export default function RegisterPage() {
     defaultValues: {
       name: "",
       email: "",
+      username: "",
       password: "",
     },
   });
@@ -62,6 +67,19 @@ export default function RegisterPage() {
                     {...field}
                     className="h-11"
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input placeholder="ibnkhaldun" {...field} className="h-11" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

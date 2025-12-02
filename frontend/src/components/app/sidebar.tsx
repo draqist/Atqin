@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { NotificationBell } from "./notification-bell";
 import { SidebarUserMenu } from "./sidebar-user-menu";
 
 const mainNav = [
@@ -28,14 +29,6 @@ const mainNav = [
   // { name: "API Docs", href: "/docs", icon: FileText },
 ];
 
-// Matching the categories from your Landing Page
-// const categories = [
-//   { name: "Tajweed & Qira'at", slug: "tajweed" },
-//   { name: "Aqeedah", slug: "aqeedah" },
-//   { name: "Hadith", slug: "hadith" },
-//   { name: "Arabic Grammar", slug: "grammar" },
-// ];
-
 export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -45,7 +38,7 @@ export function Sidebar() {
     // CHANGE 1: Width logic (Mobile: hidden, Tablet: w-20, Desktop: w-64)
     <div className="hidden md:flex md:w-20 lg:w-64 flex-col h-full border-r border-slate-200 bg-white text-slate-900 transition-all duration-300">
       {/* 1. APP LOGO */}
-      <div className="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-slate-100">
+      <div className="h-16 flex items-center justify-center lg:justify-between lg:px-4 border-b border-slate-100">
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
           {/* Logo */}
           <Image
@@ -63,6 +56,9 @@ export function Sidebar() {
             className="block lg:hidden"
           />
         </Link>
+        <div className="hidden lg:block">
+          <NotificationBell />
+        </div>
       </div>
 
       {/* 2. MAIN NAVIGATION */}

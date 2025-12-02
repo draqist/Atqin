@@ -11,25 +11,36 @@ import { PdfSkeleton } from "./pdf-skeleton";
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 // Basic styling for the PDF wrapper
+import { useDebounce } from "@/hooks/use-debounce-value";
+import api from "@/lib/axios";
+import { useResizeObserver } from "@/lib/hooks/use-resize-observer";
+import { useRef } from "react";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+import { PdfNoData } from "./no-pdf-data";
 
 interface PdfViewerProps {
   url: string | File;
+  bookId?: string;
+  initialPage?: number;
   onClose?: () => void;
 }
 
-import { useResizeObserver } from "@/lib/hooks/use-resize-observer";
-import { useRef } from "react";
-import { PdfNoData } from "./no-pdf-data";
-
-export function PdfViewer({ url, onClose }: PdfViewerProps) {
+export function PdfViewer({
+  url,
+  bookId,
+  initialPage = 1,
+  onClose,
+}: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [pageNumber, setPageNumber] = useState<number>(initialPage);
   const [scale, setScale] = useState<number>(1.0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const containerWidth = useResizeObserver(containerRef);
+
+  // Debounce the page number to avoid spamming the API
+  const debouncedPageNumber = useDebounce(pageNumber, 1000);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
@@ -41,6 +52,18 @@ export function PdfViewer({ url, onClose }: PdfViewerProps) {
       setScale(1.0);
     }
   }, [containerWidth]);
+
+  // Save progress when page changes (debounced)
+  useEffect(() => {
+    if (bookId && debouncedPageNumber && numPages) {
+      api
+        .post(`/books/${bookId}/progress`, {
+          current_page: debouncedPageNumber,
+          total_pages: numPages,
+        })
+        .catch(console.error);
+    }
+  }, [debouncedPageNumber, bookId, numPages]);
 
   return (
     <div className="flex flex-col items-center w-full">

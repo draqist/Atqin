@@ -171,3 +171,23 @@ export interface GeminiBook {
     sequence_index: number;
   }[];
 }
+
+export interface DailyActivity {
+  date: string;
+  minutes: number;
+}
+
+export interface BookProgress {
+  current_page: number;
+  total_pages: number;
+  percentage: number;
+}
+
+export interface StudentStats {
+  total_minutes: number;
+  current_streak: number;
+  books_opened: number;
+  activity_chart: DailyActivity[];
+  last_book_opened?: Book;
+  last_book_progress?: BookProgress;
+}

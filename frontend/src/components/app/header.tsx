@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Bell, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MobileNav } from "./mobile-nav";
+import { NotificationBell } from "./notification-bell";
 
 export function Header() {
   const router = useRouter();
@@ -85,13 +85,7 @@ export function Header() {
           )}
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-slate-400 hover:text-slate-900"
-        >
-          <Bell className="w-5 h-5" />
-        </Button>
+        <NotificationBell />
       </div>
     </header>
   );

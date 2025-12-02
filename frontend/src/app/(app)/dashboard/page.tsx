@@ -8,7 +8,7 @@ import { HalaqahWidget } from "@/components/social/halaqah-widget";
 import { PartnerCard } from "@/components/social/partner-card";
 import { useStudentStats } from "@/lib/hooks/queries/analytics";
 import { useUser } from "@/lib/hooks/queries/auth";
-import { BookOpen, Clock, Flame, Trophy } from "lucide-react";
+import { BookOpen, Clock, Flame } from "lucide-react";
 
 export default function DashboardPage() {
   const { data: user } = useUser();
@@ -29,7 +29,7 @@ export default function DashboardPage() {
           Welcome back, {user.name} 👋
         </h1>
         <p className="text-slate-500 text-sm mt-1">
-          You're on a 4-day streak. Keep it up!
+          You're on a {stats?.current_streak || 0}-day streak. Keep it up!
         </p>
       </div>
 
@@ -38,7 +38,7 @@ export default function DashboardPage() {
         <StatCard
           title="Current Streak"
           value={`${stats?.current_streak || 0} Days`}
-          subtitle="Best: 14 Days"
+          subtitle={`Best: ${stats?.activity_chart.length || 0} Days`}
           icon={Flame}
           color="text-orange-500"
         />
@@ -58,13 +58,13 @@ export default function DashboardPage() {
           icon={BookOpen}
           color="text-emerald-500"
         />
-        <StatCard
+        {/* <StatCard
           title="Mastery"
           value="142"
           subtitle="Verses Memorized"
           icon={Trophy}
           color="text-yellow-500"
-        />
+        /> */}
       </div>
 
       {/* 3. MAIN GRID */}
@@ -72,7 +72,10 @@ export default function DashboardPage() {
         {/* LEFT COLUMN (Work) */}
         <div className="lg:col-span-2 space-y-8">
           {/* Hero: Continue Reading */}
-          <ContinueReadingHero />
+          <ContinueReadingHero
+            book={stats?.last_book_opened}
+            progress={stats?.last_book_progress}
+          />
 
           {/* Chart */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
@@ -82,7 +85,7 @@ export default function DashboardPage() {
                 <option>Last 7 Days</option>
               </select>
             </div>
-            <ActivityChart />
+            <ActivityChart data={stats?.activity_chart ?? []} />
           </div>
         </div>
 

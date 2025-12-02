@@ -19,7 +19,7 @@ import * as z from "zod";
 
 // 1. Validation Schema
 const formSchema = z.object({
-  email: z.string().email("Please enter a valid email address."),
+  email: z.string().min(1, "Email or Username is required."), // Relaxed validation to allow username
   password: z.string().min(1, "Password is required."),
 });
 
@@ -62,10 +62,10 @@ export default function LoginPage() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Email or Username</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="name@example.com"
+                    placeholder="name@example.com or username"
                     {...field}
                     className="h-11 bg-slate-50 border-slate-200 focus-visible:ring-emerald-500 focus-visible:ring-offset-0"
                   />
