@@ -30,7 +30,7 @@ export default function AdminLayout({
         <div className="h-16 flex items-center px-6 border-b border-slate-100">
           <Link
             href="/admin"
-            className="flex items-center gap-2 font-bold text-lg tracking-tight"
+            className="flex h-16 items-center gap-2 font-bold text-lg tracking-tight"
           >
             <Image src={"/iqraa.svg"} alt="admin_logo" height={20} width={70} />
           </Link>
