@@ -77,4 +77,5 @@ We are actively building the following features to complete the vision:
 ### Join the Journey
 
 Iqraa is currently in active development.
-**[Insert Link to Live App Here]**
+**[https://atqin.vercel.app]**
+
