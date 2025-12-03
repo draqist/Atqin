@@ -2,6 +2,9 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Roadmap } from "./types";
 
+/**
+ * Merges Tailwind CSS classes with clsx.
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -14,6 +17,9 @@ export const categories = [
   { id: "grammar", label: "Arabic Grammar" },
 ];
 
+/**
+ * Converts a base64 string to an ArrayBuffer.
+ */
 export function base64ToArrayBuffer(base64: string): ArrayBuffer {
   const binaryString = window.atob(base64);
   const len = binaryString.length;
@@ -24,6 +30,9 @@ export function base64ToArrayBuffer(base64: string): ArrayBuffer {
   return bytes.buffer;
 }
 
+/**
+ * Converts a Float32Array (audio data) to a 16-bit PCM ArrayBuffer.
+ */
 export function floatTo16BitPCM(float32Array: Float32Array): ArrayBuffer {
   const buffer = new ArrayBuffer(float32Array.length * 2);
   const view = new DataView(buffer);
@@ -34,6 +43,9 @@ export function floatTo16BitPCM(float32Array: Float32Array): ArrayBuffer {
   return buffer;
 }
 
+/**
+ * Converts an ArrayBuffer to a base64 string.
+ */
 export function arrayBufferToBase64(buffer: ArrayBuffer): string {
   let binary = "";
   const bytes = new Uint8Array(buffer);
@@ -44,7 +56,9 @@ export function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return window.btoa(binary);
 }
 
-// Create the payload for Gemini
+/**
+ * Creates the payload for Gemini audio content.
+ */
 export function createAudioContent(inputData: Float32Array) {
   const pcmBuffer = floatTo16BitPCM(inputData);
   const base64 = arrayBufferToBase64(pcmBuffer);
@@ -54,7 +68,9 @@ export function createAudioContent(inputData: Float32Array) {
   };
 }
 
-// Convert Gemini's raw PCM response back to browser audio
+/**
+ * Converts Gemini's raw PCM response back to a browser AudioBuffer.
+ */
 export function pcmToAudioBuffer(
   pcmData: ArrayBuffer,
   audioContext: AudioContext,
@@ -72,6 +88,9 @@ export function pcmToAudioBuffer(
   return audioBuffer;
 }
 
+/**
+ * Generates a consistent gradient theme based on a slug string.
+ */
 export const generateTheme = (slug: string) => {
   const gradients = [
     "from-rose-500 to-orange-500",
@@ -84,11 +103,13 @@ export const generateTheme = (slug: string) => {
     "from-violet-600 to-purple-600",
   ];
 
-  // Simple hash function to pick a consistent index
   const hash = slug.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return gradients[hash % gradients.length];
 };
 
+/**
+ * Returns a human-readable label for a category slug.
+ */
 export const getCategoryLabel = (slug: string) => {
   if (slug.includes("aqeedah")) return "Aqeedah";
   if (slug.includes("tajweed")) return "Tajweed";
@@ -109,6 +130,9 @@ export const LEVEL_ORDER: Record<string, number> = {
   expert: 4,
 };
 
+/**
+ * Calculates the difficulty range (e.g., "Beginner to Advanced") for a set of roadmap nodes.
+ */
 export const getLevelRange = (nodes: Roadmap["nodes"] = []) => {
   if (!nodes || nodes.length === 0) return "Beginner to Advanced";
 
@@ -123,7 +147,7 @@ export const getLevelRange = (nodes: Roadmap["nodes"] = []) => {
     }
   });
 
-  if (max === 0) return "Beginner to Advanced"; // Fallback
+  if (max === 0) return "Beginner to Advanced";
 
   const levels = ["", "Beginner", "Intermediate", "Advanced", "Expert"];
 

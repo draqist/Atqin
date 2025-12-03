@@ -19,6 +19,10 @@ interface HifdhPlayerProps {
   verses: { id: string; content_text: string }[]; // Simplified node structure
 }
 
+/**
+ * Hifdh player component for memorization practice.
+ * Features AI-powered recitation correction, verse hiding modes, and navigation controls.
+ */
 export function HifdhPlayer({ bookTitle, verses }: HifdhPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hideMode, setHideMode] = useState<"none" | "partial" | "full">("none");

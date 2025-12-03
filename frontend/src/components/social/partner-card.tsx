@@ -10,6 +10,14 @@ import { Flame, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { UserSearch } from "./user-search";
 
+/**
+ * A card component for managing accountability partners.
+ * Handles states for finding a partner, pending invitations, and active partnerships.
+ */
+/**
+ * A card component for managing accountability partners.
+ * Handles states for finding a partner, pending invitations, and active partnerships.
+ */
 export function PartnerCard() {
   const { data, isLoading } = usePartner();
   const { mutate: invite, isPending: isInviting } = useInvitePartner();

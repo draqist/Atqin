@@ -1,33 +1,45 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
+/**
+ * Root component for the Alert Dialog.
+ */
 function AlertDialog({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
+  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
 }
 
+/**
+ * Trigger for the Alert Dialog.
+ */
 function AlertDialogTrigger({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
   return (
     <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
-  )
+  );
 }
 
+/**
+ * Portal for the Alert Dialog content.
+ */
 function AlertDialogPortal({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
   return (
     <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
-  )
+  );
 }
 
+/**
+ * Overlay for the Alert Dialog.
+ */
 function AlertDialogOverlay({
   className,
   ...props
@@ -41,9 +53,12 @@ function AlertDialogOverlay({
       )}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Content container for the Alert Dialog.
+ */
 function AlertDialogContent({
   className,
   ...props
@@ -60,9 +75,12 @@ function AlertDialogContent({
         {...props}
       />
     </AlertDialogPortal>
-  )
+  );
 }
 
+/**
+ * Header section of the Alert Dialog.
+ */
 function AlertDialogHeader({
   className,
   ...props
@@ -73,9 +91,12 @@ function AlertDialogHeader({
       className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Footer section of the Alert Dialog.
+ */
 function AlertDialogFooter({
   className,
   ...props
@@ -89,9 +110,12 @@ function AlertDialogFooter({
       )}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Title of the Alert Dialog.
+ */
 function AlertDialogTitle({
   className,
   ...props
@@ -102,9 +126,12 @@ function AlertDialogTitle({
       className={cn("text-lg font-semibold", className)}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Description text for the Alert Dialog.
+ */
 function AlertDialogDescription({
   className,
   ...props
@@ -115,9 +142,12 @@ function AlertDialogDescription({
       className={cn("text-muted-foreground text-sm", className)}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Action button (confirm) for the Alert Dialog.
+ */
 function AlertDialogAction({
   className,
   ...props
@@ -127,9 +157,12 @@ function AlertDialogAction({
       className={cn(buttonVariants(), className)}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Cancel button for the Alert Dialog.
+ */
 function AlertDialogCancel({
   className,
   ...props
@@ -139,19 +172,19 @@ function AlertDialogCancel({
       className={cn(buttonVariants({ variant: "outline" }), className)}
       {...props}
     />
-  )
+  );
 }
 
 export {
   AlertDialog,
-  AlertDialogPortal,
-  AlertDialogOverlay,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-}
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+};

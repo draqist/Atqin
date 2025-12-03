@@ -4,6 +4,10 @@ import { Book, BookProgress } from "@/lib/types";
 import { PlayCircle } from "lucide-react";
 import Link from "next/link";
 
+/**
+ * Hero component for the dashboard.
+ * Displays the user's most recently read book with a progress bar and a "Continue" button.
+ */
 export function ContinueReadingHero({
   book,
   progress,

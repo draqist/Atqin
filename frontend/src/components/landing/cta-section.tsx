@@ -5,6 +5,10 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
+/**
+ * Call to Action section component.
+ * Encourages users to enter the library or read the manifesto.
+ */
 export function CTASection() {
   return (
     <section className="py-24 px-6 w-full bg-white">

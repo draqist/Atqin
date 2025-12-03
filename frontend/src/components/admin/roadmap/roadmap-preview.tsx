@@ -18,6 +18,10 @@ interface RoadmapPreviewProps {
   title?: string;
 }
 
+/**
+ * Preview component for roadmaps.
+ * Displays the roadmap structure as it would appear to students, including levels and books.
+ */
 export function RoadmapPreview({ levels, books, title }: RoadmapPreviewProps) {
   return (
     <div className="flex flex-col p-0 gap-0 overflow-hidden w-full">

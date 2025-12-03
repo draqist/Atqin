@@ -2,6 +2,11 @@ import { joinWaitlist } from "@/lib/api/mutations/waitlist";
 import { toast } from "@/lib/toast";
 import { useMutation } from "@tanstack/react-query";
 
+/**
+ * Hook to join the waitlist.
+ *
+ * @returns {UseMutationResult} The mutation result for joining the waitlist.
+ */
 export const useJoinWaitlist = () => {
   return useMutation({
     mutationFn: (email: string) => joinWaitlist(email),

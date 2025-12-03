@@ -1,5 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * A skeleton loading state for the PDF viewer.
+ * Simulates the layout of a document page while loading.
+ */
 export function PdfSkeleton() {
   return (
     <div className="w-full h-[800px] bg-white border border-slate-200 shadow-sm p-8 flex flex-col gap-6 animate-pulse">

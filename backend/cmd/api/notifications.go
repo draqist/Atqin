@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+// listNotificationsHandler retrieves all notifications for the authenticated user.
+// GET /v1/notifications
 func (app *application) listNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserContextKey).(string)
 
@@ -18,6 +20,8 @@ func (app *application) listNotificationsHandler(w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(notifications)
 }
 
+// markNotificationReadHandler marks a specific notification as read.
+// PUT /v1/notifications/{id}/read
 func (app *application) markNotificationReadHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserContextKey).(string)
 	id := r.PathValue("id")
@@ -32,6 +36,8 @@ func (app *application) markNotificationReadHandler(w http.ResponseWriter, r *ht
 	w.Write([]byte(`{"message": "marked as read"}`))
 }
 
+// markAllNotificationsReadHandler marks all notifications for the user as read.
+// POST /v1/notifications/read-all
 func (app *application) markAllNotificationsReadHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserContextKey).(string)
 

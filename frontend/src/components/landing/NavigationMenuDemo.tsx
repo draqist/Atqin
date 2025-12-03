@@ -53,6 +53,10 @@ const components: { title: string; href: string; description: string }[] = [
   },
 ];
 
+/**
+ * A demonstration component for the Navigation Menu.
+ * Shows various navigation items and sub-menus.
+ */
 export function NavigationMenuDemo() {
   const isMobile = useIsMobile();
 
@@ -68,7 +72,7 @@ export function NavigationMenuDemo() {
               <li className="row-span-3">
                 <NavigationMenuLink asChild>
                   <a
-                    className="from-emerald-50/50 to-emerald-100 flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b p-4 no-underline outline-none transition-all duration-200 select-none focus:shadow-md md:p-6"
+                    className="from-emerald-50/50 to-emerald-100 flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b p-4 no-underline outline-none transition-all duration-200 select-none focus:shadow-md md:p-6"
                     href="/"
                   >
                     <div className="mb-2 text-lg font-medium sm:mt-4 text-emerald-900">

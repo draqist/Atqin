@@ -4,6 +4,10 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, X } from "lucide-react";
 
+/**
+ * A sortable book component for the roadmap builder.
+ * Represents a book within a roadmap level that can be dragged and reordered.
+ */
 export function SortableBook({
   id,
   title,

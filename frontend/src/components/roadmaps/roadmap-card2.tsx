@@ -29,6 +29,10 @@ const getTheme = (slug: string) => {
   return "from-slate-700 to-slate-900";
 };
 
+/**
+ * An enhanced card component for displaying a roadmap.
+ * Features a themed header, progress indicators, and visual stepper.
+ */
 export function RoadmapCard({
   roadmap,
   totalBooks = 5,

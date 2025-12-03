@@ -9,6 +9,10 @@ interface StatCardProps {
   color: string; // e.g. "text-emerald-500"
 }
 
+/**
+ * Statistic card component.
+ * Displays a single metric with a title, value, subtitle, and icon.
+ */
 export function StatCard({
   title,
   value,

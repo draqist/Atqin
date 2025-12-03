@@ -6,16 +6,19 @@ import (
 	"time"
 )
 
+// Waitlist represents an entry in the pre-launch waitlist.
 type Waitlist struct {
 	ID        int64     `json:"id"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
+// WaitlistModel wraps the database connection pool for Waitlist-related operations.
 type WaitlistModel struct {
 	DB *sql.DB
 }
 
+// Insert adds a new email to the waitlist.
 func (m WaitlistModel) Insert(email string) error {
 	query := `
 		INSERT INTO waitlist (email)

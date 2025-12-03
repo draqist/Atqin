@@ -2,6 +2,9 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Card container component.
+ */
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -17,6 +20,9 @@ const Card = React.forwardRef<
 ));
 Card.displayName = "Card";
 
+/**
+ * Header section of the Card.
+ */
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -29,6 +35,9 @@ const CardHeader = React.forwardRef<
 ));
 CardHeader.displayName = "CardHeader";
 
+/**
+ * Title of the Card.
+ */
 const CardTitle = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
@@ -41,6 +50,9 @@ const CardTitle = React.forwardRef<
 ));
 CardTitle.displayName = "CardTitle";
 
+/**
+ * Description text for the Card.
+ */
 const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
@@ -53,6 +65,9 @@ const CardDescription = React.forwardRef<
 ));
 CardDescription.displayName = "CardDescription";
 
+/**
+ * Content area of the Card.
+ */
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -61,6 +76,9 @@ const CardContent = React.forwardRef<
 ));
 CardContent.displayName = "CardContent";
 
+/**
+ * Footer section of the Card.
+ */
 const CardFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

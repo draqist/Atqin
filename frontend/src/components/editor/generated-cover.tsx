@@ -1,3 +1,7 @@
+/**
+ * Generates a deterministic abstract cover image based on the book title.
+ * Used as a fallback when no cover image is provided.
+ */
 export function GeneratedCover({ title }: { title: string }) {
   // Simple deterministic pattern based on title length/char codes
   // In production, use a proper hashing function or library like 'geopattern'

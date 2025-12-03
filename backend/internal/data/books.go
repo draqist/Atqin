@@ -8,36 +8,35 @@ import (
 	"time"
 )
 
-// Book struct matches your SQL table
+// Book represents a book or text in the library.
 type Book struct {
-	ID             string          `json:"id"` // UUID string
+	ID             string          `json:"id"`
 	Title          string          `json:"title"`
 	OriginalAuthor string          `json:"original_author"`
 	Description    string          `json:"description"`
 	CoverImageURL  string          `json:"cover_image_url"`
-	Metadata       json.RawMessage `json:"metadata"` // specialized type for JSONB
+	Metadata       json.RawMessage `json:"metadata"`
 	IsPublic       bool            `json:"is_public"`
 	CreatedAt      time.Time       `json:"created_at"`
 	Version        int             `json:"version"`
-	TitleAr       *string `json:"title_ar"`       // Use pointer to handle nulls safely
-    OriginalAuthorAr *string `json:"author_ar"`
-	ResourceCount  int             `json:"resource_count"` // Added
+	TitleAr        *string         `json:"title_ar"`
+	OriginalAuthorAr *string       `json:"author_ar"`
+	ResourceCount  int             `json:"resource_count"`
 }
 
-// BookModel wraps the connection pool
+// BookModel wraps the database connection pool for Book-related operations.
 type BookModel struct {
 	DB *sql.DB
 }
 
-// Insert adds a new book to the database
+// Insert adds a new book to the database.
+// It returns the ID, creation time, and initial version of the newly created book.
 func (m BookModel) Insert(book *Book) error {
 	query := `
 		INSERT INTO books (title, original_author, description, cover_image_url, metadata, is_public)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, version`
 
-	// Create a context with a 3-second timeout
-	// If the DB takes longer than 3s, we cancel the request to save resources
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -46,7 +45,8 @@ func (m BookModel) Insert(book *Book) error {
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(&book.ID, &book.CreatedAt, &book.Version)
 }
 
-// Get retrieves a specific book by ID
+// Get retrieves a specific book by its ID.
+// It returns the Book struct or an error if not found.
 func (m BookModel) Get(id string) (*Book, error) {
 	if id == "" {
 		return nil, errors.New("invalid id")
@@ -84,9 +84,9 @@ func (m BookModel) Get(id string) (*Book, error) {
 	return &book, nil
 }
 
-// GetAll returns a list of all books (for the main library page)
+// GetAll returns a paginated list of books filtered by title or author.
+// It returns a slice of Book pointers, metadata for pagination, or an error.
 func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, error) {
-	// The SQL query: Select everything, order by ID
 	query := `
 		SELECT count(*) OVER(), id, title, original_author, COALESCE(description, ''), COALESCE(cover_image_url, ''), COALESCE(metadata, '{}'), is_public, created_at, version,
 		(SELECT COUNT(*) FROM resources WHERE book_id = books.id) as resource_count
@@ -95,7 +95,6 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 		OR (original_author ILIKE '%' || $1 || '%' OR $1 = '')
 		ORDER BY id`
 
-	// Timeout context (3 seconds max)
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -103,10 +102,9 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 	if err != nil {
 		return nil, Metadata{}, err
 	}
-	defer rows.Close() // Important: Close the connection when done
+	defer rows.Close()
 
 	totalRecords := 0
-	// Loop through the rows (like iterating through an array)
 	books := []*Book{}
 	for rows.Next() {
 		var book Book
@@ -121,7 +119,7 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 			&book.IsPublic,
 			&book.CreatedAt,
 			&book.Version,
-			&book.ResourceCount, // Added
+			&book.ResourceCount,
 		)
 		if err != nil {
 			return nil, Metadata{}, err
@@ -129,7 +127,6 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 		books = append(books, &book)
 	}
 
-	// Check if there were errors during iteration
 	if err = rows.Err(); err != nil {
 		return nil, Metadata{}, err
 	}
@@ -139,6 +136,8 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 	return books, metadata, nil
 }
 
+// Update modifies an existing book's details in the database.
+// It increments the version number for optimistic locking.
 func (m BookModel) Update(book *Book) error {
 	query := `
 		UPDATE books
@@ -162,8 +161,9 @@ func (m BookModel) Update(book *Book) error {
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(&book.Version)
 }
 
+// Delete removes a book from the database by its ID.
+// It returns ErrRecordNotFound if the book does not exist.
 func (m BookModel) Delete(id string) error {
-	// Verify it exists first (optional, but good practice)
 	if id == "" {
 		return errors.New("invalid id")
 	}
@@ -190,6 +190,8 @@ func (m BookModel) Delete(id string) error {
 	return nil
 }
 
+// UpdateProgress records the user's reading progress for a specific book.
+// It updates the current page and total pages, or inserts a new record if none exists.
 func (m BookModel) UpdateProgress(userID, bookID string, currentPage, totalPages int) error {
 	query := `
 		INSERT INTO user_book_progress (user_id, book_id, current_page, total_pages, updated_at)
@@ -207,6 +209,8 @@ func (m BookModel) UpdateProgress(userID, bookID string, currentPage, totalPages
 	return err
 }
 
+// GetProgress retrieves the user's reading progress for a specific book.
+// It returns the current page and total pages. If no progress exists, it defaults to page 1.
 func (m BookModel) GetProgress(userID, bookID string) (int, int, error) {
 	query := `
 		SELECT current_page, total_pages
@@ -220,7 +224,7 @@ func (m BookModel) GetProgress(userID, bookID string) (int, int, error) {
 	err := m.DB.QueryRowContext(ctx, query, userID, bookID).Scan(&currentPage, &totalPages)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return 1, 0, nil // Default to page 1 if no progress
+			return 1, 0, nil
 		}
 		return 0, 0, err
 	}

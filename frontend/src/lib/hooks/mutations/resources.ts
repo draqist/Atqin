@@ -3,6 +3,11 @@ import { toast } from "@/lib/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
+/**
+ * Hook to create a new resource.
+ *
+ * @returns {UseMutationResult} The mutation result for creating a resource.
+ */
 export const useCreateResource = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -17,6 +22,12 @@ export const useCreateResource = () => {
   });
 };
 
+/**
+ * Hook to update an existing resource.
+ *
+ * @param {string} id - The ID of the resource to update.
+ * @returns {UseMutationResult} The mutation result for updating a resource.
+ */
 export const useUpdateResource = (id: string) => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -32,6 +43,11 @@ export const useUpdateResource = (id: string) => {
   });
 };
 
+/**
+ * Hook to delete a resource.
+ *
+ * @returns {UseMutationResult} The mutation result for deleting a resource.
+ */
 export const useDeleteResource = () => {
   const router = useRouter();
   const queryClient = useQueryClient();

@@ -4,6 +4,10 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect } from "react";
 
+/**
+ * A read-only rich text editor component using Tiptap.
+ * Displays content in a formatted, non-editable state.
+ */
 export function ReadOnlyEditor({ content }: { content: any }) {
   const editor = useEditor({
     extensions: [StarterKit],

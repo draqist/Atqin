@@ -2,6 +2,9 @@ import { cn } from "@/lib/utils";
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from "lucide-react";
 import { toast as sonnerToast } from "sonner";
 
+/**
+ * Props for the CustomToast component.
+ */
 interface ToastProps {
   t: string | number; // Toast ID
   type: "success" | "error" | "info" | "warning";
@@ -10,6 +13,9 @@ interface ToastProps {
   onDismiss?: () => void;
 }
 
+/**
+ * Custom toast component for displaying notifications.
+ */
 export function CustomToast({
   t,
   type,
@@ -58,7 +64,7 @@ export function CustomToast({
   return (
     <div
       className={cn(
-        "relative flex w-full md:w-[350px] items-start gap-3 rounded-xl border p-4 shadow-lg transition-all duration-300 bg-white",
+        "relative flex w-full max-w-[350px] items-start gap-3 rounded-xl border p-4 shadow-lg transition-all duration-300 bg-white",
         style.container
       )}
     >

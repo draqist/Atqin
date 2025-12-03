@@ -6,6 +6,10 @@ interface PdfErrorProps {
   onRetry?: () => void;
 }
 
+/**
+ * An error component displayed when the PDF fails to load.
+ * Provides a retry button if an `onRetry` callback is provided.
+ */
 export function PdfError({
   message = "Failed to load PDF",
   onRetry,

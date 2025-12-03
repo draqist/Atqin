@@ -1,10 +1,13 @@
-import { FileX, AlertCircle } from "lucide-react";
+import { AlertCircle, FileX } from "lucide-react";
 
 interface PdfNoDataProps {
   message?: string;
   isError?: boolean;
 }
 
+/**
+ * A placeholder component displayed when no PDF data is available or an error occurs.
+ */
 export function PdfNoData({
   message = "No PDF available for this resource.",
   isError = false,

@@ -1,18 +1,21 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Command as CommandPrimitive } from "cmdk"
-import { SearchIcon } from "lucide-react"
+import { Command as CommandPrimitive } from "cmdk";
+import { SearchIcon } from "lucide-react";
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
+/**
+ * Command palette container.
+ */
 function Command({
   className,
   ...props
@@ -26,9 +29,12 @@ function Command({
       )}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Dialog wrapper for the Command palette.
+ */
 function CommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
@@ -37,10 +43,10 @@ function CommandDialog({
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof Dialog> & {
-  title?: string
-  description?: string
-  className?: string
-  showCloseButton?: boolean
+  title?: string;
+  description?: string;
+  className?: string;
+  showCloseButton?: boolean;
 }) {
   return (
     <Dialog {...props}>
@@ -52,14 +58,17 @@ function CommandDialog({
         className={cn("overflow-hidden p-0", className)}
         showCloseButton={showCloseButton}
       >
-        <Command className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
+        <Command className="**:[[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-2 **:[[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
           {children}
         </Command>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
+/**
+ * Input field for the Command palette.
+ */
 function CommandInput({
   className,
   ...props
@@ -79,9 +88,12 @@ function CommandInput({
         {...props}
       />
     </div>
-  )
+  );
 }
 
+/**
+ * List container for Command items.
+ */
 function CommandList({
   className,
   ...props
@@ -95,9 +107,12 @@ function CommandList({
       )}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Empty state for the Command palette.
+ */
 function CommandEmpty({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Empty>) {
@@ -107,9 +122,12 @@ function CommandEmpty({
       className="py-6 text-center text-sm"
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Group of Command items.
+ */
 function CommandGroup({
   className,
   ...props
@@ -118,14 +136,17 @@ function CommandGroup({
     <CommandPrimitive.Group
       data-slot="command-group"
       className={cn(
-        "text-foreground [&_[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium",
+        "text-foreground [[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 [[cmdk-group-heading]]:px-2 [[cmdk-group-heading]]:py-1.5 [[cmdk-group-heading]]:text-xs [[cmdk-group-heading]]:font-medium",
         className
       )}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Separator between Command groups or items.
+ */
 function CommandSeparator({
   className,
   ...props
@@ -136,9 +157,12 @@ function CommandSeparator({
       className={cn("bg-border -mx-1 h-px", className)}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Individual item in the Command palette.
+ */
 function CommandItem({
   className,
   ...props
@@ -152,9 +176,12 @@ function CommandItem({
       )}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * Shortcut key hint for a Command item.
+ */
 function CommandShortcut({
   className,
   ...props
@@ -168,17 +195,17 @@ function CommandShortcut({
       )}
       {...props}
     />
-  )
+  );
 }
 
 export {
   Command,
   CommandDialog,
-  CommandInput,
-  CommandList,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
-  CommandShortcut,
+  CommandList,
   CommandSeparator,
-}
+  CommandShortcut,
+};

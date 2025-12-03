@@ -72,6 +72,10 @@ const features: {
   },
 ];
 
+/**
+ * The main navigation bar component.
+ * Includes logo, navigation menu, and action buttons.
+ */
 export function Navbar() {
   return (
     // THE CONTAINER: Adds the glass effect and border to fix "plainness"

@@ -1,17 +1,17 @@
 "use client";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import {
-  Menu,
-  LayoutDashboard,
   BookOpen,
   FileText,
+  LayoutDashboard,
+  Menu,
   Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Overview" },
@@ -20,6 +20,10 @@ const navItems = [
   { href: "/admin/settings", icon: Settings, label: "Settings" },
 ];
 
+/**
+ * Mobile navigation component for the admin dashboard.
+ * Renders a sheet with navigation links.
+ */
 export function AdminMobileNav() {
   const pathname = usePathname();
 

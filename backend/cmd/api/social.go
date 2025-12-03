@@ -7,7 +7,8 @@ import (
 	"github.com/draqist/iqraa/backend/internal/data"
 )
 
-// joinCohortHandler assigns a user to a cohort for a specific roadmap
+// joinCohortHandler assigns a user to a cohort for a specific roadmap.
+// POST /v1/roadmaps/{id}/join
 func (app *application) joinCohortHandler(w http.ResponseWriter, r *http.Request) {
 	roadmapID := r.PathValue("id")
 	userID, ok := r.Context().Value(UserContextKey).(string)
@@ -17,21 +18,19 @@ func (app *application) joinCohortHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	var input struct {
-		Pace string `json:"pace"` // 'casual', 'dedicated', 'intensive'
+		Pace string `json:"pace"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		app.errorResponse(w, http.StatusBadRequest, "Invalid input")
 		return
 	}
 
-	// Validate Pace
 	validPaces := map[string]bool{"casual": true, "dedicated": true, "intensive": true}
 	if !validPaces[input.Pace] {
 		app.errorResponse(w, http.StatusBadRequest, "Invalid pace. Must be casual, dedicated, or intensive.")
 		return
 	}
 
-	// 1. Find or Create the Cohort
 	cohort, err := app.models.Social.GetOrCreateCohort(roadmapID, input.Pace)
 	if err != nil {
 		app.logger.Println(err)
@@ -39,7 +38,6 @@ func (app *application) joinCohortHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// 2. Add User to Cohort
 	err = app.models.Social.JoinCohort(cohort.ID, userID)
 	if err != nil {
 		app.logger.Println(err)
@@ -47,7 +45,6 @@ func (app *application) joinCohortHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// 3. Return Success with Cohort Details
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"message":   "Joined cohort successfully",
@@ -56,8 +53,8 @@ func (app *application) joinCohortHandler(w http.ResponseWriter, r *http.Request
 	})
 }
 
-// --- PARTNERS ---
-
+// getPartnerHandler retrieves the current accountability partner for the user.
+// GET /v1/partners
 func (app *application) getPartnerHandler(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(UserContextKey).(string)
 	if !ok || userID == "" {
@@ -73,16 +70,12 @@ func (app *application) getPartnerHandler(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
-		"partner": partner, // Can be null
+		"partner": partner,
 	})
 }
 
-
-
-// ... (joinCohortHandler)
-
-// ... (getPartnerHandler)
-
+// invitePartnerHandler sends a partnership invitation to another user.
+// POST /v1/partners/invite
 func (app *application) invitePartnerHandler(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(UserContextKey).(string)
 	if !ok || userID == "" {
@@ -104,7 +97,6 @@ func (app *application) invitePartnerHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// NOTIFY INVITEE
 	app.models.Notifications.Insert(&data.Notification{
 		UserID:  input.TargetUserID,
 		Type:    "partner_invite",
@@ -117,6 +109,8 @@ func (app *application) invitePartnerHandler(w http.ResponseWriter, r *http.Requ
 	w.Write([]byte(`{"message": "Invite sent"}`))
 }
 
+// acceptPartnerHandler accepts a pending partnership invitation.
+// POST /v1/partners/accept
 func (app *application) acceptPartnerHandler(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(UserContextKey).(string)
 	if !ok || userID == "" {
@@ -138,17 +132,6 @@ func (app *application) acceptPartnerHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// NOTIFY INVITER (The partner)
-	// We need to know who the partner is to notify them.
-	// The `input.PartnerID` is the ID of the RELATIONSHIP row? No, wait.
-	// In `PartnerCard`, we passed `partner.id` which is the RELATIONSHIP ID.
-	// `AcceptPartner` uses `partnerID` as the relationship ID.
-	// We need to fetch the relationship to know who the other user is.
-	// `AcceptPartner` updates the row.
-	// Let's assume for MVP we don't notify on accept yet, OR we fetch the partner ID.
-	// To do it right, `AcceptPartner` should return the `otherUserID`.
-	// For now, let's skip notify on accept to save time, or do a quick fetch.
-	
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"message": "Partner accepted"}`))
 }

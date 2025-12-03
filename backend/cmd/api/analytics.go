@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+// trackActivityHandler records user activity (e.g., reading time) for a specific book.
+// POST /v1/analytics/heartbeat
 func (app *application) trackActivityHandler(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(UserContextKey).(string)
 	if !ok || userID == "" {
@@ -17,11 +19,9 @@ func (app *application) trackActivityHandler(w http.ResponseWriter, r *http.Requ
 		Minutes int    `json:"minutes"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		// Analytics should fail silently, don't break the user app
-		return 
+		return
 	}
 
-	// Fire and forget (don't block response)
 	go func() {
 		app.models.Analytics.LogActivity(userID, input.BookID, input.Minutes)
 	}()
@@ -29,6 +29,8 @@ func (app *application) trackActivityHandler(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusOK)
 }
 
+// getStudentStatsHandler retrieves analytics statistics for the authenticated student.
+// GET /v1/analytics/stats
 func (app *application) getStudentStatsHandler(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(UserContextKey).(string)
 	if !ok || userID == "" {
@@ -47,6 +49,8 @@ func (app *application) getStudentStatsHandler(w http.ResponseWriter, r *http.Re
 	json.NewEncoder(w).Encode(stats)
 }
 
+// getSystemStatsHandler retrieves system-wide statistics for the admin dashboard.
+// GET /v1/admin/stats
 func (app *application) getSystemStatsHandler(w http.ResponseWriter, r *http.Request) {
 	stats, err := app.models.Analytics.GetDashboardData()
 	if err != nil {

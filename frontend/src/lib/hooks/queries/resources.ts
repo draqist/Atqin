@@ -2,19 +2,26 @@ import { fetchAllResources, fetchBookResources } from '@/lib/api/queries/resourc
 import { Resource } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 
+/**
+ * Hook to fetch resources for a specific book.
+ *
+ * @param {string} bookId - The ID of the book.
+ * @returns {UseQueryResult<Resource[], Error>} The query result containing the list of resources.
+ */
 export const useBookResources = (bookId: string) => {
   return useQuery<Resource[], Error>({
-    // Unique key for caching: ['books', '123', 'resources']
     queryKey: ['books', bookId, 'resources'],
     queryFn: () => fetchBookResources(bookId),
-    // Only run the query if we actually have a bookId
     enabled: !!bookId,
-    // Keep resources fresh for 5 minutes
     staleTime: 5 * 60 * 1000,
   });
 };
 
-
+/**
+ * Hook to fetch all resources for admin purposes.
+ *
+ * @returns {UseQueryResult<Resource[]>} The query result containing all resources.
+ */
 export const useAdminResources = () => {
   return useQuery({
     queryKey: ["admin", "resources"],

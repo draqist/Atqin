@@ -1,22 +1,33 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as PopoverPrimitive from "@radix-ui/react-popover"
+import * as PopoverPrimitive from "@radix-ui/react-popover";
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
+/**
+ * The root component for the Popover.
+ * Manages the state of the popover (open/closed).
+ */
 function Popover({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />
+  return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }
 
+/**
+ * The trigger button that toggles the popover.
+ */
 function PopoverTrigger({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
 }
 
+/**
+ * The content to be displayed within the popover.
+ * Positioned relative to the anchor or trigger.
+ */
 function PopoverContent({
   className,
   align = "center",
@@ -36,13 +47,17 @@ function PopoverContent({
         {...props}
       />
     </PopoverPrimitive.Portal>
-  )
+  );
 }
 
+/**
+ * An optional anchor element to position the popover against,
+ * instead of the trigger.
+ */
 function PopoverAnchor({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {
-  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />
+  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />;
 }
 
-export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor }
+export { Popover, PopoverAnchor, PopoverContent, PopoverTrigger };

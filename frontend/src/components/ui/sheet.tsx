@@ -7,14 +7,30 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * The root component for the Sheet.
+ * Manages the state of the sheet (open/closed).
+ */
 const Sheet = SheetPrimitive.Root;
 
+/**
+ * The trigger button that opens the sheet.
+ */
 const SheetTrigger = SheetPrimitive.Trigger;
 
+/**
+ * The button that closes the sheet.
+ */
 const SheetClose = SheetPrimitive.Close;
 
+/**
+ * Portals the sheet content to the body.
+ */
 const SheetPortal = SheetPrimitive.Portal;
 
+/**
+ * The overlay that appears behind the sheet.
+ */
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
@@ -53,6 +69,10 @@ interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
+/**
+ * The content to be displayed within the sheet.
+ * Handles the slide-in animation based on the `side` prop.
+ */
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
@@ -74,6 +94,9 @@ const SheetContent = React.forwardRef<
 ));
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
+/**
+ * The header section of the sheet.
+ */
 const SheetHeader = ({
   className,
   ...props
@@ -88,6 +111,9 @@ const SheetHeader = ({
 );
 SheetHeader.displayName = "SheetHeader";
 
+/**
+ * The footer section of the sheet.
+ */
 const SheetFooter = ({
   className,
   ...props
@@ -102,6 +128,9 @@ const SheetFooter = ({
 );
 SheetFooter.displayName = "SheetFooter";
 
+/**
+ * The title of the sheet.
+ */
 const SheetTitle = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
@@ -114,6 +143,9 @@ const SheetTitle = React.forwardRef<
 ));
 SheetTitle.displayName = SheetPrimitive.Title.displayName;
 
+/**
+ * The description of the sheet.
+ */
 const SheetDescription = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>

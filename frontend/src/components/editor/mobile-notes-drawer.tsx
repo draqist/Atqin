@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -7,10 +8,13 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Edit3 } from "lucide-react";
 import { QuickNote } from "./quick-note"; // Reuse existing component
 
+/**
+ * A mobile-optimized drawer for quick note-taking.
+ * Floating action button triggers a drawer containing the QuickNote editor.
+ */
 export function MobileNotesDrawer({ bookId }: { bookId: string }) {
   return (
     <Drawer>

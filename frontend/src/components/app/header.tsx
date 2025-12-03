@@ -7,6 +7,10 @@ import { useEffect, useState } from "react";
 import { MobileNav } from "./mobile-nav";
 import { NotificationBell } from "./notification-bell";
 
+/**
+ * Main application header component.
+ * Includes global search functionality, mobile navigation trigger, and notification bell.
+ */
 export function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();

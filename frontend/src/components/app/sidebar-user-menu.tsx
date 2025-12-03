@@ -24,6 +24,10 @@ import { useLogout } from "@/hooks/use-auth";
 import { useUser } from "@/lib/hooks/queries/auth";
 import { useRouter } from "next/navigation";
 
+/**
+ * User menu component for the sidebar.
+ * Displays the current user's avatar and name, with options for profile, billing, settings, and logout.
+ */
 export function SidebarUserMenu() {
   const { data: user, isLoading } = useUser();
   const { logout } = useLogout();

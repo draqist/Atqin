@@ -1,6 +1,9 @@
 import api from "@/lib/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+/**
+ * Interface representing a user notification.
+ */
 export interface Notification {
   id: string;
   user_id: string;
@@ -11,6 +14,12 @@ export interface Notification {
   created_at: string;
 }
 
+/**
+ * Hook to fetch user notifications.
+ * Polls every 30 seconds.
+ *
+ * @returns {UseQueryResult<Notification[]>} The query result containing notifications.
+ */
 export const useNotifications = () => {
   return useQuery<Notification[]>({
     queryKey: ["notifications"],
@@ -22,6 +31,11 @@ export const useNotifications = () => {
   });
 };
 
+/**
+ * Hook to mark a single notification as read.
+ *
+ * @returns {UseMutationResult} The mutation result for marking a notification as read.
+ */
 export const useMarkNotificationRead = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -34,6 +48,11 @@ export const useMarkNotificationRead = () => {
   });
 };
 
+/**
+ * Hook to mark all notifications as read.
+ *
+ * @returns {UseMutationResult} The mutation result for marking all notifications as read.
+ */
 export const useMarkAllNotificationsRead = () => {
   const queryClient = useQueryClient();
   return useMutation({

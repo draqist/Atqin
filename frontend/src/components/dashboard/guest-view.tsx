@@ -2,9 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Lock, LayoutDashboard, ArrowRight } from "lucide-react";
+import { ArrowRight, Lock } from "lucide-react";
 import Link from "next/link";
 
+/**
+ * Guest view for the dashboard.
+ * Displays a blurred background with a locked overlay, prompting the user to sign in or register.
+ */
 export function DashboardGuestView() {
   return (
     <div className="relative min-h-[80vh] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50/50">

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Structs representing the DB tables
+// Cohort represents a group of students learning together on a roadmap.
 type Cohort struct {
 	ID        string    `json:"id"`
 	RoadmapID string    `json:"roadmap_id"`
@@ -15,19 +15,21 @@ type Cohort struct {
 	StartDate time.Time `json:"start_date"`
 }
 
+// CohortMember represents a student within a cohort.
 type CohortMember struct {
 	UserID          string    `json:"user_id"`
-	UserName        string    `json:"user_name"` // Joined from users table
+	UserName        string    `json:"user_name"`
 	CurrentProgress int       `json:"current_progress"`
 	LastActiveAt    time.Time `json:"last_active_at"`
 }
 
+// SocialModel wraps the database connection pool for social features (Cohorts, Partners).
 type SocialModel struct {
 	DB *sql.DB
 }
 
-// 1. Find or Create a Cohort (The "Sorting Hat" Logic)
-// It looks for a cohort starting this week with the same pace. If none, creates one.
+// GetOrCreateCohort finds an existing cohort starting this week with the same pace,
+// or creates a new one if none exists.
 func (m SocialModel) GetOrCreateCohort(roadmapID, pace string) (*Cohort, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -65,7 +67,7 @@ func (m SocialModel) GetOrCreateCohort(roadmapID, pace string) (*Cohort, error) 
 	return &c, nil
 }
 
-// 2. Join a Cohort
+// JoinCohort adds a user to a specific cohort.
 func (m SocialModel) JoinCohort(cohortID, userID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -79,8 +81,8 @@ func (m SocialModel) JoinCohort(cohortID, userID string) error {
 	return err
 }
 
-// 3. Get My Cohort (For Dashboard Widget)
-// Returns the list of classmates for a specific roadmap's active cohort
+// GetCohortPeers fetches the list of classmates for a specific roadmap's active cohort.
+// It returns the top 10 most active members.
 func (m SocialModel) GetCohortPeers(userID, roadmapID string) ([]*CohortMember, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -118,8 +120,7 @@ func (m SocialModel) GetCohortPeers(userID, roadmapID string) ([]*CohortMember, 
 	return members, nil
 }
 
-// --- PARTNER LOGIC ---
-
+// Partner represents a learning partner relationship.
 type Partner struct {
 	ID            string    `json:"id"`
 	UserID        string    `json:"user_id"`
@@ -127,10 +128,10 @@ type Partner struct {
 	Status        string    `json:"status"` // 'pending', 'accepted'
 	Streak        int       `json:"streak"`
 	LastActive    time.Time `json:"last_active_at"`
-	InitiatedByMe bool      `json:"initiated_by_me"` // NEW
+	InitiatedByMe bool      `json:"initiated_by_me"`
 }
 
-// 4. Invite Partner (by UserID)
+// InvitePartner sends a partnership invitation to another user.
 func (m SocialModel) InvitePartner(requesterID, targetUserID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -139,18 +140,17 @@ func (m SocialModel) InvitePartner(requesterID, targetUserID string) error {
 		return errors.New("cannot invite yourself")
 	}
 
-	// 2. Create Relationship (Pending)
 	// We store requester as user_id_1
 	query := `
 		INSERT INTO partners (user_id_1, user_id_2, status)
 		VALUES ($1, $2, 'pending')
 		ON CONFLICT (user_id_1, user_id_2) DO NOTHING`
-	
+
 	_, err := m.DB.ExecContext(ctx, query, requesterID, targetUserID)
 	return err
 }
 
-// 5. Accept Partner
+// AcceptPartner accepts a pending partnership invitation.
 func (m SocialModel) AcceptPartner(userID, partnerID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -165,7 +165,7 @@ func (m SocialModel) AcceptPartner(userID, partnerID string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	rows, _ := result.RowsAffected()
 	if rows == 0 {
 		return errors.New("invite not found or already accepted")
@@ -173,7 +173,7 @@ func (m SocialModel) AcceptPartner(userID, partnerID string) error {
 	return nil
 }
 
-// 6. Get Partner Status
+// GetPartner fetches the current user's partner status.
 func (m SocialModel) GetPartner(userID string) (*Partner, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -189,7 +189,7 @@ func (m SocialModel) GetPartner(userID string) (*Partner, error) {
 	var p Partner
 	var partnerUserID string
 	var initiatorID string
-	
+
 	err := m.DB.QueryRowContext(ctx, query, userID).Scan(&p.ID, &p.Status, &initiatorID, &partnerUserID, &p.UserName)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -197,12 +197,12 @@ func (m SocialModel) GetPartner(userID string) (*Partner, error) {
 		}
 		return nil, err
 	}
-	
+
 	p.UserID = partnerUserID
 	p.InitiatedByMe = (initiatorID == userID)
 
 	// Calculate Streak (Mock logic for now, or simple query)
-	p.Streak = 0 
-	
+	p.Streak = 0
+
 	return &p, nil
 }

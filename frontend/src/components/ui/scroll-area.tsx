@@ -1,10 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
+/**
+ * A scrollable area with custom cross-browser styling.
+ */
 function ScrollArea({
   className,
   children,
@@ -25,9 +28,12 @@ function ScrollArea({
       <ScrollBar />
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
-  )
+  );
 }
 
+/**
+ * The scrollbar component used within ScrollArea.
+ */
 function ScrollBar({
   className,
   orientation = "vertical",
@@ -52,7 +58,7 @@ function ScrollBar({
         className="bg-border relative flex-1 rounded-full"
       />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
-  )
+  );
 }
 
-export { ScrollArea, ScrollBar }
+export { ScrollArea, ScrollBar };

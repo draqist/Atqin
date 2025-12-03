@@ -17,6 +17,10 @@ interface ShareMenuProps {
   title: string;
 }
 
+/**
+ * A dropdown menu for sharing a book.
+ * Provides options to share via Twitter, WhatsApp, Facebook, or copy the link.
+ */
 export function ShareMenu({ bookId, title }: ShareMenuProps) {
   // In a real app, get the full URL dynamically. For now:
   const currentUrl =

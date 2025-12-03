@@ -19,6 +19,11 @@ interface StudentTimelineProps {
   nodes: StudentNode[];
 }
 
+/**
+ * A timeline component for students to track their progress through a roadmap.
+ * Displays nodes in a vertical timeline with status indicators (locked, active, completed).
+ * Allows users to mark nodes as complete or navigate to reading/memorization.
+ */
 export function StudentTimeline({ nodes }: StudentTimelineProps) {
   const activeIndex = nodes.findIndex((n) => n.status === "active") ?? 0;
   const { data: user } = useUser();

@@ -23,6 +23,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+/**
+ * Activity chart component using Recharts.
+ * Visualizes daily reading activity (minutes read) over time.
+ */
 export function ActivityChart({ data }: { data: DailyActivity[] }) {
   return (
     <div className="h-[300px] w-full">

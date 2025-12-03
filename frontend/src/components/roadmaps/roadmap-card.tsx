@@ -12,6 +12,10 @@ interface RoadmapCardProps {
   completedBooks?: number;
 }
 
+/**
+ * A card component representing a learning roadmap.
+ * Displays the roadmap's title, description, and progress.
+ */
 export function RoadmapCard({
   roadmap,
   progress = 0,

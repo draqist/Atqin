@@ -22,6 +22,10 @@ interface TimelineViewProps {
   nodes: TimelineNode[];
 }
 
+/**
+ * A simplified timeline view component.
+ * Visualizes a sequence of learning nodes with status markers.
+ */
 export function TimelineView({ nodes }: TimelineViewProps) {
   return (
     <div className="relative max-w-2xl mx-auto py-12 px-4">

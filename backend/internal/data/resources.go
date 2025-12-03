@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Resource represents an external or internal resource linked to a book.
 type Resource struct {
 	ID                string    `json:"id"`
 	BookID            string    `json:"book_id"`
@@ -22,32 +23,33 @@ type Resource struct {
 	BookTitle         string    `json:"book_title,omitempty"`
 }
 
+// ResourceModel wraps the database connection pool for Resource-related operations.
 type ResourceModel struct {
 	DB *sql.DB
 }
 
+// GetByBookID retrieves all resources associated with a specific book.
+// It orders them by official status, sequence index, and creation time.
 func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
-    // UPDATED QUERY: Added parent_id and sequence_index
-    query := `
+	query := `
         SELECT id, book_id, type, title, url, media_start_seconds, media_end_seconds, is_official, created_at, parent_id, sequence_index
         FROM resources
         WHERE book_id = $1
-        ORDER BY is_official DESC, sequence_index ASC, created_at DESC` 
+        ORDER BY is_official DESC, sequence_index ASC, created_at DESC`
 
-    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-    defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
-    rows, err := m.DB.QueryContext(ctx, query, bookID)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
+	rows, err := m.DB.QueryContext(ctx, query, bookID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-    var resources []*Resource
+	var resources []*Resource
 	for rows.Next() {
 		var r Resource
 
-		// Helper for nullable fields
 		var parentID sql.NullString
 		var mediaStart, mediaEnd sql.NullInt32
 
@@ -61,14 +63,13 @@ func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
 			&mediaEnd,
 			&r.IsOfficial,
 			&r.CreatedAt,
-			&parentID,        // Scan into NullString
-			&r.SequenceIndex, // Scan sequence
+			&parentID,
+			&r.SequenceIndex,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		// Convert NullString to pointer for our struct
 		if parentID.Valid {
 			r.ParentID = &parentID.String
 		}
@@ -82,14 +83,14 @@ func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
 		resources = append(resources, &r)
 	}
 
-    if err = rows.Err(); err != nil {
-        return nil, err
-    }
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
 
-    return resources, nil
+	return resources, nil
 }
 
-// Get fetches a single resource by ID
+// Get retrieves a single resource by its ID.
 func (m ResourceModel) Get(id string) (*Resource, error) {
 	query := `
 		SELECT id::text, book_id::text, type, title, url, media_start_seconds, media_end_seconds, is_official, parent_id::text, sequence_index, created_at
@@ -128,8 +129,8 @@ func (m ResourceModel) Get(id string) (*Resource, error) {
 	return &r, nil
 }
 
-// GetAll fetches ALL resources (for Admin Table)
-// We join with books so the admin sees which book the video belongs to
+// GetAll fetches all resources, joined with book titles.
+// This is primarily used for the Admin dashboard.
 func (m ResourceModel) GetAll() ([]*Resource, error) {
 	query := `
         SELECT 
@@ -158,7 +159,6 @@ func (m ResourceModel) GetAll() ([]*Resource, error) {
 	var resources []*Resource
 	for rows.Next() {
 		var r Resource
-		// Scan book_title into the new field
 		err := rows.Scan(&r.ID, &r.BookID, &r.BookTitle, &r.Type, &r.Title, &r.URL, &r.IsOfficial, &r.CreatedAt)
 		if err != nil {
 			return nil, err
@@ -168,7 +168,7 @@ func (m ResourceModel) GetAll() ([]*Resource, error) {
 	return resources, nil
 }
 
-// Insert adds a new resource
+// Insert adds a new resource to the database.
 func (m ResourceModel) Insert(r *Resource) error {
 	query := `
 		INSERT INTO resources (book_id, type, title, url, media_start_seconds, media_end_seconds, is_official, parent_id, sequence_index)
@@ -187,7 +187,7 @@ func (m ResourceModel) Insert(r *Resource) error {
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(&r.ID, &r.CreatedAt)
 }
 
-// Update modifies a resource
+// Update modifies an existing resource.
 func (m ResourceModel) Update(r *Resource) error {
 	query := `
 		UPDATE resources
@@ -203,7 +203,7 @@ func (m ResourceModel) Update(r *Resource) error {
 	return err
 }
 
-// Delete removes a resource
+// Delete removes a resource from the database.
 func (m ResourceModel) Delete(id string) error {
 	query := `DELETE FROM resources WHERE id = $1`
 

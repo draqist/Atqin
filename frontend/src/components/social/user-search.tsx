@@ -32,6 +32,10 @@ interface UserSearchProps {
   isLoading?: boolean;
 }
 
+/**
+ * A search component for finding users to invite as partners.
+ * Uses a debounced search query to fetch users from the API.
+ */
 export function UserSearch({ onSelect, isLoading }: UserSearchProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");

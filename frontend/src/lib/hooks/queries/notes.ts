@@ -3,8 +3,12 @@ import api from '@/lib/axios';
 import { PublicReflection } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 
-
-// Query: Get the note
+/**
+ * Hook to fetch the user's draft note for a specific book.
+ *
+ * @param {string} bookId - The ID of the book.
+ * @returns {UseQueryResult<Note | null>} The query result containing the draft note.
+ */
 export const useBookNote = (bookId: string) => {
   return useQuery({
     queryKey: ['notes', bookId],
@@ -14,7 +18,12 @@ export const useBookNote = (bookId: string) => {
   });
 };
 
-
+/**
+ * Hook to fetch public reflections for a specific book.
+ *
+ * @param {string} bookId - The ID of the book.
+ * @returns {UseQueryResult<PublicReflection[]>} The query result containing public reflections.
+ */
 export const usePublicReflections = (bookId: string) => {
   return useQuery({
     queryKey: ['reflections', bookId],

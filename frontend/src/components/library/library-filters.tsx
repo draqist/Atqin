@@ -34,6 +34,11 @@ const categories = [
 
 const levels = ["Beginner", "Intermediate", "Advanced"];
 
+/**
+ * A component for filtering the library books.
+ * Allows filtering by category, level, and sorting order.
+ * Updates the URL search parameters to reflect the selected filters.
+ */
 export function LibraryFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();

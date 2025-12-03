@@ -62,6 +62,10 @@ const LEVEL_CONFIG = [
   { id: "advanced", title: "Level 3: Advanced", color: "bg-red-500" },
 ];
 
+/**
+ * Interactive builder for creating and managing roadmaps.
+ * Supports drag-and-drop reordering of books across different levels.
+ */
 export function RoadmapBuilder({ roadmap }: { roadmap: Roadmap }) {
   const { data: allBooks } = useBooks();
   const [search, setSearch] = useState("");

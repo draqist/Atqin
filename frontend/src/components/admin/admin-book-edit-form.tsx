@@ -58,6 +58,10 @@ interface BookEditFormProps {
   book: Book;
 }
 
+/**
+ * Form component for editing an existing book.
+ * Handles updating book details, metadata, and deletion.
+ */
 export function BookEditForm({ book }: BookEditFormProps) {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState(book.cover_image_url || "");

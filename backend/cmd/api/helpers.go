@@ -9,7 +9,7 @@ import (
 	"github.com/draqist/iqraa/backend/internal/validator" // Assuming you have or need a validator
 )
 
-// readString is a helper to read a string from query params or return default
+// readString retrieves a string value from query parameters or returns a default value.
 func (app *application) readString(qs url.Values, key string, defaultValue string) string {
 	s := qs.Get(key)
 	if s == "" {
@@ -18,8 +18,8 @@ func (app *application) readString(qs url.Values, key string, defaultValue strin
 	return s
 }
 
-// readInt reads an integer from query params or returns default
-// It also adds an error to the validator if the value is not an integer
+// readInt retrieves an integer value from query parameters or returns a default value.
+// It adds a validation error if the value is not a valid integer.
 func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
 	s := qs.Get(key)
 	if s == "" {
@@ -35,7 +35,7 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 	return i
 }
 
-// Helper for JSON responses (You likely have something similar already)
+// writeJSON sends a JSON response with the specified status code, data, and headers.
 func (app *application) writeJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
 	js, err := json.Marshal(data)
 	if err != nil {
@@ -54,6 +54,7 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data any, h
 	return nil
 }
 
+// errorResponse sends a JSON error response with the specified status code and message.
 func (app *application) errorResponse(w http.ResponseWriter, status int, message any) {
 	env := envelope{"error": message}
 
@@ -64,8 +65,10 @@ func (app *application) errorResponse(w http.ResponseWriter, status int, message
 	}
 }
 
+// failedValidationResponse sends a 422 Unprocessable Entity response with validation errors.
 func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
 	app.errorResponse(w, http.StatusUnprocessableEntity, errors)
 }
 
+// envelope is a generic map for wrapping JSON responses.
 type envelope map[string]any

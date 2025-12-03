@@ -1,3 +1,4 @@
+// Package auth provides authentication and token management functionality.
 package auth
 
 import (
@@ -6,16 +7,19 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// SECRET should eventually move to env variables
+// jwtSecret is the secret key used for signing JWT tokens.
+// TODO: Move this to environment variables for security.
 var jwtSecret = []byte("your-very-secret-key-change-this")
 
+// Claims represents the custom JWT claims, including the user ID.
 type Claims struct {
 	UserID string `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
+// GenerateToken creates a new JWT token for the specified user ID.
+// The token expires in 24 hours.
 func GenerateToken(userID string) (string, error) {
-	// Token expires in 24 hours
 	expirationTime := time.Now().Add(24 * time.Hour)
 
 	claims := &Claims{
@@ -31,6 +35,8 @@ func GenerateToken(userID string) (string, error) {
 	return token.SignedString(jwtSecret)
 }
 
+// ValidateToken parses and validates a JWT token string.
+// It returns the claims if the token is valid, or an error otherwise.
 func ValidateToken(tokenString string) (*Claims, error) {
 	claims := &Claims{}
 

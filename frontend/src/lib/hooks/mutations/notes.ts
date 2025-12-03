@@ -2,14 +2,17 @@ import { saveBookDraft } from "@/lib/api/queries/notes";
 import { toast } from "@/lib/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-// Mutation: Save the note
+/**
+ * Hook to save a draft note for a book.
+ *
+ * @returns {UseMutationResult} The mutation result for saving a note.
+ */
 export const useSaveNote = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: saveBookDraft,
     onSuccess: (savedNote) => {
-      // Update the cache immediately with the new data
       queryClient.setQueryData(['notes', savedNote.book_id], savedNote);
       toast.success('Note saved');
     },

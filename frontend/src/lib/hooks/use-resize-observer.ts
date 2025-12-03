@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
 
+/**
+ * A hook that observes the width of an element using ResizeObserver.
+ *
+ * @template T - The type of the HTML element.
+ * @param {React.RefObject<T | null>} ref - The ref to the element to observe.
+ * @returns {number} The current width of the element.
+ */
 export function useResizeObserver<T extends HTMLElement>(
   ref: React.RefObject<T | null>
 ) {

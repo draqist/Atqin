@@ -1,25 +1,29 @@
 import { Resource } from "../types";
 
+/**
+ * Extracts the YouTube video ID from a given URL.
+ * Supports standard URLs, short URLs (youtu.be), and embed URLs.
+ *
+ * @param {string} url - The YouTube URL.
+ * @returns {string | null} The video ID if found, otherwise null.
+ */
 export function getYouTubeId(url: string): string | null {
   if (!url) return null;
 
-  // 1. Handle "youtu.be" short links (e.g., https://youtu.be/ID?si=...)
   if (url.includes("youtu.be")) {
     const parts = url.split("youtu.be/");
     if (parts.length > 1) {
-      return parts[1].split("?")[0]; // Remove query params
+      return parts[1].split("?")[0];
     }
   }
 
-  // 2. Handle standard "watch?v=" (e.g., https://youtube.com/watch?v=ID)
   if (url.includes("watch?v=")) {
     const parts = url.split("v=");
     if (parts.length > 1) {
-      return parts[1].split("&")[0]; // Remove other params
+      return parts[1].split("&")[0];
     }
   }
 
-  // 3. Handle embed urls (e.g., https://youtube.com/embed/ID)
   if (url.includes("embed/")) {
     const parts = url.split("embed/");
     if (parts.length > 1) {
@@ -29,14 +33,20 @@ export function getYouTubeId(url: string): string | null {
 
   return null;
 }
-// Helper to render the active content in the "Stage"
+
+/**
+ * Renders the active content (e.g., YouTube video) in the stage area.
+ *
+ * @param {string | null} activeResource - The ID of the currently active resource.
+ * @param {Resource[]} structuredResources - The list of available resources.
+ * @returns {JSX.Element | null} The rendered content or null if no active resource is found.
+ */
 export const renderActiveContent = (
   activeResource: string | null,
   structuredResources: Resource[]
 ) => {
   if (!activeResource) return null;
 
-  // 1. Find the active item (Standalone or Child)
   const allPlayableItems = structuredResources.flatMap((r) =>
     r.children && r.children.length > 0 ? r.children : [r]
   );
@@ -44,8 +54,6 @@ export const renderActiveContent = (
 
   if (!active || !active.url) return null;
 
-  // 2. GENERATE THE EMBED URL
-  // If it's a YouTube video, we MUST use the /embed/ endpoint
   let videoSrc = active.url;
   if (active.type === "youtube_video") {
     const videoId = getYouTubeId(active.url);
@@ -67,6 +75,12 @@ export const renderActiveContent = (
   );
 };
 
+/**
+ * Generates a thumbnail URL for a video resource.
+ *
+ * @param {Resource} resource - The resource object.
+ * @returns {string | null} The thumbnail URL if available, otherwise null.
+ */
 export const getVideoThumbnail = (resource: Resource) => {
   const videoId = getYouTubeId(resource.url);
   const thumbnailUrl = videoId
@@ -74,4 +88,4 @@ export const getVideoThumbnail = (resource: Resource) => {
     : null;
 
   return thumbnailUrl;
-}
+};

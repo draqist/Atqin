@@ -43,6 +43,10 @@ const paces = [
   },
 ];
 
+/**
+ * A dialog component for joining a learning track (cohort).
+ * Allows the user to select a learning pace (Casual, Dedicated, Intensive).
+ */
 export function JoinTrackDialog({ children, roadmapId }: JoinTrackDialogProps) {
   const [selectedPace, setSelectedPace] = useState("dedicated");
   const [isOpen, setIsOpen] = useState(false);

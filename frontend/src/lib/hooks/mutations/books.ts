@@ -4,16 +4,18 @@ import { Book } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
+/**
+ * Hook to create a new book.
+ *
+ * @returns {UseMutationResult} The mutation result for creating a book.
+ */
 export const useCreateBook = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: Partial<CreateBookPayload>) => createBook(data),
     onSuccess: () => {
-      // 1. Invalidate the list so the new book appears immediately
       queryClient.invalidateQueries({ queryKey: ["books"] });
-
-      // 2. Show success
       toast.success("Book created successfully");
     },
     onError: (error: any) => {
@@ -23,6 +25,12 @@ export const useCreateBook = () => {
   });
 };
 
+/**
+ * Hook to update an existing book.
+ *
+ * @param {string} id - The ID of the book to update.
+ * @returns {UseMutationResult} The mutation result for updating a book.
+ */
 export const useUpdateBook = (id: string) => {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -39,6 +47,11 @@ export const useUpdateBook = (id: string) => {
   });
 };
 
+/**
+ * Hook to delete a book.
+ *
+ * @returns {UseMutationResult} The mutation result for deleting a book.
+ */
 export const useDeleteBook = () => {
   const queryClient = useQueryClient();
   const router = useRouter();

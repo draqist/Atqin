@@ -21,6 +21,10 @@ interface RoadmapActionsProps {
   roadmap: Roadmap;
 }
 
+/**
+ * Dropdown menu for roadmap actions.
+ * Provides options to preview, edit, toggle publication status, and delete a roadmap.
+ */
 export function RoadmapActions({ roadmap }: RoadmapActionsProps) {
   const { mutate: updateRoadmap, isPending: isUpdating } = useUpdateRoadmap();
   const { mutate: deleteRoadmap, isPending: isDeleting } = useDeleteRoadmap();

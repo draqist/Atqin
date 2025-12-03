@@ -5,10 +5,11 @@ import (
 	"net/http"
 )
 
-// toggleBookmarkHandler adds or removes a book from study list
+// toggleBookmarkHandler adds or removes a book from the user's bookmarks.
+// POST /v1/books/{id}/bookmark
 func (app *application) toggleBookmarkHandler(w http.ResponseWriter, r *http.Request) {
 	bookID := r.PathValue("id")
-	userID := r.Context().Value(UserContextKey). (string) // Hardcoded for now
+	userID := r.Context().Value(UserContextKey).(string)
 
 	isBookmarked, err := app.models.Bookmarks.Toggle(userID, bookID)
 	if err != nil {
@@ -17,15 +18,15 @@ func (app *application) toggleBookmarkHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Return the new status
 	response := map[string]bool{"bookmarked": isBookmarked}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
-// listBookmarksHandler returns the user's study list
+// listBookmarksHandler retrieves all bookmarked books for the authenticated user.
+// GET /v1/bookmarks
 func (app *application) listBookmarksHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value(UserContextKey). (string) // Hardcoded for now
+	userID := r.Context().Value(UserContextKey).(string)
 
 	books, err := app.models.Bookmarks.GetUserBookmarks(userID)
 	if err != nil {

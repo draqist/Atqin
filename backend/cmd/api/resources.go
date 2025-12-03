@@ -13,9 +13,10 @@ import (
 	"github.com/draqist/iqraa/backend/internal/youtube"
 )
 
-// createResourceHandler
+// createResourceHandler adds a new resource to the database.
+// It supports creating single resources or playlists with child resources.
+// POST /v1/resources
 func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Request) {
-	// Define a struct that can hold children
 	type ResourceInput struct {
 		BookID        string           `json:"book_id"`
 		Type          string           `json:"type"`
@@ -24,8 +25,7 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 		IsOfficial    bool             `json:"is_official"`
 		ParentID      *string          `json:"parent_id"`
 		SequenceIndex int              `json:"sequence_index"`
-		// NEW: Children for playlists
-		Children      []*ResourceInput `json:"children"` 
+		Children      []*ResourceInput `json:"children"`
 	}
 
 	var input ResourceInput
@@ -34,16 +34,13 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// 1. START TRANSACTION
 	tx, err := app.models.Resources.DB.Begin()
 	if err != nil {
 		app.errorResponse(w, http.StatusInternalServerError, "Failed to start transaction")
 		return
 	}
-	// Defer rollback in case of panic/error
-	defer tx.Rollback() 
+	defer tx.Rollback()
 
-	// 2. Helper to insert a single resource within the transaction
 	insertFunc := func(res *data.Resource) error {
 		query := `
 			INSERT INTO resources (book_id, type, title, url, is_official, parent_id, sequence_index)
@@ -52,14 +49,13 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 		return tx.QueryRow(query, res.BookID, res.Type, res.Title, res.URL, res.IsOfficial, res.ParentID, res.SequenceIndex).Scan(&res.ID, &res.CreatedAt)
 	}
 
-	// 3. Create the Parent (Playlist)
 	parent := &data.Resource{
-		BookID: input.BookID,
-		Type:   input.Type,
-		Title:  input.Title,
-		URL:    input.URL,
-		IsOfficial: input.IsOfficial,
-		ParentID:   input.ParentID,
+		BookID:        input.BookID,
+		Type:          input.Type,
+		Title:         input.Title,
+		URL:           input.URL,
+		IsOfficial:    input.IsOfficial,
+		ParentID:      input.ParentID,
 		SequenceIndex: input.SequenceIndex,
 	}
 
@@ -69,19 +65,18 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// 4. Create Children (if Playlist)
 	if input.Type == "playlist" && len(input.Children) > 0 {
 		for i, childInput := range input.Children {
 			child := &data.Resource{
-				BookID:        input.BookID, // Inherit Book ID
-				Type:          "youtube_video", // Force type or use childInput.Type
+				BookID:        input.BookID,
+				Type:          "youtube_video",
 				Title:         childInput.Title,
 				URL:           childInput.URL,
-				IsOfficial:    input.IsOfficial, // Inherit Official status
-				ParentID:      &parent.ID,       // LINK TO PARENT
-				SequenceIndex: i + 1,            // Auto-increment order
+				IsOfficial:    input.IsOfficial,
+				ParentID:      &parent.ID,
+				SequenceIndex: i + 1,
 			}
-			
+
 			if err := insertFunc(child); err != nil {
 				app.logger.Println(err)
 				app.errorResponse(w, http.StatusInternalServerError, "Failed to create child resource")
@@ -90,7 +85,6 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 		}
 	}
 
-	// 5. COMMIT TRANSACTION
 	if err := tx.Commit(); err != nil {
 		app.errorResponse(w, http.StatusInternalServerError, "Failed to commit transaction")
 		return
@@ -100,7 +94,8 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(parent)
 }
 
-// listAllResourcesHandler (For Admin Table)
+// listAllResourcesHandler retrieves all resources for the admin dashboard.
+// GET /v1/resources
 func (app *application) listAllResourcesHandler(w http.ResponseWriter, r *http.Request) {
 	resources, err := app.models.Resources.GetAll()
 	if err != nil {
@@ -111,7 +106,8 @@ func (app *application) listAllResourcesHandler(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(resources)
 }
 
-// deleteResourceHandler
+// deleteResourceHandler removes a resource from the database.
+// DELETE /v1/resources/{id}
 func (app *application) deleteResourceHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	err := app.models.Resources.Delete(id)
@@ -127,10 +123,11 @@ func (app *application) deleteResourceHandler(w http.ResponseWriter, r *http.Req
 	w.Write([]byte(`{"message":"deleted"}`))
 }
 
-// updateResourceHandler
+// updateResourceHandler modifies an existing resource.
+// PUT /v1/resources/{id}
 func (app *application) updateResourceHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	
+
 	resource, err := app.models.Resources.Get(id)
 	if err != nil {
 		app.errorResponse(w, http.StatusNotFound, "Resource not found")
@@ -150,11 +147,21 @@ func (app *application) updateResourceHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if input.Title != nil { resource.Title = *input.Title }
-	if input.URL != nil { resource.URL = *input.URL }
-	if input.Type != nil { resource.Type = *input.Type }
-	if input.IsOfficial != nil { resource.IsOfficial = *input.IsOfficial }
-	if input.SequenceIndex != nil { resource.SequenceIndex = *input.SequenceIndex }
+	if input.Title != nil {
+		resource.Title = *input.Title
+	}
+	if input.URL != nil {
+		resource.URL = *input.URL
+	}
+	if input.Type != nil {
+		resource.Type = *input.Type
+	}
+	if input.IsOfficial != nil {
+		resource.IsOfficial = *input.IsOfficial
+	}
+	if input.SequenceIndex != nil {
+		resource.SequenceIndex = *input.SequenceIndex
+	}
 
 	err = app.models.Resources.Update(resource)
 	if err != nil {
@@ -165,6 +172,9 @@ func (app *application) updateResourceHandler(w http.ResponseWriter, r *http.Req
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resource)
 }
+
+// getResourceHandler retrieves a single resource by its ID.
+// GET /v1/resources/{id}
 func (app *application) getResourceHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	resource, err := app.models.Resources.Get(id)
@@ -176,11 +186,11 @@ func (app *application) getResourceHandler(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(resource)
 }
 
+// listBookResourcesHandler retrieves all resources associated with a specific book.
+// GET /v1/books/{id}/resources
 func (app *application) listBookResourcesHandler(w http.ResponseWriter, r *http.Request) {
-	// 1. Get the book ID from the URL
 	bookID := r.PathValue("id")
 
-	// 2. Call the Model (The Chef)
 	resources, err := app.models.Resources.GetByBookID(bookID)
 	if err != nil {
 		app.logger.Println(err)
@@ -188,13 +198,12 @@ func (app *application) listBookResourcesHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	// 3. Send the JSON response (Serve the food)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resources)
 }
 
-// import "github.com/yourusername/iqraa/backend/internal/youtube"
-
+// fetchYouTubePlaylistHandler fetches videos from a YouTube playlist and returns them as potential resources.
+// POST /v1/tools/youtube-playlist
 func (app *application) fetchYouTubePlaylistHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		PlaylistID string `json:"playlist_id"`
@@ -204,7 +213,6 @@ func (app *application) fetchYouTubePlaylistHandler(w http.ResponseWriter, r *ht
 		return
 	}
 
-	// 1. Call the YouTube Helper
 	videos, err := youtube.FetchPlaylistVideos(input.PlaylistID)
 	if err != nil {
 		app.logger.Println(err)
@@ -212,8 +220,6 @@ func (app *application) fetchYouTubePlaylistHandler(w http.ResponseWriter, r *ht
 		return
 	}
 
-	// 2. Transform to your Resource Input format
-	// We return a list of "Children" ready for your Bulk Create form
 	type ChildInput struct {
 		Title string `json:"title"`
 		URL   string `json:"url"`
@@ -231,8 +237,9 @@ func (app *application) fetchYouTubePlaylistHandler(w http.ResponseWriter, r *ht
 	json.NewEncoder(w).Encode(children)
 }
 
+// searchYouTubePlaylistsHandler searches for YouTube playlists matching a query.
+// GET /v1/tools/youtube-search
 func (app *application) searchYouTubePlaylistsHandler(w http.ResponseWriter, r *http.Request) {
-	// Get query from URL ?q=...
 	query := r.URL.Query().Get("q")
 	if query == "" {
 		app.errorResponse(w, http.StatusBadRequest, "Search query required")
@@ -240,8 +247,6 @@ func (app *application) searchYouTubePlaylistsHandler(w http.ResponseWriter, r *
 	}
 
 	apiKey := os.Getenv("YOUTUBE_API_KEY")
-	// Call YouTube Search API
-	// Type=playlist ensures we only get playlists
 	url := fmt.Sprintf(
 		"https://www.googleapis.com/youtube/v3/search?part=snippet&type=playlist&q=%s&maxResults=10&key=%s",
 		url.QueryEscape(query), apiKey,
@@ -254,8 +259,6 @@ func (app *application) searchYouTubePlaylistsHandler(w http.ResponseWriter, r *
 	}
 	defer resp.Body.Close()
 
-	// We can just pipe the YouTube JSON directly back to the frontend
-	// effectively acting as a proxy to hide the API Key
 	w.Header().Set("Content-Type", "application/json")
 	io.Copy(w, resp.Body)
 }

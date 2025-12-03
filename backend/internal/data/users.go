@@ -13,31 +13,32 @@ var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
+// User represents a registered user in the system.
 type User struct {
 	ID           string    `json:"id"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
-	Username     string    `json:"username"`       // Added
-	Password     string    `json:"-"`              // Never output this to JSON
-	PasswordHash []byte    `json:"-"`              // Never output this to JSON
+	Username     string    `json:"username"`
+	Password     string    `json:"-"`
+	PasswordHash []byte    `json:"-"`
 	CreatedAt    time.Time `json:"created_at"`
 	Role         string    `json:"role"`
 }
 
+// UserModel wraps the database connection pool for User-related operations.
 type UserModel struct {
 	DB *sql.DB
 }
 
-// Insert adds a new user
+// Insert adds a new user to the database.
+// It hashes the password before storage and returns an error if the email or username already exists.
 func (m UserModel) Insert(user *User) error {
-	// 1. Hash the password
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
 	if err != nil {
 		return err
 	}
 	user.PasswordHash = hash
 
-	// 2. Insert into DB
 	query := `
 		INSERT INTO users (name, email, username, password_hash)
 		VALUES ($1, $2, $3, $4)
@@ -48,17 +49,18 @@ func (m UserModel) Insert(user *User) error {
 
 	err = m.DB.QueryRowContext(ctx, query, user.Name, user.Email, user.Username, user.PasswordHash).Scan(&user.ID, &user.CreatedAt)
 	if err != nil {
-		return err 
+		return err
 	}
 	return nil
 }
 
-// GetByEmail fetches a user to verify login
+// GetByEmail retrieves a user by their email address.
+// It returns the User struct or an error if the user is not found.
 func (m UserModel) GetByEmail(email string) (*User, error) {
 	query := `SELECT id, name, email, username, password_hash, role, created_at FROM users WHERE email = $1`
 
 	var user User
-	var username sql.NullString // Handle NULL
+	var username sql.NullString
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -66,7 +68,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 		&user.ID,
 		&user.Name,
 		&user.Email,
-		&username, 
+		&username,
 		&user.PasswordHash,
 		&user.Role,
 		&user.CreatedAt,
@@ -79,7 +81,8 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-// GetByEmailOrUsername fetches a user by email OR username
+// GetByEmailOrUsername retrieves a user by either their email or username.
+// This is useful for login flows where the user can identify themselves with either.
 func (m UserModel) GetByEmailOrUsername(identifier string) (*User, error) {
 	query := `
 		SELECT id, name, email, username, password_hash, role, created_at 
@@ -87,7 +90,7 @@ func (m UserModel) GetByEmailOrUsername(identifier string) (*User, error) {
 		WHERE email = $1 OR username = $1`
 
 	var user User
-	var username sql.NullString // Handle NULL
+	var username sql.NullString
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -95,7 +98,7 @@ func (m UserModel) GetByEmailOrUsername(identifier string) (*User, error) {
 		&user.ID,
 		&user.Name,
 		&user.Email,
-		&username, 
+		&username,
 		&user.PasswordHash,
 		&user.Role,
 		&user.CreatedAt,
@@ -108,7 +111,8 @@ func (m UserModel) GetByEmailOrUsername(identifier string) (*User, error) {
 	return &user, nil
 }
 
-// PasswordMatches checks if the provided password matches the hash
+// PasswordMatches compares the provided plaintext password with the stored hash.
+// It returns true if they match, false otherwise.
 func (u *User) PasswordMatches(plaintextPassword string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword(u.PasswordHash, []byte(plaintextPassword))
 	if err != nil {
@@ -120,43 +124,43 @@ func (u *User) PasswordMatches(plaintextPassword string) (bool, error) {
 	return true, nil
 }
 
-// GetByID fetches a user by their UUID
+// GetByID retrieves a user by their unique ID (UUID).
 func (m UserModel) GetByID(id string) (*User, error) {
-    query := `
+	query := `
         SELECT id, name, email, username, role, created_at 
         FROM users 
         WHERE id = $1`
 
-    var user User
-    var username sql.NullString // Handle NULL
-    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-    defer cancel()
+	var user User
+	var username sql.NullString
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
-    err := m.DB.QueryRowContext(ctx, query, id).Scan(
-        &user.ID,
-        &user.Name,
-        &user.Email,
-        &username,
-        &user.Role,
-        &user.CreatedAt,
-    )
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&username,
+		&user.Role,
+		&user.CreatedAt,
+	)
 
-    if err != nil {
-        if errors.Is(err, sql.ErrNoRows) {
-            return nil, ErrRecordNotFound
-        }
-        return nil, err
-    }
-    user.Username = username.String
-    return &user, nil
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
+		return nil, err
+	}
+	user.Username = username.String
+	return &user, nil
 }
 
-// Search finds users by username or name
+// Search finds users matching the query string in either their username or name.
+// It performs a case-insensitive search and limits results to 10.
 func (m UserModel) Search(query string) ([]*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	// Simple ILIKE search
 	sqlQuery := `
 		SELECT id, name, username 
 		FROM users 
@@ -172,8 +176,7 @@ func (m UserModel) Search(query string) ([]*User, error) {
 	var users []*User
 	for rows.Next() {
 		var u User
-		// We only scan public fields
-		var username sql.NullString // Handle nulls if migration didn't backfill
+		var username sql.NullString
 		if err := rows.Scan(&u.ID, &u.Name, &username); err != nil {
 			return nil, err
 		}

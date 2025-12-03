@@ -1,3 +1,7 @@
+/**
+ * A component that injects JSON-LD structured data for a book.
+ * Improves SEO by providing search engines with detailed book metadata.
+ */
 export function BookJsonLd({ book }: { book: any }) {
   const jsonLd = {
     "@context": "https://schema.org",

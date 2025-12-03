@@ -25,6 +25,10 @@ interface MobilePlayerProps {
   bookId: string; // Added prop
 }
 
+/**
+ * A mobile-optimized media player drawer.
+ * Handles video playback, resource listing, and note-taking in a collapsible drawer.
+ */
 export function MobilePlayer({
   activeVideo,
   embedUrl,

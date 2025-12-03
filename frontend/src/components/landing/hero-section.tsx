@@ -5,6 +5,10 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { WordRotator } from "./WordRotator";
 
+/**
+ * The main Hero section of the landing page.
+ * Features the main value proposition, dynamic text, and stats.
+ */
 const HeroSection = () => {
   const { data: books } = useBooks();
   return (

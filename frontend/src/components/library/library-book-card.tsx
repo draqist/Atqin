@@ -7,6 +7,10 @@ interface LibraryBookCardProps {
   book: Book;
 }
 
+/**
+ * A card component representing a book in the library.
+ * Displays the book's cover image, title, author, and rating.
+ */
 export function LibraryBookCard({ book }: LibraryBookCardProps) {
   // Fallback image if none provided
   const coverImage =

@@ -17,6 +17,11 @@ interface QuickNoteProps {
   initialContent?: any; // JSON from DB
 }
 
+/**
+ * A quick note editor component using Tiptap.
+ * Allows users to jot down thoughts and auto-saves changes.
+ * Handles loading states and authentication checks.
+ */
 export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
   const router = useRouter();
   const { data: user, isLoading: isUserLoading } = useUser();

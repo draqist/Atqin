@@ -1,11 +1,15 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { GripVerticalIcon } from "lucide-react"
-import * as ResizablePrimitive from "react-resizable-panels"
+import { GripVerticalIcon } from "lucide-react";
+import * as React from "react";
+import * as ResizablePrimitive from "react-resizable-panels";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
+/**
+ * A group of resizable panels.
+ * Manages the layout and resizing logic for its children panels.
+ */
 function ResizablePanelGroup({
   className,
   ...props
@@ -19,21 +23,27 @@ function ResizablePanelGroup({
       )}
       {...props}
     />
-  )
+  );
 }
 
+/**
+ * An individual panel within a ResizablePanelGroup.
+ */
 function ResizablePanel({
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.Panel>) {
-  return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />
+  return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />;
 }
 
+/**
+ * A handle that can be dragged to resize adjacent panels.
+ */
 function ResizableHandle({
   withHandle,
   className,
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
-  withHandle?: boolean
+  withHandle?: boolean;
 }) {
   return (
     <ResizablePrimitive.PanelResizeHandle
@@ -50,7 +60,7 @@ function ResizableHandle({
         </div>
       )}
     </ResizablePrimitive.PanelResizeHandle>
-  )
+  );
 }
 
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle }
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup };

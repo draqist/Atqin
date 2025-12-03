@@ -86,6 +86,10 @@ const item = {
   show: { opacity: 1, y: 0 },
 };
 
+/**
+ * A grid layout displaying the key features of the platform.
+ * Uses Framer Motion for entrance animations.
+ */
 export function FeaturesGrid() {
   return (
     <section className="py-24 px-6 w-full bg-slate-50">

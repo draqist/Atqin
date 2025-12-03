@@ -18,6 +18,10 @@ interface YouTubePickerProps {
   onSelect: (playlistId: string) => void;
 }
 
+/**
+ * A dialog component for searching and selecting YouTube playlists.
+ * Integrates with the YouTube Data API to fetch playlist details.
+ */
 export function YouTubePicker({ onSelect }: YouTubePickerProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);

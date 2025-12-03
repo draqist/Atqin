@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Notification represents a system notification for a user.
 type Notification struct {
 	ID        string          `json:"id"`
 	UserID    string          `json:"user_id"`
@@ -18,10 +19,12 @@ type Notification struct {
 	CreatedAt time.Time       `json:"created_at"`
 }
 
+// NotificationModel wraps the database connection pool for Notification-related operations.
 type NotificationModel struct {
 	DB *sql.DB
 }
 
+// Insert adds a new notification to the database.
 func (m NotificationModel) Insert(n *Notification) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -34,6 +37,7 @@ func (m NotificationModel) Insert(n *Notification) error {
 	return m.DB.QueryRowContext(ctx, query, n.UserID, n.Type, n.Title, n.Message, n.Data, n.IsRead).Scan(&n.ID, &n.CreatedAt)
 }
 
+// GetForUser fetches the latest 50 notifications for a specific user.
 func (m NotificationModel) GetForUser(userID string) ([]*Notification, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -62,6 +66,7 @@ func (m NotificationModel) GetForUser(userID string) ([]*Notification, error) {
 	return notifications, nil
 }
 
+// MarkRead marks a specific notification as read.
 func (m NotificationModel) MarkRead(id string, userID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -71,6 +76,7 @@ func (m NotificationModel) MarkRead(id string, userID string) error {
 	return err
 }
 
+// MarkAllRead marks all notifications for a user as read.
 func (m NotificationModel) MarkAllRead(userID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

@@ -1,30 +1,34 @@
 export type BookCategory = 'tajweed' | 'aqeedah' | 'hadith' | 'grammar' | string;
 export type BookLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert' | string;
 
+/**
+ * Metadata associated with a book, including category and difficulty level.
+ */
 export interface BookMetadata {
   category: BookCategory;
   level?: BookLevel;
-  // Add future metadata fields here (e.g., "translator", "page_count")
   [key: string]: any;
 }
 
+/**
+ * Represents a book in the library.
+ */
 export interface Book {
   id: string;
   title: string;
   original_author: string;
   description: string;
   cover_image_url: string;
-
-  // We strictly type this now instead of 'any'
   metadata: BookMetadata;
-
   is_public: boolean;
-  created_at: string; // ISO Date string coming from Go
+  created_at: string;
   version: number;
-  resource_count?: number; // Added
+  resource_count?: number;
 }
 
-// Optional: Type for the Tree Nodes (Chapters/Verses) if you need it again
+/**
+ * Represents a content node within a book (e.g., chapter, section, verse).
+ */
 export interface ContentNode {
   id: string;
   book_id: string;
@@ -34,8 +38,12 @@ export interface ContentNode {
   sequence_index: number;
   version: number;
 }
+
 export type ResourceType = 'pdf' | 'youtube_video' | 'audio' | 'web_link' | 'playlist';
 
+/**
+ * Represents an external resource linked to a book.
+ */
 export interface Resource {
   id: string;
   book_id: string;
@@ -47,10 +55,13 @@ export interface Resource {
   media_end_seconds?: number;
   parent_id: string | null;
   sequence_index: number;
-  children?: Resource[]; // We will add this manually in the frontend
+  children?: Resource[];
   book_title?: string
 }
 
+/**
+ * Payload for creating a new resource.
+ */
 export interface CreateResourcePayload {
   title: string;
   type: ResourceType;
@@ -60,25 +71,34 @@ export interface CreateResourcePayload {
   children?: { title: string; url: string }[];
 }
 
+/**
+ * Represents a user's note or reflection on a book.
+ */
 export interface Note {
   id: string;
   book_id: string;
   user_id: string;
   title: string;
   description: string;
-  content: any; // JSON object from Tiptap
+  content: any;
   is_published?: boolean;
   updated_at: string;
 }
 
+/**
+ * Represents a public reflection visible in the community feed.
+ */
 export interface PublicReflection {
   id: string;
   title: string;
-  description: string; // The short subtitle
+  description: string;
   author_name: string;
   created_at: string;
 }
 
+/**
+ * Represents a reflection in the global feed.
+ */
 export interface GlobalReflection {
   id: string;
   title: string;
@@ -94,6 +114,9 @@ export interface BookmarkResponse {
   bookmarked: boolean;
 }
 
+/**
+ * Represents a learning roadmap or curriculum.
+ */
 export interface Roadmap {
   id: string;
   title: string;
@@ -103,10 +126,12 @@ export interface Roadmap {
   is_public: boolean;
   created_at: string;
   nodes: RoadmapNode[];
-  // Optional: count of nodes if your backend sends it
   nodes_count?: number;
 }
 
+/**
+ * Represents a node (book) within a roadmap.
+ */
 export interface RoadmapNode {
   id: string;
   roadmap_id: string;
@@ -133,11 +158,14 @@ export interface StudentNode {
   title: string;
   author: string;
   level: string;
-  description: string; // Specific instruction for this step
+  description: string;
   status: "completed" | "active" | "locked";
   sequence: number;
 }
 
+/**
+ * Represents a user in the system.
+ */
 export interface User {
   id: string;
   name: string;
@@ -146,6 +174,9 @@ export interface User {
   created_at: string;
 }
 
+/**
+ * Data structure for the admin dashboard.
+ */
 export interface AdminDashboardData {
   stats: {
     total_books: number;
@@ -156,19 +187,18 @@ export interface AdminDashboardData {
   recent_users: User[];
 }
 
-// ... existing types ...
-
 export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error';
 
-// Ensure your Book type supports the nodes structure needed for the prompt
+/**
+ * Book structure used for AI processing (Gemini).
+ */
 export interface GeminiBook {
   id: string;
   title_en: string;
   title_ar?: string;
-  // The AI needs the raw text to check against
   nodes: {
     id: string;
-    content_text: string; // This is the Arabic text
+    content_text: string;
     sequence_index: number;
   }[];
 }
@@ -184,6 +214,9 @@ export interface BookProgress {
   percentage: number;
 }
 
+/**
+ * Statistics for a student's activity.
+ */
 export interface StudentStats {
   total_minutes: number;
   current_streak: number;

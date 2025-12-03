@@ -1,6 +1,10 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * Loading skeleton for the admin dashboard.
+ * Displays placeholders for metrics, charts, and activity feeds.
+ */
 export function DashboardSkeleton() {
   return (
     <div className="space-y-8">

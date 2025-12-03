@@ -41,6 +41,10 @@ const formSchema = z.object({
     .or(z.literal("")),
 });
 
+/**
+ * Form component for creating a new book.
+ * Handles book creation with title, author, description, category, and cover image.
+ */
 export function BookForm() {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState("");

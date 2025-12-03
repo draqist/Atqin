@@ -26,6 +26,10 @@ interface PdfViewerProps {
   onClose?: () => void;
 }
 
+/**
+ * A PDF viewer component using `react-pdf`.
+ * Features page navigation, zooming, and progress tracking.
+ */
 export function PdfViewer({
   url,
   bookId,

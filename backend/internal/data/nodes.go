@@ -6,22 +6,24 @@ import (
 	"time"
 )
 
-// ContentNode represents a single unit of text (Chapter, Section, or Bayt)
+// ContentNode represents a single unit of text (Chapter, Section, or Bayt) within a book.
 type ContentNode struct {
-	ID             string `json:"id"`
-	BookID         string `json:"book_id"`
-	ParentID       *string `json:"parent_id"` // Pointer because it can be null (root nodes)
-	NodeType       string `json:"node_type"`  // 'chapter', 'bayt', etc.
-	ContentText    string `json:"content_text"`
-	SequenceIndex  int    `json:"sequence_index"`
-	Version        int    `json:"version"`
+	ID            string  `json:"id"`
+	BookID        string  `json:"book_id"`
+	ParentID      *string `json:"parent_id"`
+	NodeType      string  `json:"node_type"`
+	ContentText   string  `json:"content_text"`
+	SequenceIndex int     `json:"sequence_index"`
+	Version       int     `json:"version"`
 }
 
+// NodeModel wraps the database connection pool for ContentNode-related operations.
 type NodeModel struct {
 	DB *sql.DB
 }
 
-// Insert adds a new node and returns its ID
+// Insert adds a new content node to the database.
+// It returns the ID and initial version of the newly created node.
 func (m NodeModel) Insert(node *ContentNode) error {
 	query := `
 		INSERT INTO content_nodes (book_id, parent_id, node_type, content_text, sequence_index)
@@ -31,23 +33,23 @@ func (m NodeModel) Insert(node *ContentNode) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	// Handle the null pointer for ParentID
 	var parentID sql.NullString
 	if node.ParentID != nil {
 		parentID.String = *node.ParentID
 		parentID.Valid = true
 	}
 
-	return m.DB.QueryRowContext(ctx, query, 
-		node.BookID, 
-		parentID, 
-		node.NodeType, 
-		node.ContentText, 
+	return m.DB.QueryRowContext(ctx, query,
+		node.BookID,
+		parentID,
+		node.NodeType,
+		node.ContentText,
 		node.SequenceIndex,
 	).Scan(&node.ID, &node.Version)
 }
 
-// GetByBookID retrieves the entire tree for a book (We'll need this for the Reader)
+// GetByBookID retrieves the entire content tree for a specific book.
+// It returns a slice of ContentNode pointers ordered by sequence index.
 func (m NodeModel) GetByBookID(bookID string) ([]*ContentNode, error) {
 	query := `
 		SELECT id, book_id, parent_id, node_type, content_text, sequence_index, version

@@ -28,6 +28,11 @@ const mainNav = [
   // { name: "API Docs", href: "/docs", icon: FileText },
 ];
 
+/**
+ * Main sidebar navigation component.
+ * Displays the application logo, main navigation links, and the user menu footer.
+ * Responsive design adapts to different screen sizes (hidden on mobile, icon-only on tablet, full width on desktop).
+ */
 export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();

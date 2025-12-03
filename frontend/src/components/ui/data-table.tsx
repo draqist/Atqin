@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
   ColumnDef,
   flexRender,
@@ -19,11 +18,17 @@ import {
 } from "@/components/ui/table";
 import { DataTablePagination } from "./data-table-pagination";
 
+/**
+ * Props for the DataTable component.
+ */
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
+/**
+ * Reusable Data Table component using TanStack Table.
+ */
 export function DataTable<TData, TValue>({
   columns,
   data,

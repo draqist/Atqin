@@ -12,6 +12,10 @@ const words = [
   "Smart Hifdh",
 ];
 
+/**
+ * A component that rotates through a list of words with animation.
+ * Used in the Hero section to display dynamic text.
+ */
 export function WordRotator() {
   const [index, setIndex] = useState(0);
 

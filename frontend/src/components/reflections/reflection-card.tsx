@@ -18,6 +18,10 @@ function getGradient(id: string) {
   return gradients[index % gradients.length];
 }
 
+/**
+ * A card component representing a single reflection or note.
+ * Displays the note's title, description, author, and associated book.
+ */
 export function ReflectionCard({ note }: { note: GlobalReflection }) {
   const gradient = getGradient(note.id);
 

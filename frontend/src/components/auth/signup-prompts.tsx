@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,8 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Brain, CheckCircle2, ArrowRight } from "lucide-react";
+import { ArrowRight, Brain, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 interface SignupPromptProps {
@@ -17,6 +17,10 @@ interface SignupPromptProps {
   redirectUrl?: string; // Where do they go after logging in?
 }
 
+/**
+ * A dialog component that prompts users to sign up or log in.
+ * Triggered by a child element, it displays value propositions and redirects to auth pages.
+ */
 export function SignupPrompt({
   children,
   redirectUrl = "/library",

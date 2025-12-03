@@ -9,42 +9,47 @@ import {
   REGISTER,
   REHYDRATE,
 } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // Defaults to localStorage for web
+import storage from 'redux-persist/lib/storage';
 import uiReducer from './features/uiSlice';
 
-// 1. Combine all your slices here
+/**
+ * Root reducer combining all application slices.
+ */
 const rootReducer = combineReducers({
   ui: uiReducer,
-  // auth: authReducer, // Add future slices here
 });
 
-// 2. Configure Persistence
+/**
+ * Configuration for Redux Persist.
+ * Whitelists the 'ui' slice to be persisted in storage.
+ */
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['ui'], // Only persist the 'ui' slice (don't persist things that should reset on refresh)
+  whitelist: ['ui'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// 3. Create the Store
+/**
+ * Creates and configures the Redux store.
+ * Sets up persistence and middleware.
+ */
 export const makeStore = () => {
   return configureStore({
     reducer: persistedReducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         serializableCheck: {
-          // Ignore these Redux Persist actions to prevent errors
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         },
       }),
   });
 };
 
-export const store = makeStore()
-export const persistedStore = persistStore(store)
+export const store = makeStore();
+export const persistedStore = persistStore(store);
 
-// 4. Export Types
 export type AppStore = ReturnType<typeof makeStore>;
 export type RootState = ReturnType<AppStore['getState']>;
 export type AppDispatch = AppStore['dispatch'];

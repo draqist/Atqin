@@ -44,6 +44,10 @@ import { NotificationBell } from "./notification-bell";
 
 // ...
 
+/**
+ * Mobile navigation component.
+ * Renders a sheet with the main navigation menu and user menu for mobile devices.
+ */
 export function MobileNav() {
   const pathname = usePathname();
 

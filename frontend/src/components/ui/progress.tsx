@@ -1,10 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as ProgressPrimitive from "@radix-ui/react-progress"
+import * as ProgressPrimitive from "@radix-ui/react-progress";
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
+/**
+ * Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.
+ */
 function Progress({
   className,
   value,
@@ -25,7 +28,7 @@ function Progress({
         style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
       />
     </ProgressPrimitive.Root>
-  )
+  );
 }
 
-export { Progress }
+export { Progress };

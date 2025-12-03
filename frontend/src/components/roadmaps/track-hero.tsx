@@ -14,6 +14,10 @@ interface TrackHeroProps {
   totalCount: number;
 }
 
+/**
+ * A hero section component for a specific learning track.
+ * Displays the track's title, description, and overall progress with a circular indicator.
+ */
 export function TrackHero({
   roadmap,
   progress,
@@ -28,7 +32,7 @@ export function TrackHero({
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="relative bg-slate-900 text-white overflow-hidden h-full flex flex-col justify-start rounded-t-3xl">
+    <div className="relative bg-slate-900 text-white overflow-hidden h-full flex flex-col justify-start rounded-t-none md:rounded-t-3xl">
       {/* Background FX */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
       <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />

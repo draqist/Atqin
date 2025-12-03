@@ -1,5 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * A loading skeleton for the PDF viewer.
+ * Simulates the layout of the PDF viewer toolbar and document canvas while loading.
+ */
 export function PdfSkeleton() {
   return (
     <div className="flex flex-col items-center w-full min-h-[600px]">

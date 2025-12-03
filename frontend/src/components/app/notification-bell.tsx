@@ -17,6 +17,10 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { Bell } from "lucide-react";
 
+/**
+ * Notification bell component.
+ * Displays a badge with the count of unread notifications and a dropdown list of notifications.
+ */
 export function NotificationBell() {
   const { data: notifications = [] } = useNotifications();
   const { mutate: markRead } = useMarkNotificationRead();

@@ -1,7 +1,11 @@
 import api from "@/lib/axios";
 import { Book } from "@/lib/types";
 
-// Fetch user's saved books
+/**
+ * Fetches the list of books bookmarked by the current user.
+ *
+ * @returns {Promise<Book[]>} A promise that resolves to an array of bookmarked books.
+ */
 export const fetchUserBookmarks = async (): Promise<Book[]> => {
   const { data } = await api.get<Book[]>("/bookmarks");
   return data;

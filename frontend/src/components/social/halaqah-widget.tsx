@@ -45,6 +45,10 @@ const cohortMembers = [
   },
 ];
 
+/**
+ * A widget component displaying cohort activity and members.
+ * Shows active members, allows nudging inactive ones, and displays user ranking.
+ */
 export function HalaqahWidget() {
   const handleNudge = (name: string) => {
     toast.success(`Sent a reminder to ${name}!`);

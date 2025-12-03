@@ -59,6 +59,11 @@ const formSchema = z.object({
 
 // ... schema
 
+/**
+ * Form component for creating or editing a resource.
+ * Supports various resource types including YouTube videos, playlists, and PDFs.
+ * Handles playlist imports and dynamic child resource management.
+ */
 export function ResourceForm({ resource }: { resource?: Resource }) {
   const router = useRouter();
   const searchParams = useSearchParams();

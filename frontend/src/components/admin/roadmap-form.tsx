@@ -38,6 +38,10 @@ interface RoadmapFormProps {
   roadmap?: Roadmap; // Optional for Edit mode
 }
 
+/**
+ * Form component for creating or editing a roadmap.
+ * Handles roadmap metadata including title, slug, description, and visibility.
+ */
 export function RoadmapForm({ roadmap }: RoadmapFormProps) {
   const router = useRouter();
   const { mutate: createRoadmap, isPending } = useCreateRoadmap();

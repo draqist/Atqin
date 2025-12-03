@@ -49,6 +49,10 @@ const footerColumns = [
   },
 ];
 
+/**
+ * The site footer component.
+ * Contains links to various sections, social media icons, and copyright info.
+ */
 export function Footer() {
   return (
     <footer className="bg-white border-t border-slate-200 pt-20 pb-10 text-slate-600">

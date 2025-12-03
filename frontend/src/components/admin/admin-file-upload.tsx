@@ -15,6 +15,10 @@ interface FileUploadProps {
   accept?: string; // e.g., "application/pdf" or "image/*"
 }
 
+/**
+ * A file upload component that uploads files to Supabase storage.
+ * Supports drag and drop, file validation, and progress indication.
+ */
 export function FileUpload({
   value,
   onChange,
