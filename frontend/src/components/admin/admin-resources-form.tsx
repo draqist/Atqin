@@ -239,113 +239,115 @@ export function ResourceForm({ resource }: { resource?: Resource }) {
 
                 {/* --- PLAYLIST EDITOR --- */}
                 {resourceType === "playlist" && (
-                  <div className="mt-8 border-t border-slate-100 pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                        <ListVideo className="w-4 h-4 text-indigo-600" />{" "}
-                        Playlist Videos
-                      </h3>
-                      <div className="flex gap-2">
-                        <YouTubePicker onSelect={handlePlaylistSelect} />{" "}
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => append({ title: "", url: "" })}
-                          className="gap-2 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
-                        >
-                          <Plus className="w-3 h-3" /> Add Manually
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      {fields.map((field, index) => (
-                        <div
-                          key={field.id}
-                          className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 group"
-                        >
-                          {/* Drag Handle Visual */}
-                          <div className="mt-3 text-slate-400 cursor-move">
-                            <GripVertical className="w-4 h-4" />
-                          </div>
-
-                          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <FormField
-                              control={form.control}
-                              name={`children.${index}.title`}
-                              render={({ field }) => (
-                                <FormItem className="space-y-1">
-                                  <FormControl>
-                                    <Input
-                                      {...field}
-                                      placeholder="Episode Title"
-                                      className="bg-white h-9 text-sm"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name={`children.${index}.url`}
-                              render={({ field }) => (
-                                <FormItem className="space-y-1">
-                                  <FormControl>
-                                    <Input
-                                      {...field}
-                                      placeholder="YouTube URL"
-                                      className="bg-white h-9 text-sm"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
+                  <>
+                    <div className="mt-8 border-t border-slate-100 pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                          <ListVideo className="w-4 h-4 text-indigo-600" />{" "}
+                          Playlist Videos
+                        </h3>
+                        <div className="flex gap-2">
+                          <YouTubePicker onSelect={handlePlaylistSelect} />{" "}
                           <Button
                             type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => remove(index)}
-                            className="text-slate-400 hover:text-red-600"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => append({ title: "", url: "" })}
+                            className="gap-2 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Plus className="w-3 h-3" /> Add Manually
                           </Button>
                         </div>
-                      ))}
+                      </div>
 
-                      {fields.length === 0 && (
-                        <div className="text-center py-8 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-sm">
-                          No videos added to playlist yet.
-                        </div>
-                      )}
+                      <div className="space-y-3">
+                        {fields.map((field, index) => (
+                          <div
+                            key={field.id}
+                            className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 group"
+                          >
+                            {/* Drag Handle Visual */}
+                            <div className="mt-3 text-slate-400 cursor-move">
+                              <GripVertical className="w-4 h-4" />
+                            </div>
+
+                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <FormField
+                                control={form.control}
+                                name={`children.${index}.title`}
+                                render={({ field }) => (
+                                  <FormItem className="space-y-1">
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        placeholder="Episode Title"
+                                        className="bg-white h-9 text-sm"
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`children.${index}.url`}
+                                render={({ field }) => (
+                                  <FormItem className="space-y-1">
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        placeholder="YouTube URL"
+                                        className="bg-white h-9 text-sm"
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => remove(index)}
+                              className="text-slate-400 hover:text-red-600"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+
+                        {fields.length === 0 && (
+                          <div className="text-center py-8 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-sm">
+                            No videos added to playlist yet.
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                    <div className="flex gap-2 items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
+                      <Input
+                        placeholder="Paste YouTube Playlist URL or ID"
+                        className="bg-white h-9 text-sm"
+                        value={playlistInput}
+                        onChange={(e) => setPlaylistInput(e.target.value)}
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onClick={handleManualImport}
+                        disabled={importLoading || !playlistInput}
+                      >
+                        {importLoading ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          "Import"
+                        )}
+                      </Button>
+                    </div>
+                  </>
                 )}
-                <div className="flex gap-2 items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
-                  <Input
-                    placeholder="Paste YouTube Playlist URL or ID"
-                    className="bg-white h-9 text-sm"
-                    value={playlistInput}
-                    onChange={(e) => setPlaylistInput(e.target.value)}
-                  />
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    onClick={handleManualImport}
-                    disabled={importLoading || !playlistInput}
-                  >
-                    {importLoading ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      "Import"
-                    )}
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </div>
