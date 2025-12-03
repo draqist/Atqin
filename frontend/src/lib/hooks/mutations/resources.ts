@@ -1,7 +1,7 @@
 import { createResource, deleteResource, updateResource } from "@/lib/api/queries/resources";
+import { toast } from "@/lib/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export const useCreateResource = () => {
   const queryClient = useQueryClient();

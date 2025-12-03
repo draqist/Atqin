@@ -367,6 +367,7 @@ export default function StudyPage({
   // --- DESKTOP VIEW ---
   return (
     <div className="h-[calc(100vh-112px)] flex flex-col bg-[#F8F9FA]">
+      <BookJsonLd book={bookData} />
       {/* 1. CLEANER HEADER (Floating Style) */}
       <header className="h-16 px-6 flex items-center justify-between bg-white/80 backdrop-blur-sm border-b border-slate-200/60 z-10 sticky top-0">
         {/* Left: Navigation */}
@@ -553,4 +554,28 @@ export default function StudyPage({
       </div>
     </div>
   );
+}
+
+import { BookJsonLd } from "@/components/seo/json-ld";
+import { fetchBookById } from "@/lib/api/queries/books";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { bookId: string };
+}): Promise<Metadata> {
+  const book = await fetchBookById(params.bookId); // Reuse your API fetcher
+
+  if (!book) return { title: "Book Not Found" };
+
+  return {
+    title: `${book.title} - Read & Memorize Online`,
+    description:
+      book.description?.slice(0, 160) ||
+      `Study ${book.title} by ${book.original_author} on Iqraa.`,
+    openGraph: {
+      images: [book.cover_image_url || "/default-cover.jpg"],
+    },
+  };
 }

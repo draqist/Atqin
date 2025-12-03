@@ -9,8 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "@/lib/toast";
 import { Facebook, Link as LinkIcon, Share2, Twitter } from "lucide-react";
-import { toast } from "sonner";
 
 interface ShareMenuProps {
   bookId: string;

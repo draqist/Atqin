@@ -74,6 +74,7 @@ func (app *application) getRoadmapHandler(w http.ResponseWriter, r *http.Request
 }
 
 // POST /v1/roadmaps/{node_id}/progress (Protected)
+// POST /v1/roadmaps/{node_id}/progress (Protected)
 func (app *application) updateRoadmapProgressHandler(w http.ResponseWriter, r *http.Request) {
 	nodeID := r.PathValue("node_id")
 	userID := r.Context().Value(UserContextKey).(string) // Safe because protected route
@@ -84,6 +85,28 @@ func (app *application) updateRoadmapProgressHandler(w http.ResponseWriter, r *h
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		app.errorResponse(w, http.StatusBadRequest, "Invalid input")
 		return
+	}
+
+	// RULE: To complete a book, you must have published a reflection
+	if input.Status == "completed" {
+		// 1. Get Book ID from Node ID
+		bookID, err := app.models.Roadmaps.GetNodeBookID(nodeID)
+		if err != nil {
+			app.errorResponse(w, http.StatusNotFound, "Node not found")
+			return
+		}
+
+		// 2. Check for published note
+		hasNote, err := app.models.Notes.HasPublishedNote(userID, bookID)
+		if err != nil {
+			app.errorResponse(w, http.StatusInternalServerError, "Failed to verify reflection")
+			return
+		}
+
+		if !hasNote {
+			app.errorResponse(w, http.StatusForbidden, "You must publish a reflection for this book before marking it as complete.")
+			return
+		}
 	}
 
 	err := app.models.Roadmaps.UpdateProgress(userID, nodeID, input.Status)

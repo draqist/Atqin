@@ -405,3 +405,18 @@ func (m RoadmapModel) BatchUpdateNodes(updates []struct {
 
 	return tx.Commit()
 }
+
+// GetNodeBookID fetches the book_id associated with a roadmap node
+func (m RoadmapModel) GetNodeBookID(nodeID string) (string, error) {
+	query := `SELECT book_id FROM roadmap_nodes WHERE id = $1`
+	
+	var bookID string
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, nodeID).Scan(&bookID)
+	if err != nil {
+		return "", err
+	}
+	return bookID, nil
+}

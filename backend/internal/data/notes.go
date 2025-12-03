@@ -292,3 +292,15 @@ func (m NoteModel) GetPublicByID(noteID string) (*GlobalNote, error) {
 
 	return &n, nil
 }
+
+// HasPublishedNote checks if a user has published a note for a specific book
+func (m NoteModel) HasPublishedNote(userID, bookID string) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM notes WHERE user_id = $1 AND book_id = $2 AND is_published = TRUE)`
+	
+	var exists bool
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, userID, bookID).Scan(&exists)
+	return exists, err
+}

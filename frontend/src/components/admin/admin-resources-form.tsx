@@ -26,13 +26,13 @@ import {
   useUpdateResource,
 } from "@/lib/hooks/mutations/resources";
 import { useBooks } from "@/lib/hooks/queries/books";
+import { toast } from "@/lib/toast";
 import { Resource } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GripVertical, ListVideo, Loader2, Plus, Trash2 } from "lucide-react"; // New Icons
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Resolver, useFieldArray, useForm } from "react-hook-form"; // Import useFieldArray
-import { toast } from "sonner";
 import * as z from "zod";
 import { FileUpload } from "./admin-file-upload";
 import { YouTubePicker } from "./youtube-picker";

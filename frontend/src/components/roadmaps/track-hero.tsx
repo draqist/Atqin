@@ -1,11 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "@/lib/toast";
 import { Roadmap } from "@/lib/types";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, Clock, Share2, Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 interface TrackHeroProps {
   roadmap: Roadmap;

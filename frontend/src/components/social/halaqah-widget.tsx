@@ -9,8 +9,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "@/lib/toast";
 import { ArrowRight, BellRing, Users } from "lucide-react";
-import { toast } from "sonner";
 
 // Mock Data
 const cohortMembers = [

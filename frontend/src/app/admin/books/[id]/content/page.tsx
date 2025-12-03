@@ -11,10 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import api from "@/lib/axios";
 import { useBook } from "@/lib/hooks/queries/books";
 import { useBookResources } from "@/lib/hooks/queries/resources";
+import { toast } from "@/lib/toast";
 import { ArrowLeft, Loader2, Save, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
-import { toast } from "sonner";
 
 export default function ContentEditorPage({
   params,

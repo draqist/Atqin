@@ -3,8 +3,8 @@ import { RoadmapInput } from "@/lib/api/queries/roadmaps";
 import { RoadmapNodeInput } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export const useCreateRoadmap = () => {
   const queryClient = useQueryClient();

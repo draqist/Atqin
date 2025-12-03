@@ -1,6 +1,6 @@
 import { joinCohort } from "@/lib/api/mutations/social";
+import { toast } from "@/lib/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 export const useJoinCohort = (roadmapId: string) => {
   const queryClient = useQueryClient();

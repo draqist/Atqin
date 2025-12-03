@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
+import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, FileText, Loader2, UploadCloud, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 
 interface FileUploadProps {
   value: string; // Current URL

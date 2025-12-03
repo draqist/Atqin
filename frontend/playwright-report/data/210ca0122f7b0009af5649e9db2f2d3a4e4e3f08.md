@@ -1,0 +1,48 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - link "Iqraa Logo" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "Iqraa Logo" [ref=e6]
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - heading "Create an account" [level=1] [ref=e9]
+          - paragraph [ref=e10]: Join the community of students.
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - generic [ref=e13]: Full Name
+            - textbox "Full Name" [ref=e14]:
+              - /placeholder: Ibn Khaldun
+              - text: Test User 1764752118258
+          - generic [ref=e15]:
+            - generic [ref=e16]: Username
+            - textbox "Username" [ref=e17]:
+              - /placeholder: ibnkhaldun
+              - text: user1764752118258
+          - generic [ref=e18]:
+            - generic [ref=e19]: Email
+            - textbox "Email" [active] [ref=e20]:
+              - /placeholder: name@example.com
+              - text: user1764752118258@example.com
+          - generic [ref=e21]:
+            - generic [ref=e22]: Password
+            - generic [ref=e23]:
+              - textbox "••••••••" [ref=e24]
+              - button [ref=e25]:
+                - img
+          - button "Create Account" [ref=e26]
+        - generic [ref=e27]:
+          - text: Already have an account?
+          - link "Log in" [ref=e28] [cursor=pointer]:
+            - /url: /login
+    - blockquote [ref=e32]:
+      - paragraph [ref=e33]: "\"The seeking of knowledge is obligatory for every Muslim.\""
+      - contentinfo [ref=e34]: — Prophet Muhammad ﷺ
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e40] [cursor=pointer]:
+    - img [ref=e41]
+  - alert [ref=e44]
+```

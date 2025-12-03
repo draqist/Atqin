@@ -1,16 +1,11 @@
 "use client";
 
 import { AppStore, makeStore } from "@/lib/store";
-import {
-  MutationCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { Provider } from "react-redux";
 import { persistStore } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
-import { toast } from "sonner";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   // 1. TanStack Query Client
@@ -18,25 +13,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     () =>
       new QueryClient({
         defaultOptions: { queries: { staleTime: 60 * 5 * 1000 } },
-        // queryCache: new QueryCache({
-        //   onError: (error) => {
-        //     if (error.message === "Failed to fetch") {
-        //       console.log(error);
-        //       toast.error("Something went wrong: Network error");
-        //     } else {
-        //       toast.error(`Something went wrong: ${error.message}`);
-        //     }
-        //   },
-        // }),
-        mutationCache: new MutationCache({
-          onError: (error) => {
-            if (error.message === "Failed to fetch") {
-              toast.error("Something went wrong: Network error");
-            } else {
-              toast.error(`Something went wrong: ${error.message}`);
-            }
-          },
-        }),
       })
   );
 

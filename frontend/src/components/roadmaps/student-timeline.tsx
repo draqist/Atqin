@@ -3,11 +3,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import api from "@/lib/axios";
 import { useUser } from "@/lib/hooks/queries/auth";
+import { toast } from "@/lib/toast";
 import { StudentNode } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Check, Lock, Star } from "lucide-react";
+import { ArrowRight, BookOpen, Check, Loader2, Lock, Star } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { SignupPrompt } from "../auth/signup-prompts";
@@ -19,10 +22,38 @@ interface StudentTimelineProps {
 export function StudentTimeline({ nodes }: StudentTimelineProps) {
   const activeIndex = nodes.findIndex((n) => n.status === "active") ?? 0;
   const { data: user } = useUser();
+  const queryClient = useQueryClient();
+
   // Safety check: if -1 (not found), default to 0
   const initialId = nodes[activeIndex === -1 ? 0 : activeIndex]?.id;
 
   const [expandedId, setExpandedId] = useState<string | null>(initialId);
+
+  const { mutate: completeNode, isPending } = useMutation({
+    mutationFn: async (nodeId: string) => {
+      await api.post(`/roadmaps/nodes/${nodeId}/progress`, {
+        status: "completed",
+      });
+    },
+    onSuccess: () => {
+      toast.success("Book completed! Next step unlocked.");
+      queryClient.invalidateQueries({ queryKey: ["roadmap"] });
+    },
+    onError: (error: any) => {
+      if (error.response?.status === 403) {
+        toast.error("Reflection Required", {
+          description:
+            "You must publish a reflection for this book before marking it as complete.",
+        });
+      } else {
+        toast.error("Failed to update progress");
+      }
+    },
+  });
+
+  const handleComplete = (nodeId: string) => {
+    completeNode(nodeId);
+  };
 
   return (
     <div className="relative w-full max-w-7xl mx-auto pb-40 pt-5 md:pt-12 px-4 md:px-0">
@@ -116,7 +147,7 @@ export function StudentTimeline({ nodes }: StudentTimelineProps) {
                         {node.description ||
                           "Master the core concepts of this text."}
                       </p>
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 flex-col sm:flex-row">
                         <Link
                           href={`/library/${node.bookId}`}
                           className="flex-1"
@@ -125,21 +156,42 @@ export function StudentTimeline({ nodes }: StudentTimelineProps) {
                             <BookOpen className="w-4 h-4" /> Read
                           </Button>
                         </Link>
+
                         {user ? (
-                          <Link
-                            href={`/hifdh/${node.bookId}`}
-                            className="flex-1"
-                          >
-                            <Button
-                              className={cn(
-                                "w-full gap-2 text-white",
-                                isCompleted ? "bg-emerald-600" : "bg-slate-900"
-                              )}
-                            >
-                              {isCompleted ? "Review" : "Memorize"}{" "}
-                              <ArrowRight className="w-4 h-4" />
-                            </Button>
-                          </Link>
+                          <>
+                            {/* ACTION BUTTON: If active, show Complete. If completed, show Review */}
+                            {isActive ? (
+                              <Button
+                                onClick={() => handleComplete(node.id)}
+                                disabled={isPending}
+                                className="flex-1 w-full gap-2 bg-slate-900 text-white hover:bg-slate-800"
+                              >
+                                {isPending ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Check className="w-4 h-4" />
+                                )}
+                                Mark Complete
+                              </Button>
+                            ) : (
+                              <Link
+                                href={`/hifdh/${node.bookId}`}
+                                className="flex-1"
+                              >
+                                <Button
+                                  className={cn(
+                                    "w-full gap-2 text-white",
+                                    isCompleted
+                                      ? "bg-emerald-600 hover:bg-emerald-700"
+                                      : "bg-slate-900"
+                                  )}
+                                >
+                                  {isCompleted ? "Review" : "Memorize"}{" "}
+                                  <ArrowRight className="w-4 h-4" />
+                                </Button>
+                              </Link>
+                            )}
+                          </>
                         ) : (
                           <SignupPrompt>
                             <Button className="flex-1 w-full gap-2 text-white bg-slate-900 hover:bg-slate-800">

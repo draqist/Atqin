@@ -48,6 +48,32 @@ export const metadata: Metadata = {
   title: "Iqraa | The Digital Majlis for Students of Knowledge",
   description:
     "Master the Mutuun. A unified platform to read, listen, and memorize classical Islamic texts and Mutuuns with AI-powered correction and structured roadmaps.",
+  keywords: [
+    "Islamic Studies",
+    "Hifdh App",
+    "Mutuun",
+    "Qira'at",
+    "Tajweed",
+    "Online Madrasah",
+    "Fiqh",
+    "Islamic Learning",
+    "E-Learning",
+  ],
+  authors: [{ name: "Iqraa Platform" }],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "SYSVVS4j6QolJ7t0CzAHx1Z0lNV6Dkq2zFDnGFPUWzs",
+  },
 };
 
 export default function RootLayout({

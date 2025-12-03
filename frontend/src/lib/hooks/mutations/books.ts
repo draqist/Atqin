@@ -1,8 +1,8 @@
 import { createBook, CreateBookPayload, deleteBook, updateBook } from "@/lib/api/mutations/books";
+import { toast } from "@/lib/toast";
 import { Book } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export const useCreateBook = () => {
   const queryClient = useQueryClient();

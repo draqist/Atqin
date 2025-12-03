@@ -1,6 +1,6 @@
 import api from "@/lib/axios";
+import { toast } from "@/lib/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 export interface Partner {
   id: string;

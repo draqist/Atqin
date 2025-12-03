@@ -117,8 +117,7 @@ export default function RoadmapsPage() {
                 <Route className="w-6 h-6 text-slate-400" /> Available Tracks
               </h2>
 
-              <div className="flex items-center gap-2">
-                {/* Category Filter */}
+              {/* <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-2 h-9">
@@ -146,8 +145,6 @@ export default function RoadmapsPage() {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-
-                {/* Level Filter */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-2 h-9">
@@ -186,7 +183,7 @@ export default function RoadmapsPage() {
                     Reset
                   </Button>
                 )}
-              </div>
+              </div> */}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">

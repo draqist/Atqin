@@ -1,8 +1,8 @@
 import api from "@/lib/axios";
+import { toast } from "@/lib/toast"; // Assuming you have sonner or use generic alert
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { toast } from "sonner"; // Assuming you have sonner or use generic alert
 
 // Types matching your Go Backend response
 interface AuthResponse {

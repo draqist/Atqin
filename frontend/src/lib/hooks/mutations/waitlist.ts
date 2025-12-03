@@ -1,6 +1,6 @@
 import { joinWaitlist } from "@/lib/api/mutations/waitlist";
+import { toast } from "@/lib/toast";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 export const useJoinWaitlist = () => {
   return useMutation({

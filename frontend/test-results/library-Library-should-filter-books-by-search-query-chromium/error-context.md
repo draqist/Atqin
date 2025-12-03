@@ -1,0 +1,70 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - link "iqraa_logo" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img "iqraa_logo" [ref=e7]
+      - generic [ref=e9]:
+        - heading "Menu" [level=3] [ref=e10]
+        - navigation [ref=e11]:
+          - link "Dashboard" [ref=e12] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e13]:
+              - img [ref=e14]
+              - generic [ref=e19]: Dashboard
+          - link "Library" [ref=e20] [cursor=pointer]:
+            - /url: /library
+            - generic [ref=e21]:
+              - img [ref=e22]
+              - generic [ref=e24]: Library
+          - link "Reflections" [ref=e25] [cursor=pointer]:
+            - /url: /reflections
+            - generic [ref=e26]:
+              - img [ref=e27]
+              - generic [ref=e31]: Reflections
+          - link "My Hifdh" [ref=e32] [cursor=pointer]:
+            - /url: /hifdh
+            - generic [ref=e33]:
+              - img [ref=e34]
+              - generic [ref=e37]: My Hifdh
+          - link "Roadmaps" [ref=e38] [cursor=pointer]:
+            - /url: /roadmaps
+            - generic [ref=e39]:
+              - img [ref=e40]
+              - generic [ref=e42]: Roadmaps
+          - link "Bookmarks" [ref=e43] [cursor=pointer]:
+            - /url: /bookmarks
+            - generic [ref=e44]:
+              - img [ref=e45]
+              - generic [ref=e47]: Bookmarks
+      - button "G Guest Student Sign in to save" [ref=e49]:
+        - generic [ref=e51]: G
+        - generic [ref=e52]:
+          - generic [ref=e53]: Guest Student
+          - generic [ref=e54]: Sign in to save
+        - img [ref=e55]
+    - generic [ref=e58]:
+      - banner [ref=e59]:
+        - generic [ref=e61]: Library
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - img [ref=e64] [cursor=pointer]
+            - textbox "Search books, authors, or topics... (Enter)" [ref=e67]
+          - button [ref=e68]:
+            - img
+      - main [ref=e69]:
+        - generic [ref=e70]:
+          - img [ref=e72]
+          - heading "Connection Interrupted" [level=3] [ref=e74]
+          - paragraph [ref=e75]: We couldn't fetch the library data. This might be a temporary network issue or the server is resting.
+          - button "Try Again" [ref=e76]:
+            - img
+            - text: Try Again
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e82] [cursor=pointer]:
+    - img [ref=e83]
+  - alert [ref=e86]
+```

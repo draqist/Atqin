@@ -1,6 +1,6 @@
 import { saveBookDraft } from "@/lib/api/queries/notes";
+import { toast } from "@/lib/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 // Mutation: Save the note
 export const useSaveNote = () => {
