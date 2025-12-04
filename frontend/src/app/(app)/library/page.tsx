@@ -76,6 +76,9 @@ export default function LibraryPage() {
         // Level Filter
         if (currentLevel && meta?.level !== currentLevel) return false;
 
+        // Resource Count Filter (Hide empty books)
+        if ((book.resource_count || 0) === 0) return false;
+
         return true;
       })
       .sort((a, b) => {
