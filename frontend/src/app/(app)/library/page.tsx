@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/use-debounce-value";
 import { useInView } from "@/hooks/use-in-view";
 import { useBooks } from "@/lib/hooks/queries/books";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, RefreshCw, Search, SearchX } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -207,19 +207,25 @@ export default function LibraryPage() {
 
         {filteredBooks.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredBooks.map((book, index) => (
-                <motion.div
-                  key={book.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                  layout
-                >
-                  <LibraryBookCard book={book} />
-                </motion.div>
-              ))}
-            </div>
+            <motion.div
+              layout
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredBooks.map((book, index) => (
+                  <motion.div
+                    key={book.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <LibraryBookCard book={book} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
             {/* Infinite Scroll Trigger & Skeletons */}
             <div ref={ref} className="mt-8">
               {isFetchingNextPage && (
