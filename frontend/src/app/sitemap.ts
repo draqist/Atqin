@@ -1,5 +1,6 @@
 import { fetchBooks } from '@/lib/api/queries/books';
 import { fetchRoadmaps } from '@/lib/api/queries/roadmaps';
+import { Book, Roadmap } from '@/lib/types';
 import { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -7,8 +8,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 1. Fetch all dynamic data
   // (Ensure these API calls are cached or fast)
-  const books = await fetchBooks();
-  const roadmaps = await fetchRoadmaps();
+  // 1. Fetch all dynamic data
+  // (Ensure these API calls are cached or fast)
+  let books: { books: Book[]; metadata: any } = { books: [], metadata: {} };
+  let roadmaps: Roadmap[] = [];
+
+  try {
+    books = await fetchBooks();
+    roadmaps = await fetchRoadmaps();
+  } catch (error) {
+    console.warn('Failed to fetch dynamic data for sitemap:', error);
+    // Proceed with empty arrays if fetch fails (e.g. during build without backend)
+  }
 
   // 2. Map Books
   const bookUrls = (books?.books || []).map((book) => ({
