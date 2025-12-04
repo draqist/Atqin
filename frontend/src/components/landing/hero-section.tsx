@@ -1,17 +1,40 @@
-import { useBooks } from "@/lib/hooks/queries/books";
-import { motion } from "framer-motion";
-import { ArrowRight, Library, Mic } from "lucide-react";
+import { usePublicStats } from "@/lib/hooks/queries/stats";
+import { animate, motion } from "framer-motion";
+import { ArrowRight, Layers, Library } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { Button } from "../ui/button";
 import { WordRotator } from "./WordRotator";
+
+const Counter = ({ value }: { value: number }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    const controls = animate(0, value, {
+      duration: 2.5,
+      ease: "easeOut",
+      onUpdate(v) {
+        node.textContent = Math.round(v).toLocaleString();
+      },
+    });
+
+    return () => controls.stop();
+  }, [value]);
+
+  return <span ref={ref}>0</span>;
+};
 
 /**
  * The main Hero section of the landing page.
  * Features the main value proposition, dynamic text, and stats.
  */
 const HeroSection = () => {
-  const { data: books } = useBooks();
-  const totalBooks = books?.pages.flatMap((page) => page.books).length || 0;
+  const { data: stats } = usePublicStats();
+  const totalBooks = stats?.total_books || 0;
+  const totalResources = stats?.total_resources || 0;
   return (
     <section className="pt-32 pb-20 px-6 w-full">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[550px]">
@@ -99,7 +122,7 @@ const HeroSection = () => {
 
           {/* BOTTOM ROW: Two Vertical Cards (Side by Side) */}
           <div className="flex-1 grid grid-cols-2 gap-6">
-            {/* CARD 1: AI Tasm'i (Vertical) */}
+            {/* CARD 1: Resources (Vertical) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -107,22 +130,18 @@ const HeroSection = () => {
               className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden"
             >
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-4">
-                <Mic className="w-6 h-6" />
+                <Layers className="w-6 h-6" />
               </div>
               <div>
-                <div className="font-bold text-slate-900 text-lg leading-tight mb-1">
-                  AI Tasm'i
+                <div className="font-bold text-slate-900 text-3xl leading-tight mb-1">
+                  <Counter value={totalResources} />+
                 </div>
-                <div className="text-slate-500 text-xs">
-                  Real-time correction helper
+                <div className="text-slate-500 text-xs font-medium">
+                  Curated Resources
                 </div>
-              </div>
-              {/* Vertical Waveform visual at bottom */}
-              <div className="flex gap-1 items-end h-6 mt-2">
-                <div className="w-1.5 h-3 bg-slate-100 rounded-t-sm" />
-                <div className="w-1.5 h-5 bg-blue-200 rounded-t-sm animate-pulse" />
-                <div className="w-1.5 h-full bg-blue-400 rounded-t-sm" />
-                <div className="w-1.5 h-4 bg-slate-100 rounded-t-sm" />
+                <p className="text-slate-400/60 text-[10px] mt-2 leading-tight">
+                  Over 30 pdfs, 50 videos, 100 playlists.
+                </p>
               </div>
             </motion.div>
 
@@ -139,8 +158,8 @@ const HeroSection = () => {
                 <div className="w-12 h-12 bg-emerald-800/50 rounded-2xl flex items-center justify-center text-emerald-300 mb-4 border border-emerald-700">
                   <Library className="w-6 h-6" />
                 </div>
-                <div className="text-3xl font-bold text-white mb-1">
-                  {totalBooks}
+                <div className="text-3xl font-bold text-white mb-1 mt-7">
+                  <Counter value={totalBooks} />
                 </div>
                 <div className="text-emerald-200 text-xs font-medium">
                   Verified Works

@@ -91,7 +91,7 @@ export function Navbar() {
 
         {/* NAVIGATION MENU (CENTER) */}
         <NavigationMenu className="hidden md:flex">
-          <NavigationMenuList>
+          <NavigationMenuList className="flex-1 gap-6">
             {/* MENU 1: THE LIBRARY (Mega Menu) */}
             <NavigationMenuItem>
               <NavigationMenuTrigger className="bg-transparent text-slate-600 hover:text-emerald-700 focus:bg-emerald-50">
@@ -132,30 +132,19 @@ export function Navbar() {
               </NavigationMenuContent>
             </NavigationMenuItem>
 
-            {/* MENU 2: FEATURES */}
-            {/* <NavigationMenuItem>
-              <NavigationMenuTrigger className="bg-transparent text-slate-600 hover:text-emerald-700 focus:bg-emerald-50">
-                Features
-              </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid w-[400px] gap-3 p-0 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                  {features.map((component) => (
-                    <ListItem
-                      key={component.title}
-                      title={component.title}
-                      href={component.href}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <component.icon className="w-4 h-4 text-emerald-600" />
-                        {component.description}
-                      </div>
-                    </ListItem>
-                  ))}
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem> */}
-
             {/* MENU 3: SIMPLE LINKS */}
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                asChild
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "bg-transparent text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/50"
+                )}
+              >
+                <Link href="/about">About</Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
             <NavigationMenuItem>
               <NavigationMenuLink
                 className={cn(
@@ -164,10 +153,10 @@ export function Navbar() {
                 )}
                 asChild
               >
-                <Link href="/roadmaps">Roadmaps</Link>
+                <Link href="/roadmap">Roadmaps</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
-            <NavigationMenuItem>
+            {/* <NavigationMenuItem>
               <NavigationMenuLink
                 className={cn(
                   navigationMenuTriggerStyle(),
@@ -177,7 +166,7 @@ export function Navbar() {
               >
                 <Link href="#">Pricing</Link>
               </NavigationMenuLink>
-            </NavigationMenuItem>
+            </NavigationMenuItem> */}
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -191,7 +180,7 @@ export function Navbar() {
           </Link>
           <Link href="/library">
             <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-full px-6">
-              Get Started
+              Start Learning
             </Button>
           </Link>
         </div>

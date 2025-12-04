@@ -1,6 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Globe } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,19 +29,19 @@ const footerColumns = [
       { label: "Family Plan", href: "#" },
     ],
   },
-  {
-    title: "Company",
-    links: [
-      { label: "Blog", href: "#" },
-      { label: "Careers", href: "#" },
-      { label: "Scholarship", href: "#" },
-    ],
-  },
+  // {
+  //   title: "Company",
+  //   links: [
+  //     { label: "Blog", href: "#" },
+  //     { label: "Careers", href: "#" },
+  //     { label: "Scholarship", href: "#" },
+  //   ],
+  // },
   {
     title: "Support",
     links: [
-      { label: "Support Center", href: "#" },
-      { label: "Feature Requests", href: "#" },
+      { label: "Support Center", href: "/support" },
+      { label: "Feature Requests", href: "/features" },
     ],
   },
   {
@@ -80,21 +86,28 @@ export function Footer() {
 
             {/* Social Icons */}
             <div className="flex items-center gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.name}
-                  href={social.href}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"
-                  aria-label={social.name}
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
+              <TooltipProvider>
+                {socialLinks.map((social) => (
+                  <Tooltip key={social.name}>
+                    <TooltipTrigger asChild>
+                      <span
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"
+                        aria-label={social.name}
+                      >
+                        <social.icon className="w-5 h-5" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-white">
+                      <p>Coming Soon</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </TooltipProvider>
             </div>
           </div>
 
           {/* 2. Links Columns (Right) */}
-          <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-3 gap-8">
             {footerColumns.map((col) => (
               <div key={col.title}>
                 <h4 className="font-bold text-slate-900 mb-6 text-sm uppercase tracking-wider">
@@ -126,13 +139,13 @@ export function Footer() {
 
           <div className="flex flex-wrap items-center justify-center gap-6">
             <Link
-              href="/privacy"
+              href="#"
               className="text-sm text-slate-500 hover:text-slate-900"
             >
               Privacy Policy
             </Link>
             <Link
-              href="/terms"
+              href="#"
               className="text-sm text-slate-500 hover:text-slate-900"
             >
               Terms of Service

@@ -16,3 +16,24 @@ export const useAdminStats = () => {
     },
   });
 };
+
+export interface PublicStats {
+  total_books: number;
+  total_resources: number;
+  total_students: number;
+}
+
+/**
+ * Hook to fetch public statistics for the landing page.
+ *
+ * @returns {UseQueryResult<PublicStats>} The query result containing public stats.
+ */
+export const usePublicStats = () => {
+  return useQuery({
+    queryKey: ["public", "stats"],
+    queryFn: async () => {
+      const { data } = await api.get<PublicStats>("/public/stats");
+      return data;
+    },
+  });
+};

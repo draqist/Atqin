@@ -38,6 +38,9 @@ func (app *application) routes() http.Handler {
 	// Waitlist
 	mux.HandleFunc("POST /v1/waitlist", app.subscribeHandler)
 
+	// Public Stats
+	mux.HandleFunc("GET /v1/public/stats", app.getPublicStatsHandler)
+
 	// --- PROTECTED ROUTES (Authenticated Users) ---
 
 	// Notes
@@ -104,6 +107,12 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("GET /v1/tools/youtube-search", app.requireAuth(app.requireAdmin(app.searchYouTubePlaylistsHandler)))
 	mux.HandleFunc("GET /v1/admin/stats", app.requireAuth(app.requireAdmin(app.getSystemStatsHandler)))
 	mux.HandleFunc("POST /v1/admin/tools/extract-pdf", app.requireAuth(app.requireAdmin(app.extractPdfContentHandler)))
+	mux.HandleFunc("PATCH /v1/features/{id}/status", app.requireAuth(app.requireAdmin(app.updateFeatureStatusHandler)))
+
+	// Feature Requests
+	mux.HandleFunc("GET /v1/features", app.listFeatureRequestsHandler)
+	mux.HandleFunc("POST /v1/features", app.requireAuth(app.createFeatureRequestHandler))
+	mux.HandleFunc("POST /v1/features/{id}/vote", app.requireAuth(app.voteFeatureRequestHandler))
 
 	return app.enableCORS(mux)
 }

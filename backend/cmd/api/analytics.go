@@ -62,3 +62,17 @@ func (app *application) getSystemStatsHandler(w http.ResponseWriter, r *http.Req
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(stats)
 }
+
+// getPublicStatsHandler retrieves public statistics for the landing page.
+// GET /v1/public/stats
+func (app *application) getPublicStatsHandler(w http.ResponseWriter, r *http.Request) {
+	stats, err := app.models.Analytics.GetSystemStats()
+	if err != nil {
+		app.logger.Println(err)
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to fetch public stats")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(stats)
+}
