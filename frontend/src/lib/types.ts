@@ -182,6 +182,9 @@ export interface AdminDashboardData {
     total_books: number;
     total_resources: number;
     total_students: number;
+    books_this_week: number;
+    resources_this_week: number;
+    students_growth_pct: number;
   };
   recent_resources: Resource[];
   recent_users: User[];

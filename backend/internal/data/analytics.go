@@ -25,9 +25,12 @@ type BookProgress struct {
 
 // AdminStats aggregates high-level statistics for the admin dashboard.
 type AdminStats struct {
-	TotalBooks     int `json:"total_books"`
-	TotalResources int `json:"total_resources"`
-	TotalStudents  int `json:"total_students"`
+	TotalBooks        int `json:"total_books"`
+	TotalResources    int `json:"total_resources"`
+	TotalStudents     int `json:"total_students"`
+	BooksThisWeek     int `json:"books_this_week"`
+	ResourcesThisWeek int `json:"resources_this_week"`
+	StudentsGrowthPct int `json:"students_growth_pct"`
 }
 
 // AdminDashboardData contains all data required for the admin dashboard view.
@@ -195,12 +198,25 @@ func (m AnalyticsModel) GetDashboardData() (*AdminDashboardData, error) {
 		SELECT 
 			(SELECT COUNT(*) FROM books),
 			(SELECT COUNT(*) FROM resources),
-			(SELECT COUNT(*) FROM users WHERE role = 'student')`
+			(SELECT COUNT(*) FROM users WHERE role = 'student'),
+			(SELECT COUNT(*) FROM books WHERE created_at > NOW() - INTERVAL '7 days'),
+			(SELECT COUNT(*) FROM resources WHERE created_at > NOW() - INTERVAL '7 days'),
+			(
+				SELECT CASE 
+					WHEN (SELECT COUNT(*) FROM users WHERE role = 'student' AND created_at < NOW() - INTERVAL '30 days') = 0 THEN 100
+					ELSE (
+						(SELECT COUNT(*) FROM users WHERE role = 'student') - (SELECT COUNT(*) FROM users WHERE role = 'student' AND created_at < NOW() - INTERVAL '30 days')
+					) * 100 / (SELECT COUNT(*) FROM users WHERE role = 'student' AND created_at < NOW() - INTERVAL '30 days')
+				END
+			)`
 
 	err := m.DB.QueryRowContext(ctx, queryTotals).Scan(
 		&data.Stats.TotalBooks,
 		&data.Stats.TotalResources,
 		&data.Stats.TotalStudents,
+		&data.Stats.BooksThisWeek,
+		&data.Stats.ResourcesThisWeek,
+		&data.Stats.StudentsGrowthPct,
 	)
 	if err != nil {
 		return nil, err

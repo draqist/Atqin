@@ -35,7 +35,7 @@ export default function AdminDashboard() {
           title="Total Books"
           value={data?.stats.total_books}
           icon={BookOpen}
-          trend="+2 this week"
+          trend={`+${data?.stats.books_this_week || 0} this week`}
           color="text-blue-600"
           bg="bg-blue-50"
         />
@@ -43,7 +43,7 @@ export default function AdminDashboard() {
           title="Total Resources"
           value={data?.stats.total_resources}
           icon={FileText}
-          trend="+12 this week"
+          trend={`+${data?.stats.resources_this_week || 0} this week`}
           color="text-emerald-600"
           bg="bg-emerald-50"
         />
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
           title="Active Students"
           value={data?.stats.total_students}
           icon={Users}
-          trend="+5% growth"
+          trend={`+${data?.stats.students_growth_pct || 0}% growth`}
           color="text-purple-600"
           bg="bg-purple-50"
         />
