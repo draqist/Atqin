@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const roadmaps = await fetchRoadmaps();
 
   // 2. Map Books
-  const bookUrls = books.books.map((book) => ({
+  const bookUrls = (books?.books || []).map((book) => ({
     url: `${baseUrl}/library/${book.id}`,
     lastModified: new Date(book.created_at),
     changeFrequency: 'monthly' as const,
@@ -19,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // 3. Map Roadmaps
-  const roadmapUrls = roadmaps.map((map) => ({
+  const roadmapUrls = (roadmaps || []).map((map) => ({
     url: `${baseUrl}/roadmaps/${map.slug}`,
     lastModified: new Date(map.created_at),
     changeFrequency: 'weekly' as const, // Roadmaps update more often
