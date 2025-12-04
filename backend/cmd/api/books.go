@@ -87,15 +87,14 @@ func (app *application) listBooksHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	books, _, err := app.models.Books.GetAll(input.Title, input.Filters)
+	books, metadata, err := app.models.Books.GetAll(input.Title, input.Filters)
 	if err != nil {
 		app.logger.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(books)
+	app.writeJSON(w, http.StatusOK, envelope{"books": books, "metadata": metadata}, nil)
 }
 
 // updateBookHandler updates an existing book's details.

@@ -1,7 +1,7 @@
 import { fetchGlobalReflections, ReflectionFilters } from "@/lib/api/queries/reflections";
 import api from "@/lib/axios";
 import { GlobalReflection } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 /**
  * Hook to fetch global reflections based on filters.
@@ -10,10 +10,17 @@ import { useQuery } from "@tanstack/react-query";
  * @returns {UseQueryResult<GlobalReflection[]>} The query result containing global reflections.
  */
 export const useGlobalReflections = (filters?: ReflectionFilters) => {
-  return useQuery({
+  return useInfiniteQuery({
     // Include filters in the query key so it refetches automatically!
     queryKey: ["reflections", "global", filters],
-    queryFn: () => fetchGlobalReflections(filters),
+    queryFn: ({ pageParam = 1 }) => fetchGlobalReflections(filters, pageParam as number),
+    getNextPageParam: (lastPage) => {
+      if (lastPage.metadata.current_page < lastPage.metadata.last_page) {
+        return lastPage.metadata.current_page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
     staleTime: 1000 * 60 * 5,
   });
 };

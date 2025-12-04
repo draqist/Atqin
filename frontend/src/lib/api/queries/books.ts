@@ -7,10 +7,23 @@ import { Book } from '@/lib/types';
  * @param {string} [searchQuery] - The search query to filter books.
  * @returns {Promise<Book[]>} A promise that resolves to an array of books.
  */
-export const fetchBooks = async (searchQuery?: string): Promise<Book[]> => {
-  const response = await api.get<Book[]>('/books', {
+export interface PaginatedResponse<T> {
+  metadata: {
+    current_page: number;
+    page_size: number;
+    first_page: number;
+    last_page: number;
+    total_records: number;
+  };
+  [key: string]: any; // To allow dynamic keys like "books", "notes" etc.
+}
+
+export const fetchBooks = async (searchQuery?: string, pageParam = 1, pageSize = 24): Promise<{ books: Book[]; metadata: any }> => {
+  const response = await api.get<{ books: Book[]; metadata: any }>('/books', {
     params: {
       q: searchQuery,
+      page: pageParam,
+      page_size: pageSize,
     },
   });
   return response.data;

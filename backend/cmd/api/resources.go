@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/draqist/iqraa/backend/internal/data"
+	"github.com/draqist/iqraa/backend/internal/validator"
 	"github.com/draqist/iqraa/backend/internal/youtube"
 )
 
@@ -97,13 +98,35 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 // listAllResourcesHandler retrieves all resources for the admin dashboard.
 // GET /v1/resources
 func (app *application) listAllResourcesHandler(w http.ResponseWriter, r *http.Request) {
-	resources, err := app.models.Resources.GetAll()
+	var input struct {
+		data.Filters
+	}
+
+	v := validator.New()
+	qs := r.URL.Query()
+
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+	input.Filters.SortSafeList = []string{"id", "created_at"}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	resources, metadata, err := app.models.Resources.GetAll(input.Filters)
 	if err != nil {
 		app.errorResponse(w, http.StatusInternalServerError, "Failed to fetch resources")
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resources)
+	// We should probably return metadata too, but for now let's just return resources to match previous behavior if frontend expects array
+	// Actually, admin dashboard usually expects metadata for pagination.
+	// Let's wrap it in an envelope or just return resources if that's what it expects, but the request was for pagination.
+	// Assuming standard envelope response for paginated data:
+	app.writeJSON(w, http.StatusOK, envelope{"resources": resources, "metadata": metadata}, nil)
 }
 
 // deleteResourceHandler removes a resource from the database.

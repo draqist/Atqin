@@ -196,13 +196,14 @@ type GlobalNote struct {
 type NoteFilters struct {
 	Category string
 	Search   string
+	Filters
 }
 
 // GetAllPublished fetches a paginated list of published notes from all users.
 // It supports filtering by category and searching by book title or author name.
-func (m NoteModel) GetAllPublished(filters NoteFilters) ([]*GlobalNote, error) {
+func (m NoteModel) GetAllPublished(filters NoteFilters) ([]*GlobalNote, Metadata, error) {
 	query := `
-		SELECT n.id, n.title, n.description, u.name, b.title, b.id, n.created_at
+		SELECT count(*) OVER(), n.id, n.title, n.description, u.name, b.title, b.id, n.created_at
 		FROM notes n
 		JOIN users u ON n.user_id = u.id
 		JOIN books b ON n.book_id = b.id
@@ -210,24 +211,25 @@ func (m NoteModel) GetAllPublished(filters NoteFilters) ([]*GlobalNote, error) {
 		AND ($1 = '' OR b.metadata->>'category' = $1)
 		AND ($2 = '' OR (b.title ILIKE '%' || $2 || '%' OR u.name ILIKE '%' || $2 || '%'))
 		ORDER BY n.created_at DESC
-		LIMIT 50`
+		LIMIT $3 OFFSET $4`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, filters.Category, filters.Search)
+	rows, err := m.DB.QueryContext(ctx, query, filters.Category, filters.Search, filters.Limit(), filters.Offset())
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 	defer rows.Close()
 
 	var notes []*GlobalNote
+	totalRecords := 0
 	for rows.Next() {
 		var n GlobalNote
 		var description sql.NullString
-		err := rows.Scan(&n.ID, &n.Title, &description, &n.AuthorName, &n.BookTitle, &n.BookID, &n.CreatedAt)
+		err := rows.Scan(&totalRecords, &n.ID, &n.Title, &description, &n.AuthorName, &n.BookTitle, &n.BookID, &n.CreatedAt)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 		if description.Valid {
 			n.Description = description.String
@@ -236,10 +238,12 @@ func (m NoteModel) GetAllPublished(filters NoteFilters) ([]*GlobalNote, error) {
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
-	return notes, nil
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return notes, metadata, nil
 }
 
 // GetPublicByID fetches a single published note by its ID.

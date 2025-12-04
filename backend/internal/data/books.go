@@ -93,12 +93,13 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 		FROM books
 		WHERE (title ILIKE '%' || $1 || '%' OR $1 = '')
 		OR (original_author ILIKE '%' || $1 || '%' OR $1 = '')
-		ORDER BY id`
+		ORDER BY id DESC
+		LIMIT $2 OFFSET $3`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, title)
+	rows, err := m.DB.QueryContext(ctx, query, title, filters.Limit(), filters.Offset())
 	if err != nil {
 		return nil, Metadata{}, err
 	}

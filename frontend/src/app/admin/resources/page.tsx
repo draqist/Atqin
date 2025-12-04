@@ -1,28 +1,56 @@
 "use client";
 // Hook created above
+import { AdminResourceFilters } from "@/components/admin/resources/resource-filters";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { useAdminResources } from "@/lib/hooks/queries/resources";
-import { Filter, Loader2, Plus, Search } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { columns } from "./columns";
 
 export default function AdminResourcesPage() {
-  const { data: resources, isLoading } = useAdminResources();
+  // Fetch all resources (up to 1000) for client-side filtering
+  const { data, isLoading } = useAdminResources(1, 100);
+
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<
+    "all" | "video" | "pdf" | "link" | "playlist"
+  >("all");
+  const [officialFilter, setOfficialFilter] = useState<
+    "all" | "official" | "community"
+  >("all");
+
+  const resources = data?.resources || [];
 
   // Client Side Filter
   const filteredResources =
     resources?.filter((res) => {
-      if (!search) return true;
-      const q = search.toLowerCase();
-      return (
-        res.title.toLowerCase().includes(q) ||
-        res.book_title?.toLowerCase().includes(q)
-      );
+      // 1. Search
+      if (search) {
+        const q = search.toLowerCase();
+        const matchesSearch =
+          res.title.toLowerCase().includes(q) ||
+          res.book_title?.toLowerCase().includes(q);
+        if (!matchesSearch) return false;
+      }
+
+      // 2. Type Filter
+      if (typeFilter !== "all" && res.type !== typeFilter) return false;
+
+      // 3. Official Filter
+      if (officialFilter === "official" && !res.is_official) return false;
+      if (officialFilter === "community" && res.is_official) return false;
+
+      return true;
     }) || [];
+
+  const clearFilters = () => {
+    setTypeFilter("all");
+    setOfficialFilter("all");
+    setSearch("");
+  };
 
   return (
     <div className="space-y-6">
@@ -55,9 +83,14 @@ export default function AdminResourcesPage() {
           />
         </div>
         <div className="hidden sm:block w-px h-6 bg-slate-200 mx-2" />
-        <Button variant="ghost" size="sm" className="text-slate-500">
-          <Filter className="w-4 h-4 mr-2" /> Filter
-        </Button>
+
+        <AdminResourceFilters
+          typeFilter={typeFilter}
+          setTypeFilter={setTypeFilter}
+          officialFilter={officialFilter}
+          setOfficialFilter={setOfficialFilter}
+          onClear={clearFilters}
+        />
       </div>
 
       {/* TABLE */}

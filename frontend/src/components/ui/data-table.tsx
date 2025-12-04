@@ -5,6 +5,8 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  OnChangeFn,
+  PaginationState,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -24,6 +26,9 @@ import { DataTablePagination } from "./data-table-pagination";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  pageCount?: number;
+  pagination?: PaginationState;
+  onPaginationChange?: OnChangeFn<PaginationState>;
 }
 
 /**
@@ -32,6 +37,9 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
+  pageCount,
+  pagination,
+  onPaginationChange,
 }: DataTableProps<TData, TValue>) {
   // We removed sorting/filtering state from here because
   // the parent page handles it now. simpler and cleaner.
@@ -41,7 +49,13 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    // set page size to match your design
+    pageCount: pageCount ?? undefined,
+    state: {
+      ...(pagination && { pagination }),
+    },
+    onPaginationChange: onPaginationChange,
+    manualPagination: !!pageCount,
+    // set page size to match your design if not controlled
     initialState: {
       pagination: {
         pageSize: 12,

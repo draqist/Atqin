@@ -131,9 +131,9 @@ func (m ResourceModel) Get(id string) (*Resource, error) {
 
 // GetAll fetches all resources, joined with book titles.
 // This is primarily used for the Admin dashboard.
-func (m ResourceModel) GetAll() ([]*Resource, error) {
+func (m ResourceModel) GetAll(filters Filters) ([]*Resource, Metadata, error) {
 	query := `
-        SELECT 
+        SELECT count(*) OVER(),
             r.id::text, 
             r.book_id::text, 
             b.title as book_title, -- Get the human readable title
@@ -145,27 +145,35 @@ func (m ResourceModel) GetAll() ([]*Resource, error) {
         FROM resources r
         JOIN books b ON r.book_id = b.id
         ORDER BY r.created_at DESC
-        LIMIT 100`
+        LIMIT $1 OFFSET $2`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := m.DB.QueryContext(ctx, query, filters.Limit(), filters.Offset())
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 	defer rows.Close()
 
+	totalRecords := 0
 	var resources []*Resource
 	for rows.Next() {
 		var r Resource
-		err := rows.Scan(&r.ID, &r.BookID, &r.BookTitle, &r.Type, &r.Title, &r.URL, &r.IsOfficial, &r.CreatedAt)
+		err := rows.Scan(&totalRecords, &r.ID, &r.BookID, &r.BookTitle, &r.Type, &r.Title, &r.URL, &r.IsOfficial, &r.CreatedAt)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 		resources = append(resources, &r)
 	}
-	return resources, nil
+
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return resources, metadata, nil
 }
 
 // Insert adds a new resource to the database.

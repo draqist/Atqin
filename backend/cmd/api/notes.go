@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/draqist/iqraa/backend/internal/data"
+	"github.com/draqist/iqraa/backend/internal/validator"
 )
 
 // MockUserID is a placeholder for development without full auth.
@@ -101,20 +102,31 @@ func (app *application) listAllPublicNotesHandler(w http.ResponseWriter, r *http
 	category := qs.Get("category")
 	search := qs.Get("q")
 
+	v := validator.New()
+
 	filters := data.NoteFilters{
 		Category: category,
 		Search:   search,
 	}
 
-	notes, err := app.models.Notes.GetAllPublished(filters)
+	filters.Page = app.readInt(qs, "page", 1, v)
+	filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	filters.Sort = app.readString(qs, "sort", "created_at")
+	filters.SortSafeList = []string{"created_at"}
+
+	if data.ValidateFilters(v, filters.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	notes, metadata, err := app.models.Notes.GetAllPublished(filters)
 	if err != nil {
 		app.logger.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(notes)
+	app.writeJSON(w, http.StatusOK, envelope{"notes": notes, "metadata": metadata}, nil)
 }
 
 // getPublicNoteHandler fetches a specific published note by its ID.

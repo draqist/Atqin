@@ -10,14 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useBooks } from "@/lib/hooks/queries/books";
+import { useBooksQuery } from "@/lib/hooks/queries/books";
+import { Book } from "@/lib/types";
 import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { columns } from "./columns";
 
 export default function AdminBooksPage() {
-  const { data: books, isLoading } = useBooks();
+  const { data, isLoading } = useBooksQuery("", 1, 20);
+  const books: Book[] = data?.books || [];
+
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
   const [resourceFilter, setResourceFilter] = useState<
     "all" | "with_resources" | "no_resources"
@@ -26,7 +29,7 @@ export default function AdminBooksPage() {
 
   // --- CLIENT SIDE FILTERING LOGIC ---
   const filteredBooks =
-    books?.filter((book) => {
+    books.filter((book) => {
       // 1. Status Filter
       if (filter === "published" && !book.is_public) return false;
       if (filter === "draft" && book.is_public) return false;

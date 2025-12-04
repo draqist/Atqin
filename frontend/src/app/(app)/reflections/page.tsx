@@ -3,11 +3,14 @@
 import { ReflectionCard } from "@/components/reflections/reflection-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/use-debounce-value";
+import { useInView } from "@/hooks/use-in-view";
 import { useGlobalReflections } from "@/lib/hooks/queries/reflections";
 import { categories, cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import { Loader2, Search, SlidersHorizontal, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ReflectionsPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -24,10 +27,23 @@ export default function ReflectionsPage() {
   };
 
   const {
-    data: reflections,
+    data,
     isLoading,
     isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useGlobalReflections(filters);
+
+  const [ref, inView] = useInView();
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const reflections = data?.pages.flatMap((page) => page.notes) || [];
 
   if (isLoading) {
     return (
@@ -125,11 +141,45 @@ export default function ReflectionsPage() {
           </div>
         ) : (
           /* Results Grid */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-            {reflections?.map((note) => (
-              <ReflectionCard key={note.id} note={note} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+              {reflections?.map((note, index) => (
+                <motion.div
+                  key={note.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  layout
+                >
+                  <ReflectionCard note={note} />
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Infinite Scroll Trigger & Skeletons */}
+            <div ref={ref} className="mt-8">
+              {isFetchingNextPage && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="h-[200px] rounded-xl border border-slate-200 bg-white p-5 space-y-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-10 h-10 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="w-24 h-4 rounded" />
+                          <Skeleton className="w-16 h-3 rounded" />
+                        </div>
+                      </div>
+                      <Skeleton className="w-full h-4 rounded" />
+                      <Skeleton className="w-2/3 h-4 rounded" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
         )}
         {reflections?.length === 0 ||
           reflections === null ||
