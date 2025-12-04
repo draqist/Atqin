@@ -11,6 +11,7 @@ import { WordRotator } from "./WordRotator";
  */
 const HeroSection = () => {
   const { data: books } = useBooks();
+  const totalBooks = books?.pages.flatMap((page) => page.books).length || 0;
   return (
     <section className="pt-32 pb-20 px-6 w-full">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[550px]">
@@ -139,7 +140,7 @@ const HeroSection = () => {
                   <Library className="w-6 h-6" />
                 </div>
                 <div className="text-3xl font-bold text-white mb-1">
-                  {books ? books?.length : "0"}
+                  {totalBooks}
                 </div>
                 <div className="text-emerald-200 text-xs font-medium">
                   Verified Works

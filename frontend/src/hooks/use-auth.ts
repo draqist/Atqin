@@ -7,9 +7,13 @@ import { useEffect } from "react";
 // Types matching your Go Backend response
 interface AuthResponse {
   token: string;
-  user_id: string;
-  name: string;
-  role: string;
+  user: {
+    id: string;
+    name: string;
+    role: string;
+    email: string;
+    username: string;
+  };
 }
 
 export const useLogin = () => {
@@ -33,14 +37,14 @@ export const useLogin = () => {
     onSuccess: (data) => {
       // 1. Store Token
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify({ id: data.user_id, name: data.name }));
+      localStorage.setItem("user", JSON.stringify({ id: data.user.id, name: data.user.name }));
 
       // 2. Configure Axios to use it for future requests
       // (Ideally done in an interceptor, but this works for MVP)
       api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
-      toast.success(`Welcome back, ${data.name}!`);
-      if (data.role === "admin") {
+      toast.success(`Welcome back, ${data.user.name}!`);
+      if (data.user.role === "admin") {
         router.push("/admin");
       } else if (nextUrl) {
         // If there was a specific destination, go there!
@@ -70,7 +74,7 @@ export const useRegister = () => {
     },
     onSuccess: (data) => {
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify({ id: data.user_id, name: data.name }));
+      localStorage.setItem("user", JSON.stringify({ id: data.user.id, name: data.user.name }));
       api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
       toast.success("Account created successfully!");

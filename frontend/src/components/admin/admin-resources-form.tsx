@@ -373,11 +373,13 @@ export function ResourceForm({ resource }: { resource?: Resource }) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {books?.map((b) => (
-                            <SelectItem key={b.id} value={b.id}>
-                              {b.title}
-                            </SelectItem>
-                          ))}
+                          {books?.pages
+                            .flatMap((p) => p.books)
+                            .map((b) => (
+                              <SelectItem key={b.id} value={b.id}>
+                                {b.title}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />

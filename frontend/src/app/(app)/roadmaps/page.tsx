@@ -2,19 +2,12 @@
 
 import { RoadmapCard } from "@/components/roadmaps/roadmap-card2";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import api from "@/lib/axios";
 import { useBooks } from "@/lib/hooks/queries/books";
 import { Roadmap } from "@/lib/types";
 import { getCategoryLabel } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Compass, Filter, Loader2, Route } from "lucide-react";
+import { Compass, Loader2, Route } from "lucide-react";
 import { useState } from "react";
 
 const fetchPublicRoadmaps = async () => {
@@ -57,6 +50,8 @@ export default function RoadmapsPage() {
     new Set(roadmaps?.map((r) => getCategoryLabel(r.slug)) || [])
   ).sort();
 
+  const totalBooks = books?.pages.flatMap((page) => page.books).length || 0;
+
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
       {/* 1. HERO SECTION: The "Why" */}
@@ -92,7 +87,7 @@ export default function RoadmapsPage() {
               </div>
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center w-32">
                 <div className="text-3xl font-bold text-slate-900">
-                  {books?.length || 0}
+                  {totalBooks}
                 </div>
                 <div className="text-xs text-slate-500 font-medium uppercase mt-1">
                   Total Books

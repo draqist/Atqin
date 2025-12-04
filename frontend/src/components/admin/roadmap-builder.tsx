@@ -68,6 +68,7 @@ const LEVEL_CONFIG = [
  */
 export function RoadmapBuilder({ roadmap }: { roadmap: Roadmap }) {
   const { data: allBooks } = useBooks();
+  const flattenedBooks = allBooks?.pages.flatMap((page) => page.books) || [];
   const [search, setSearch] = useState("");
 
   // Mutations
@@ -259,7 +260,7 @@ export function RoadmapBuilder({ roadmap }: { roadmap: Roadmap }) {
 
   // Search Filter
   const filteredLibrary =
-    allBooks?.filter((b) =>
+    flattenedBooks.filter((b) =>
       b.title.toLowerCase().includes(search.toLowerCase())
     ) || [];
   const { mutate: saveOrder, isPending: isSaving } = useReorderNodes(
@@ -393,7 +394,7 @@ export function RoadmapBuilder({ roadmap }: { roadmap: Roadmap }) {
                     ...l,
                     bookIds: items[l.id],
                   }))}
-                  books={allBooks || []}
+                  books={flattenedBooks}
                   title={roadmap.title}
                 />
               </SheetContent>
@@ -440,7 +441,9 @@ export function RoadmapBuilder({ roadmap }: { roadmap: Roadmap }) {
                   >
                     <div className="space-y-2 min-h-[60px]">
                       {items[level.id].map((bookId) => {
-                        const book = allBooks?.find((b) => b.id === bookId);
+                        const book = flattenedBooks.find(
+                          (b) => b.id === bookId
+                        );
                         if (!book) return null;
                         return (
                           <SortableBook
@@ -470,7 +473,7 @@ export function RoadmapBuilder({ roadmap }: { roadmap: Roadmap }) {
             <Card className="p-3 flex items-center gap-3 bg-white border-emerald-400 shadow-xl rotate-2 w-[300px] cursor-grabbing opacity-90">
               <GripVertical className="w-4 h-4 text-slate-400" />
               <div className="flex-1 text-sm font-medium text-slate-900 truncate">
-                {allBooks?.find((b) => b.id === activeId)?.title ||
+                {flattenedBooks.find((b) => b.id === activeId)?.title ||
                   "Moving Book..."}
               </div>
             </Card>
