@@ -29,10 +29,10 @@ export const useBooks = (searchQuery?: string) => {
  * @param {number} [pageSize] - The number of items per page.
  * @returns {UseQueryResult<{ books: Book[]; metadata: any }>} The query result.
  */
-export const useBooksQuery = (searchQuery?: string, page = 1, pageSize = 20) => {
+export const useBooksQuery = (searchQuery?: string, page = 1, pageSize = 20, isPublic?: boolean) => {
   return useQuery({
-    queryKey: ['books', 'paginated', searchQuery, page, pageSize],
-    queryFn: () => fetchBooks(searchQuery, page, pageSize),
+    queryKey: ['books', 'paginated', searchQuery, page, pageSize, isPublic],
+    queryFn: () => fetchBooks(searchQuery, page, pageSize, isPublic),
   });
 };
 

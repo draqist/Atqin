@@ -12,6 +12,7 @@ type Filters struct {
 	PageSize     int      `json:"page_size"`
 	Sort         string   `json:"sort"`
 	SortSafeList []string // Supported sort fields
+	IsPublic     *bool    `json:"is_public"` // Optional filter
 }
 
 // Metadata contains pagination metadata for a list response.

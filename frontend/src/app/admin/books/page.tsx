@@ -18,23 +18,25 @@ import { useState } from "react";
 import { columns } from "./columns";
 
 export default function AdminBooksPage() {
-  const { data, isLoading } = useBooksQuery("", 1, 20);
-  const books: Book[] = data?.books || [];
-
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20); // Default page size
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
   const [resourceFilter, setResourceFilter] = useState<
     "all" | "with_resources" | "no_resources"
   >("all");
   const [search, setSearch] = useState("");
 
-  // --- CLIENT SIDE FILTERING LOGIC ---
+  // Server-side filtering params
+  const isPublic = filter === "all" ? undefined : filter === "published";
+
+  const { data, isLoading } = useBooksQuery(search, page, pageSize, isPublic);
+  const books: Book[] = data?.books || [];
+  const metadata = data?.metadata;
+
+  // Client-side Resource Filter (still client-side for now)
   const filteredBooks =
     books.filter((book) => {
-      // 1. Status Filter
-      if (filter === "published" && !book.is_public) return false;
-      if (filter === "draft" && book.is_public) return false;
-
-      // 2. Resource Filter
+      // Resource Filter
       if (
         resourceFilter === "with_resources" &&
         (book.resource_count || 0) === 0
@@ -43,14 +45,6 @@ export default function AdminBooksPage() {
       if (resourceFilter === "no_resources" && (book.resource_count || 0) > 0)
         return false;
 
-      // 3. Search Filter
-      if (search) {
-        const searchLower = search.toLowerCase();
-        return (
-          book.title.toLowerCase().includes(searchLower) ||
-          book.original_author.toLowerCase().includes(searchLower)
-        );
-      }
       return true;
     }) || [];
 
@@ -63,7 +57,7 @@ export default function AdminBooksPage() {
             Books Library
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Manage your catalog of {books?.length || 0} texts.
+            Manage your catalog of {metadata?.total_records || 0} texts.
           </p>
         </div>
         <Link href="/admin/books/new">
@@ -82,7 +76,10 @@ export default function AdminBooksPage() {
             placeholder="Search by title or author..."
             className="pl-10 border-0 bg-transparent shadow-none focus-visible:ring-0 text-slate-900 placeholder:text-slate-400"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1); // Reset to page 1 on search
+            }}
           />
         </div>
 
@@ -109,7 +106,10 @@ export default function AdminBooksPage() {
           {["all", "published", "draft"].map((tab) => (
             <button
               key={tab}
-              onClick={() => setFilter(tab as any)}
+              onClick={() => {
+                setFilter(tab as any);
+                setPage(1); // Reset to page 1 on filter change
+              }}
               className={`flex-1 sm:flex-none px-4 py-1.5 text-xs font-medium rounded-md transition-all capitalize ${
                 filter === tab
                   ? "bg-white text-slate-900 shadow-sm"
@@ -143,7 +143,28 @@ export default function AdminBooksPage() {
             </Button>
           </div>
         ) : (
-          <DataTable columns={columns} data={filteredBooks} />
+          <DataTable
+            columns={columns}
+            data={filteredBooks}
+            pageCount={metadata?.last_page}
+            pagination={{
+              pageIndex: page - 1, // TanStack table is 0-indexed
+              pageSize: pageSize,
+            }}
+            onPaginationChange={(updater) => {
+              if (typeof updater === "function") {
+                const newState = updater({
+                  pageIndex: page - 1,
+                  pageSize,
+                });
+                setPage(newState.pageIndex + 1);
+                setPageSize(newState.pageSize);
+              } else {
+                setPage(updater.pageIndex + 1);
+                setPageSize(updater.pageSize);
+              }
+            }}
+          />
         )}
       </div>
     </div>

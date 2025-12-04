@@ -20,9 +20,9 @@ export const fetchBookResources = async (bookId: string): Promise<Resource[]> =>
  *
  * @returns {Promise<Resource[]>} A promise that resolves to an array of all resources.
  */
-export const fetchAllResources = async (pageParam = 1, pageSize = 20): Promise<{ resources: Resource[]; metadata: any }> => {
+export const fetchAllResources = async (pageParam = 1, pageSize = 20, search?: string): Promise<{ resources: Resource[]; metadata: any }> => {
   const { data } = await api.get<{ resources: Resource[]; metadata: any }>("/resources", {
-    params: { page: pageParam, page_size: pageSize }
+    params: { page: pageParam, page_size: pageSize, q: search }
   });
   return data;
 };

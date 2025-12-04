@@ -22,10 +22,10 @@ export const useBookResources = (bookId: string) => {
  *
  * @returns {UseQueryResult<Resource[]>} The query result containing all resources.
  */
-export const useAdminResources = (page = 1, pageSize = 20) => {
+export const useAdminResources = (page = 1, pageSize = 20, search?: string) => {
   return useQuery({
-    queryKey: ["admin", "resources", page, pageSize],
-    queryFn: () => fetchAllResources(page, pageSize),
+    queryKey: ["admin", "resources", page, pageSize, search],
+    queryFn: () => fetchAllResources(page, pageSize, search),
     placeholderData: (previousData) => previousData, // Keep previous data while fetching new page
   });
 };

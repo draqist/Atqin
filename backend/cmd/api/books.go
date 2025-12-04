@@ -81,6 +81,7 @@ func (app *application) listBooksHandler(w http.ResponseWriter, r *http.Request)
 	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
 	input.Filters.Sort = app.readString(qs, "sort", "id")
 	input.Filters.SortSafeList = []string{"id", "title", "created_at", "-id", "-title", "-created_at"}
+	input.Filters.IsPublic = app.readBool(qs, "is_public", v)
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)

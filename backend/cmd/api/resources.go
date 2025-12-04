@@ -109,13 +109,14 @@ func (app *application) listAllResourcesHandler(w http.ResponseWriter, r *http.R
 	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
 	input.Filters.Sort = app.readString(qs, "sort", "id")
 	input.Filters.SortSafeList = []string{"id", "created_at"}
+    title := app.readString(qs, "q", "")
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	resources, metadata, err := app.models.Resources.GetAll(input.Filters)
+	resources, metadata, err := app.models.Resources.GetAll(title, input.Filters)
 	if err != nil {
 		app.errorResponse(w, http.StatusInternalServerError, "Failed to fetch resources")
 		return

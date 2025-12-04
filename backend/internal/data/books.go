@@ -92,14 +92,15 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 		(SELECT COUNT(*) FROM resources WHERE book_id = books.id) as resource_count
 		FROM books
 		WHERE (title ILIKE '%' || $1 || '%' OR $1 = '')
-		OR (original_author ILIKE '%' || $1 || '%' OR $1 = '')
+		AND (original_author ILIKE '%' || $1 || '%' OR $1 = '')
+        AND ($4::boolean IS NULL OR is_public = $4)
 		ORDER BY id DESC
 		LIMIT $2 OFFSET $3`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, title, filters.Limit(), filters.Offset())
+	rows, err := m.DB.QueryContext(ctx, query, title, filters.Limit(), filters.Offset(), filters.IsPublic)
 	if err != nil {
 		return nil, Metadata{}, err
 	}

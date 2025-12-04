@@ -131,7 +131,7 @@ func (m ResourceModel) Get(id string) (*Resource, error) {
 
 // GetAll fetches all resources, joined with book titles.
 // This is primarily used for the Admin dashboard.
-func (m ResourceModel) GetAll(filters Filters) ([]*Resource, Metadata, error) {
+func (m ResourceModel) GetAll(title string, filters Filters) ([]*Resource, Metadata, error) {
 	query := `
         SELECT count(*) OVER(),
             r.id::text, 
@@ -144,13 +144,14 @@ func (m ResourceModel) GetAll(filters Filters) ([]*Resource, Metadata, error) {
             r.created_at
         FROM resources r
         JOIN books b ON r.book_id = b.id
+        WHERE (r.title ILIKE '%' || $3 || '%' OR $3 = '')
         ORDER BY r.created_at DESC
         LIMIT $1 OFFSET $2`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, filters.Limit(), filters.Offset())
+	rows, err := m.DB.QueryContext(ctx, query, filters.Limit(), filters.Offset(), title)
 	if err != nil {
 		return nil, Metadata{}, err
 	}

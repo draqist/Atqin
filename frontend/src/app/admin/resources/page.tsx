@@ -11,9 +11,8 @@ import { useState } from "react";
 import { columns } from "./columns";
 
 export default function AdminResourcesPage() {
-  // Fetch all resources (up to 1000) for client-side filtering
-  const { data, isLoading } = useAdminResources(1, 100);
-
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<
     "all" | "video" | "pdf" | "link" | "playlist"
@@ -22,24 +21,19 @@ export default function AdminResourcesPage() {
     "all" | "official" | "community"
   >("all");
 
-  const resources = data?.resources || [];
+  // Fetch all resources with server-side pagination and search
+  const { data, isLoading } = useAdminResources(page, pageSize, search);
 
-  // Client Side Filter
+  const resources = data?.resources || [];
+  const metadata = data?.metadata;
+
+  // Client Side Filter (Type and Official status still client-side)
   const filteredResources =
     resources?.filter((res) => {
-      // 1. Search
-      if (search) {
-        const q = search.toLowerCase();
-        const matchesSearch =
-          res.title.toLowerCase().includes(q) ||
-          res.book_title?.toLowerCase().includes(q);
-        if (!matchesSearch) return false;
-      }
-
-      // 2. Type Filter
+      // 1. Type Filter
       if (typeFilter !== "all" && res.type !== typeFilter) return false;
 
-      // 3. Official Filter
+      // 2. Official Filter
       if (officialFilter === "official" && !res.is_official) return false;
       if (officialFilter === "community" && res.is_official) return false;
 
@@ -50,6 +44,7 @@ export default function AdminResourcesPage() {
     setTypeFilter("all");
     setOfficialFilter("all");
     setSearch("");
+    setPage(1);
   };
 
   return (
@@ -79,7 +74,10 @@ export default function AdminResourcesPage() {
             placeholder="Search resources..."
             className="pl-10 border-0 bg-transparent shadow-none focus-visible:ring-0 text-slate-900 placeholder:text-slate-400"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
         <div className="hidden sm:block w-px h-6 bg-slate-200 mx-2" />
@@ -100,7 +98,28 @@ export default function AdminResourcesPage() {
             <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
           </div>
         ) : (
-          <DataTable columns={columns} data={filteredResources} />
+          <DataTable
+            columns={columns}
+            data={filteredResources}
+            pageCount={metadata?.last_page}
+            pagination={{
+              pageIndex: page - 1,
+              pageSize: pageSize,
+            }}
+            onPaginationChange={(updater) => {
+              if (typeof updater === "function") {
+                const newState = updater({
+                  pageIndex: page - 1,
+                  pageSize,
+                });
+                setPage(newState.pageIndex + 1);
+                setPageSize(newState.pageSize);
+              } else {
+                setPage(updater.pageIndex + 1);
+                setPageSize(updater.pageSize);
+              }
+            }}
+          />
         )}
       </div>
     </div>

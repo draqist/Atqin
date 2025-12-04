@@ -35,6 +35,22 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 	return i
 }
 
+// readBool retrieves a boolean value from query parameters or returns nil.
+func (app *application) readBool(qs url.Values, key string, v *validator.Validator) *bool {
+	s := qs.Get(key)
+	if s == "" {
+		return nil
+	}
+
+	b, err := strconv.ParseBool(s)
+	if err != nil {
+		v.AddError(key, "must be a boolean value")
+		return nil
+	}
+
+	return &b
+}
+
 // writeJSON sends a JSON response with the specified status code, data, and headers.
 func (app *application) writeJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
 	js, err := json.Marshal(data)
