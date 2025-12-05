@@ -84,7 +84,7 @@ export function PdfViewer({
       }
     },
     preventScrollOnSwipe: true, // Prevents scrolling the page while swiping
-    trackMouse: false, // Only listen to touch events (optional)
+    trackMouse: true, // Listen to mouse events for desktop testing
   });
 
   return (
@@ -147,7 +147,7 @@ export function PdfViewer({
       <div
         {...handlers}
         ref={containerRef}
-        className="border border-slate-200 shadow-md rounded-sm overflow-auto bg-white w-full"
+        className="border border-slate-200 shadow-md rounded-sm overflow-auto bg-white w-full touch-pan-y"
       >
         <Document
           file={url}

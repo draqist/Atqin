@@ -1,11 +1,13 @@
 "use client";
 
+import PushNotificationManager, {
+  InstallPrompt,
+} from "@/components/app/installer";
 import { FeaturesGrid } from "@/components/landing/feature-grids";
 import { Footer } from "@/components/landing/footer";
 import HeroSection from "@/components/landing/hero-section";
 import { Navbar } from "@/components/landing/navbar";
 import { CTASection } from "../components/landing/cta-section";
-
 // Animation Variants
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -24,6 +26,8 @@ const staggerContainer = {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-slate-900 overflow-x-hidden font-sans">
+      <InstallPrompt />
+      <PushNotificationManager />
       <Navbar />
       <HeroSection />
       <FeaturesGrid />

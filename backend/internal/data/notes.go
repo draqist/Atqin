@@ -155,7 +155,7 @@ func (m NoteModel) GetPublished(bookID string) ([]*PublicNote, error) {
 	}
 	defer rows.Close()
 
-	var notes []*PublicNote
+	notes := []*PublicNote{}
 	for rows.Next() {
 		var n PublicNote
 		var description sql.NullString
@@ -222,7 +222,7 @@ func (m NoteModel) GetAllPublished(filters NoteFilters) ([]*GlobalNote, Metadata
 	}
 	defer rows.Close()
 
-	var notes []*GlobalNote
+	notes := []*GlobalNote{}
 	totalRecords := 0
 	for rows.Next() {
 		var n GlobalNote
