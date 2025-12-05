@@ -18,22 +18,25 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { FormErrorMessage } from "@/components/ui/form-errors";
+
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
-  email: z.email("Invalid email address."),
+  email: z.string().email("Invalid email address."),
   username: z
     .string()
     .min(3, "Username must be at least 3 characters.")
-    .optional(), // Optional for now to avoid breaking if user skips
+    .or(z.literal("")),
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
 export default function RegisterPage() {
-  const { mutate: register, isPending } = useRegister();
+  const { mutate: register, isPending, error } = useRegister();
   const [show, setShow] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onBlur",
     defaultValues: {
       name: "",
       email: "",
@@ -46,6 +49,8 @@ export default function RegisterPage() {
     register(values);
   }
 
+  const errorMessage = (error as any)?.response?.data?.error || error?.message;
+
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center lg:text-left">
@@ -55,6 +60,7 @@ export default function RegisterPage() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormErrorMessage message={errorMessage} />
           <FormField
             control={form.control}
             name="name"
@@ -138,7 +144,7 @@ export default function RegisterPage() {
           <Button
             type="submit"
             className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white"
-            disabled={isPending}
+            disabled={isPending || !form.formState.isValid}
           >
             {isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
