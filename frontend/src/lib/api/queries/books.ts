@@ -18,7 +18,7 @@ export interface PaginatedResponse<T> {
   [key: string]: any; // To allow dynamic keys like "books", "notes" etc.
 }
 
-export const fetchBooks = async (searchQuery?: string, pageParam = 1, pageSize = 24, isPublic?: boolean): Promise<{ books: Book[]; metadata: any }> => {
+export const fetchBooks = async (searchQuery?: string, pageParam = 1, pageSize = 40, isPublic?: boolean): Promise<{ books: Book[]; metadata: any }> => {
   const response = await api.get<{ books: Book[]; metadata: any }>('/books', {
     params: {
       q: searchQuery,
