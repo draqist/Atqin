@@ -1,8 +1,5 @@
 "use client";
 
-import PushNotificationManager, {
-  InstallPrompt,
-} from "@/components/app/installer";
 import { FeaturesGrid } from "@/components/landing/feature-grids";
 import { Footer } from "@/components/landing/footer";
 import HeroSection from "@/components/landing/hero-section";
@@ -26,8 +23,8 @@ const staggerContainer = {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-slate-900 overflow-x-hidden font-sans">
-      <InstallPrompt />
-      <PushNotificationManager />
+      {/* <InstallPrompt /> */}
+      {/* <PushNotificationManager /> */}
       <Navbar />
       <HeroSection />
       <FeaturesGrid />

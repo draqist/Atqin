@@ -36,7 +36,7 @@ const HeroSection = () => {
   const totalBooks = stats?.total_books || 0;
   const totalResources = stats?.total_resources || 0;
   return (
-    <section className="pt-32 pb-20 px-6 w-full">
+    <section className="pt-28 md:pt-32 pb-20 px-6 w-full">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[550px]">
         {/* BLOCK 1: Main Value Prop (7 Columns) */}
         <motion.div

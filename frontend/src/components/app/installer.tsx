@@ -93,9 +93,21 @@ export default function PushNotificationManager() {
   );
 }
 
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 export function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
   useEffect(() => {
     setIsIOS(
@@ -103,31 +115,76 @@ export function InstallPrompt() {
     );
 
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallModal(true);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+    };
   }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+
+    const { outcome } = await deferredPrompt.userChoice;
+
+    setDeferredPrompt(null);
+    setShowInstallModal(false);
+  };
 
   if (isStandalone) {
     return null; // Don't show install button if already installed
   }
 
   return (
-    <div>
-      <h3>Install App</h3>
-      <button>Add to Home Screen</button>
+    <>
+      <Dialog open={showInstallModal} onOpenChange={setShowInstallModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Install App</DialogTitle>
+            <DialogDescription>
+              Install this application on your home screen for a better
+              experience.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowInstallModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleInstallClick}>Install</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {isIOS && (
-        <p>
-          To install this app on your iOS device, tap the share button
-          <span role="img" aria-label="share icon">
-            {" "}
-            ⎋{" "}
-          </span>
-          and then "Add to Home Screen"
-          <span role="img" aria-label="plus icon">
-            {" "}
-            ➕{" "}
-          </span>
-          .
-        </p>
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-50">
+          <p className="text-sm text-center">
+            To install this app on your iOS device, tap the share button
+            <span role="img" aria-label="share icon" className="mx-1">
+              ⎋
+            </span>
+            and then "Add to Home Screen"
+            <span role="img" aria-label="plus icon" className="mx-1">
+              ➕
+            </span>
+            .
+          </p>
+        </div>
       )}
-    </div>
+    </>
   );
 }
