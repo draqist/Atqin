@@ -1,0 +1,136 @@
+{
+  "HomePage": {
+    "title": "Iqraa | The Digital Majlis for Students of Knowledge",
+    "description": "Master the Mutuun. A unified platform to read, listen, and memorize classical Islamic texts and Mutuuns with AI-powered correction and structured roadmaps."
+  },
+  "Header": {
+    "dashboard": "Dashboard",
+    "library": "Library",
+    "searchPlaceholder": "Search books, authors, or topics... (Enter)"
+  },
+  "Sidebar": {
+    "menu": "Menu",
+    "nav": {
+      "dashboard": "Dashboard",
+      "library": "Library",
+      "reflections": "Reflections",
+      "myHifdh": "My Hifdh",
+      "roadmaps": "Roadmaps",
+      "bookmarks": "Bookmarks"
+    }
+  },
+  "Navbar": {
+    "library": "Library",
+    "about": "About",
+    "roadmaps": "Roadmaps",
+    "login": "Log in",
+    "startLearning": "Start Learning",
+    "categories": {
+      "tajweed": {
+        "title": "Tajweed & Qira'at",
+        "description": "Master pronunciation and the rules of recitation."
+      },
+      "aqeedah": {
+        "title": "Aqeedah",
+        "description": "Texts regarding Islamic creed and theology."
+      },
+      "hadith": {
+        "title": "Hadith",
+        "description": "Collections of prophetic traditions and narrations."
+      },
+      "grammar": {
+        "title": "Arabic Grammar",
+        "description": "Nahw and Sarf foundations for understanding texts."
+      }
+    }
+  },
+  "Hero": {
+    "beta": "v1.0 Public Beta",
+    "titlePrefix": "The",
+    "titleSuffix": "for the Student of Knowledge.",
+    "description": "A unified platform to read, study, and memorize <highlight>Classical Islamic Works</highlight>. From short poetry (Mutuun) to extensive volumes of Fiqh and Hadith, preserved digitally with AI-powered tools.",
+    "exploreLibrary": "Explore the Library",
+    "quoteArabic": "طلب العلم من المهد إلى اللحد",
+    "quoteEnglish": "Seek Knowledge from the Cradle to the Grave",
+    "stats": {
+      "resources": {
+        "label": "Curated Resources",
+        "subtext": "Over 30 pdfs, 50 videos, 100 playlists."
+      },
+      "books": {
+        "label": "Verified Works",
+        "subtext": "Aqeedah, Fiqh, Tajweed & more."
+      }
+    }
+  },
+  "Features": {
+    "badge": "Our Features",
+    "title": "We built this for the love of <br /> <highlight>The Deen. (Preserving Knowledge)</highlight>",
+    "description": "Everything a student needs to read, memorize, and master the Mutuun. Streamline your Hifdh journey with powerful, modern tools.",
+    "footer": "Iqraa offers comprehensive tools for students of all levels.",
+    "items": {
+      "verifiedLibrary": {
+        "title": "Verified Library",
+        "description": "Access digitised classical texts with verified Tahqiq, not just scanned PDFs."
+      },
+      "aiTasmi": {
+        "title": "AI Tasm'i",
+        "description": "Recite to the app. It listens, corrects mistakes, and tracks your fluency."
+      },
+      "smartSrs": {
+        "title": "Smart SRS",
+        "description": "Spaced Repetition System that ensures you review lines right before you forget them."
+      },
+      "contextualSharh": {
+        "title": "Contextual Sharh",
+        "description": "Click any verse to instantly see explanations from scholars like Ibn Uthaymeen."
+      },
+      "audioSync": {
+        "title": "Audio Sync",
+        "description": "Listen to world-renowned reciters synced line-by-line with the text."
+      },
+      "hifdhCircles": {
+        "title": "Hifdh Circles",
+        "description": "Join virtual circles with friends to track progress and keep each other accountable."
+      },
+      "progressAnalytics": {
+        "title": "Progress Analytics",
+        "description": "Visualize your memorization strength with heatmaps and retention charts."
+      },
+      "crossPlatform": {
+        "title": "Cross-Platform",
+        "description": "Start reading on your laptop, continue memorizing on your phone. Always synced."
+      }
+    }
+  },
+  "CTA": {
+    "badge": "Free for the first book",
+    "title": "Ready to preserve <br /> the <highlight>Legacy?</highlight>",
+    "description": "Join a global community of students preserving the legacy. Master classical texts across <highlight>Fiqh, Hadith, and Tajweed</highlight> with intelligent tools designed for the modern learner.",
+    "primaryButton": "Enter the Library",
+    "secondaryButton": "Read our Manifesto"
+  },
+  "Footer": {
+    "tagline": "The Digital Rihal for the modern student. Preserving the legacy of Islamic knowledge through technology.",
+    "comingSoon": "Coming Soon",
+    "columns": {
+      "product": "Product",
+      "support": "Support",
+      "community": "Community"
+    },
+    "links": {
+      "pricing": "Pricing",
+      "giftCards": "Gift Cards",
+      "familyPlan": "Family Plan",
+      "supportCenter": "Support Center",
+      "featureRequests": "Feature Requests",
+      "hifzNetwork": "Hifz Network",
+      "glossary": "Glossary",
+      "ramadan": "Ramadan",
+      "discord": "Discord",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service"
+    },
+    "copyright": "© Copyright {year} Iqraa Platform. All rights reserved."
+  }
+}

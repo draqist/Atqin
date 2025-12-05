@@ -1,7 +1,9 @@
 "use client";
 
+import LanguageSwitcher from "@/components/language-switcher";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MobileNav } from "./mobile-nav";
@@ -12,6 +14,7 @@ import { NotificationBell } from "./notification-bell";
  * Includes global search functionality, mobile navigation trigger, and notification bell.
  */
 export function Header() {
+  const t = useTranslations("Header");
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -61,7 +64,7 @@ export function Header() {
         </div>
         <div className="hidden md:block font-semibold text-slate-700">
           {/* Dynamic Title based on Path could go here */}
-          {pathname === "/dashboard" ? "Dashboard" : "Library"}
+          {pathname === "/dashboard" ? t("dashboard") : t("library")}
         </div>
       </div>
 
@@ -72,7 +75,7 @@ export function Header() {
             onClick={handleSearch}
           />
           <Input
-            placeholder="Search books, authors, or topics... (Enter)"
+            placeholder={t("searchPlaceholder")}
             className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-emerald-500 pr-10"
             value={term}
             onChange={(e) => setTerm(e.target.value)}
@@ -89,6 +92,7 @@ export function Header() {
           )}
         </div>
 
+        <LanguageSwitcher />
         <NotificationBell />
       </div>
     </header>

@@ -1,6 +1,7 @@
 import { usePublicStats } from "@/lib/hooks/queries/stats";
 import { animate, motion } from "framer-motion";
 import { ArrowRight, Layers, Library } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Button } from "../ui/button";
@@ -32,6 +33,7 @@ const Counter = ({ value }: { value: number }) => {
  * Features the main value proposition, dynamic text, and stats.
  */
 const HeroSection = () => {
+  const t = useTranslations("Hero");
   const { data: stats } = usePublicStats();
   const totalBooks = stats?.total_books || 0;
   const totalResources = stats?.total_resources || 0;
@@ -52,25 +54,23 @@ const HeroSection = () => {
             <div className="mb-6">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 text-emerald-300 text-xs font-medium border border-white/10 backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                v1.0 Public Beta
+                {t("beta")}
               </span>
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight flex flex-wrap items-center gap-x-3">
-              <span>The</span>
+              <span>{t("titlePrefix")}</span>
               <WordRotator />
-              <span>for the Student of Knowledge.</span>
+              <span>{t("titleSuffix")}</span>
             </h1>
 
             {/* BROADENED COPY: Focus on Classical Works generally */}
             <p className="text-slate-400 text-md lg:text-lg max-w-lg leading-relaxed mb-8">
-              A unified platform to read, study, and memorize
-              <span className="text-slate-200 font-medium">
-                {" "}
-                Classical Islamic Works
-              </span>
-              . From short poetry (Mutuun) to extensive volumes of Fiqh and
-              Hadith, preserved digitally with AI-powered tools.
+              {t.rich("description", {
+                highlight: (chunks) => (
+                  <span className="text-slate-200 font-medium">{chunks}</span>
+                ),
+              })}
             </p>
 
             <div className="mt-auto">
@@ -79,8 +79,8 @@ const HeroSection = () => {
                   size="lg"
                   className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-full px-8 h-12 lg:h-14 text-md lg:text-base shadow-lg shadow-emerald-900/20 transition-all hover:scale-105"
                 >
-                  Explore the Library
-                  <ArrowRight className="ml-2 w-5 h-5" />
+                  {t("exploreLibrary")}
+                  <ArrowRight className="ml-2 w-5 h-5 rtl:rotate-180" />
                 </Button>
               </Link>
             </div>
@@ -112,10 +112,10 @@ const HeroSection = () => {
             <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')]" />
             <div className="z-10 transition-transform duration-500 group-hover:scale-105">
               <h2 className="text-emerald-900 font-kufi text-3xl md:text-4xl lg:text-5xl leading-snug mb-4">
-                طلب العلم من المهد إلى اللحد
+                {t("quoteArabic")}
               </h2>
               <p className="text-emerald-700 font-medium text-sm tracking-widest uppercase">
-                Seek Knowledge from the Cradle to the Grave
+                {t("quoteEnglish")}
               </p>
             </div>
           </motion.div>
@@ -137,10 +137,10 @@ const HeroSection = () => {
                   <Counter value={totalResources} />+
                 </div>
                 <div className="text-slate-500 text-xs font-medium">
-                  Curated Resources
+                  {t("stats.resources.label")}
                 </div>
                 <p className="text-slate-400/60 text-[10px] mt-2 leading-tight">
-                  Over 30 pdfs, 50 videos, 100 playlists.
+                  {t("stats.resources.subtext")}
                 </p>
               </div>
             </motion.div>
@@ -162,10 +162,10 @@ const HeroSection = () => {
                   <Counter value={totalBooks} />
                 </div>
                 <div className="text-emerald-200 text-xs font-medium">
-                  Verified Works
+                  {t("stats.books.label")}
                 </div>
                 <p className="text-emerald-400/60 text-[10px] mt-2 leading-tight">
-                  Aqeedah, Fiqh, Tajweed & more.
+                  {t("stats.books.subtext")}
                 </p>
               </div>
             </motion.div>

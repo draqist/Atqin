@@ -9,24 +9,11 @@ import {
   MessageSquareQuote,
   Mic,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { SidebarUserMenu } from "./sidebar-user-menu";
-
-const mainNav = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Library", href: "/library", icon: Library },
-  {
-    name: "Reflections",
-    href: "/reflections",
-    icon: MessageSquareQuote,
-  }, // NEW
-  { name: "My Hifdh", href: "/hifdh", icon: Mic },
-  { name: "Roadmaps", href: "/roadmaps", icon: Map },
-  { name: "Bookmarks", href: "/bookmarks", icon: Bookmark },
-  // { name: "API Docs", href: "/docs", icon: FileText },
-];
 
 /**
  * Main sidebar navigation component.
@@ -34,9 +21,24 @@ const mainNav = [
  * Responsive design adapts to different screen sizes (hidden on mobile, icon-only on tablet, full width on desktop).
  */
 export function Sidebar() {
+  const t = useTranslations("Sidebar");
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
+
+  const mainNav = [
+    { name: t("nav.dashboard"), href: "/dashboard", icon: LayoutDashboard },
+    { name: t("nav.library"), href: "/library", icon: Library },
+    {
+      name: t("nav.reflections"),
+      href: "/reflections",
+      icon: MessageSquareQuote,
+    }, // NEW
+    { name: t("nav.myHifdh"), href: "/hifdh", icon: Mic },
+    { name: t("nav.roadmaps"), href: "/roadmaps", icon: Map },
+    { name: t("nav.bookmarks"), href: "/bookmarks", icon: Bookmark },
+    // { name: "API Docs", href: "/docs", icon: FileText },
+  ];
 
   return (
     // CHANGE 1: Width logic (Mobile: hidden, Tablet: w-20, Desktop: w-64)
@@ -67,7 +69,7 @@ export function Sidebar() {
         <div>
           {/* Hide labels on tablet */}
           <h3 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-slate-400 hidden lg:block">
-            Menu
+            {t("menu")}
           </h3>
           <nav className="space-y-1 flex flex-col items-center lg:items-stretch">
             {mainNav.map((item) => {

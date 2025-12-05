@@ -1,114 +1,151 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Globe } from "lucide-react";
+import { Github, Linkedin, Twitter, Youtube } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
-const socialLinks = [
-  { name: "Instagram", icon: InstagramIcon, href: "#" },
-  { name: "YouTube", icon: YoutubeIcon, href: "#" },
-  { name: "TikTok", icon: TiktokIcon, href: "#" }, // Custom SVG below
-  { name: "X", icon: XIcon, href: "#" }, // Custom SVG below
-  { name: "Discord", icon: DiscordIcon, href: "#" }, // Custom SVG below
-  { name: "GitHub", icon: GithubIcon, href: "#" },
-];
-
-const footerColumns = [
-  {
-    title: "Product",
-    links: [
-      { label: "Pricing", href: "#" },
-      { label: "Gift Cards", href: "#" },
-      { label: "Family Plan", href: "#" },
-    ],
-  },
-  // {
-  //   title: "Company",
-  //   links: [
-  //     { label: "Blog", href: "#" },
-  //     { label: "Careers", href: "#" },
-  //     { label: "Scholarship", href: "#" },
-  //   ],
-  // },
-  {
-    title: "Support",
-    links: [
-      { label: "Support Center", href: "/support" },
-      { label: "Feature Requests", href: "/features" },
-    ],
-  },
-  {
-    title: "Community",
-    links: [
-      { label: "Hifz Network", href: "#" },
-      { label: "Glossary", href: "#" },
-      { label: "Ramadan", href: "#" },
-      { label: "Discord", href: "#" },
-    ],
-  },
-];
-
 /**
- * The site footer component.
- * Contains links to various sections, social media icons, and copyright info.
+ * The main footer component.
+ * Includes logo, tagline, social links, footer columns, and copyright.
  */
 export function Footer() {
+  const t = useTranslations("Footer");
+
+  // 1. DATA: Define your Footer Links
+  const footerLinks = [
+    {
+      title: t("columns.product.title"),
+      links: [
+        { label: t("columns.product.links.library"), href: "/library" },
+        { label: t("columns.product.links.features"), href: "/features" },
+        { label: t("columns.product.links.pricing"), href: "/pricing" }, // Hidden in UI but good to have
+        { label: t("columns.product.links.roadmap"), href: "/roadmap" },
+      ],
+    },
+    {
+      title: t("columns.resources.title"),
+      links: [
+        { label: t("columns.resources.links.documentation"), href: "/docs" },
+        { label: t("columns.resources.links.apiReference"), href: "/api" },
+        { label: t("columns.resources.links.community"), href: "/community" },
+        { label: t("columns.resources.links.blog"), href: "/blog" },
+      ],
+    },
+    {
+      title: t("columns.company.title"),
+      links: [
+        { label: t("columns.company.links.about"), href: "/about" },
+        { label: t("columns.company.links.careers"), href: "/careers" },
+        { label: t("columns.company.links.contact"), href: "/contact" },
+        { label: t("columns.company.links.partners"), href: "/partners" },
+      ],
+    },
+    {
+      title: t("columns.legal.title"),
+      links: [
+        { label: t("columns.legal.links.privacy"), href: "/privacy" },
+        { label: t("columns.legal.links.terms"), href: "/terms" },
+        { label: t("columns.legal.links.cookies"), href: "/cookies" },
+      ],
+    },
+  ];
+
   return (
-    <footer className="bg-white border-t border-slate-200 pt-20 pb-10 text-slate-600">
-      <div className="mx-auto px-6 2xl:max-w-7xl">
-        {/* TOP SECTION: Logo & Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-6 gap-12 lg:gap-8 mb-20">
-          {/* 1. Brand Column (Left) */}
-          <div className="lg:col-span-2 space-y-6">
-            <Link
-              href="/"
-              className="flex items-center gap-2 font-bold text-xl text-slate-900"
-            >
+    <footer className="bg-slate-50 border-t border-slate-200 pt-16 pb-8">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16">
+          {/* COLUMN 1: Brand & Social (4 cols) */}
+          <div className="lg:col-span-4 space-y-6">
+            <Link href="/" className="flex items-center gap-2">
               <Image
-                src={"iqraa.svg"}
-                alt="iqraa_footer_logo"
-                width={100}
-                height={30}
+                src={"/iqraa.svg"}
+                alt="iqraa_logo"
+                height={40}
+                width={70}
               />
             </Link>
-
             <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
-              The Digital Rihal for the modern student. Preserving the legacy of
-              Islamic knowledge through technology.
+              {t("tagline")}
             </p>
 
-            {/* Social Icons */}
-            <div className="flex items-center gap-3">
+            {/* Social Links */}
+            <div className="flex items-center gap-4">
               <TooltipProvider>
-                {socialLinks.map((social) => (
-                  <Tooltip key={social.name}>
-                    <TooltipTrigger asChild>
-                      <span
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"
-                        aria-label={social.name}
-                      >
-                        <social.icon className="w-5 h-5" />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-white">
-                      <p>Coming Soon</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a
+                      href="#"
+                      className="text-slate-400 hover:text-emerald-600 transition-colors"
+                    >
+                      <Github className="w-5 h-5" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-white">
+                    <p>{t("comingSoon")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a
+                      href="#"
+                      className="text-slate-400 hover:text-emerald-600 transition-colors"
+                    >
+                      <Twitter className="w-5 h-5" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-white">
+                    <p>{t("comingSoon")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a
+                      href="#"
+                      className="text-slate-400 hover:text-emerald-600 transition-colors"
+                    >
+                      <Linkedin className="w-5 h-5" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-white">
+                    <p>{t("comingSoon")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a
+                      href="#"
+                      className="text-slate-400 hover:text-emerald-600 transition-colors"
+                    >
+                      <Youtube className="w-5 h-5" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-white">
+                    <p>{t("comingSoon")}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TooltipProvider>
             </div>
           </div>
 
-          {/* 2. Links Columns (Right) */}
-          <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-3 gap-8">
-            {footerColumns.map((col) => (
+          {/* COLUMNS 2-5: Links (8 cols) */}
+          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+            {footerLinks.map((col) => (
               <div key={col.title}>
                 <h4 className="font-bold text-slate-900 mb-6 text-sm uppercase tracking-wider">
                   {col.title}
@@ -118,7 +155,7 @@ export function Footer() {
                     <li key={link.label}>
                       <Link
                         href={link.href}
-                        className="text-sm text-slate-500 hover:text-emerald-600 transition-colors"
+                        className="text-slate-500 hover:text-emerald-600 transition-colors text-sm"
                       >
                         {link.label}
                       </Link>
@@ -130,35 +167,25 @@ export function Footer() {
           </div>
         </div>
 
-        {/* BOTTOM SECTION: Copyright & Legal */}
-        <div className="pt-8 border-t border-slate-100 flex flex-col-reverse md:flex-row items-center justify-between gap-6">
-          <div className="text-sm text-slate-400">
-            © Copyright {new Date().getFullYear()} Iqraa Platform. All rights
-            reserved.
-          </div>
+        {/* BOTTOM BAR */}
+        <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-slate-400 text-sm">
+            {t("copyright", { year: new Date().getFullYear() })}
+          </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-6">
+          <div className="flex items-center gap-6">
             <Link
-              href="#"
-              className="text-sm text-slate-500 hover:text-slate-900"
+              href="/privacy"
+              className="text-slate-400 hover:text-emerald-600 text-sm transition-colors"
             >
-              Privacy Policy
+              {t("links.privacy")}
             </Link>
             <Link
-              href="#"
-              className="text-sm text-slate-500 hover:text-slate-900"
+              href="/terms"
+              className="text-slate-400 hover:text-emerald-600 text-sm transition-colors"
             >
-              Terms of Service
+              {t("links.terms")}
             </Link>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full h-8 gap-2 border-slate-200 text-slate-600 font-normal"
-            >
-              <Globe className="w-3.5 h-3.5" />
-              English
-            </Button>
           </div>
         </div>
       </div>

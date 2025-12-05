@@ -1,9 +1,10 @@
 "use client";
 
-import { BookOpen, Brain, Mic } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import * as React from "react";
 
+import LanguageSwitcher from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -17,66 +18,37 @@ import {
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
-// 1. DATA: Define your Library Categories
-const libraryCategories: {
-  title: string;
-  href: string;
-  description: string;
-}[] = [
-  {
-    title: "Tajweed & Qira'at",
-    href: "/library?category=tajweed",
-    description: "Master pronunciation and the rules of recitation.",
-  },
-  {
-    title: "Aqeedah",
-    href: "/library?category=aqeedah",
-    description: "Texts regarding Islamic creed and theology.",
-  },
-  {
-    title: "Hadith",
-    href: "/library?category=hadith",
-    description: "Collections of prophetic traditions and narrations.",
-  },
-  {
-    title: "Arabic Grammar",
-    href: "/library?category=grammar",
-    description: "Nahw and Sarf foundations for understanding texts.",
-  },
-];
-
-// 2. DATA: Define your Features
-const features: {
-  title: string;
-  href: string;
-  description: string;
-  icon: React.ElementType;
-}[] = [
-  {
-    title: "AI Recitation",
-    href: "/features/ai",
-    description: "Get real-time feedback on your memorization.",
-    icon: Mic,
-  },
-  {
-    title: "Spaced Repetition",
-    href: "/features/srs",
-    description: "Never forget a verse with smart review schedules.",
-    icon: Brain,
-  },
-  {
-    title: "Digitized Texts",
-    href: "/features/library",
-    description: "Interactive texts with deep-linking, not PDFs.",
-    icon: BookOpen,
-  },
-];
-
 /**
  * The main navigation bar component.
  * Includes logo, navigation menu, and action buttons.
  */
 export function Navbar() {
+  const t = useTranslations("Navbar");
+
+  // 1. DATA: Define your Library Categories
+  const libraryCategories = [
+    {
+      title: t("categories.tajweed.title"),
+      href: "/library?category=tajweed",
+      description: t("categories.tajweed.description"),
+    },
+    {
+      title: t("categories.aqeedah.title"),
+      href: "/library?category=aqeedah",
+      description: t("categories.aqeedah.description"),
+    },
+    {
+      title: t("categories.hadith.title"),
+      href: "/library?category=hadith",
+      description: t("categories.hadith.description"),
+    },
+    {
+      title: t("categories.grammar.title"),
+      href: "/library?category=grammar",
+      description: t("categories.grammar.description"),
+    },
+  ];
+
   return (
     // THE CONTAINER: Adds the glass effect and border to fix "plainness"
     <header className="fixed top-0 w-full z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md supports-backdrop-filter:bg-white/60">
@@ -95,7 +67,7 @@ export function Navbar() {
             {/* MENU 1: THE LIBRARY (Mega Menu) */}
             <NavigationMenuItem>
               <NavigationMenuTrigger className="bg-transparent text-slate-600 hover:text-emerald-700 focus:bg-emerald-50">
-                Library
+                {t("library")}
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-1 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
@@ -141,7 +113,7 @@ export function Navbar() {
                   "bg-transparent text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/50"
                 )}
               >
-                <Link href="/about">About</Link>
+                <Link href="/about">{t("about")}</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
 
@@ -153,7 +125,7 @@ export function Navbar() {
                 )}
                 asChild
               >
-                <Link href="/roadmap">Roadmaps</Link>
+                <Link href="/roadmap">{t("roadmaps")}</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
             {/* <NavigationMenuItem>
@@ -172,15 +144,16 @@ export function Navbar() {
 
         {/* ACTIONS (RIGHT) */}
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
           <Link
             href="/login"
             className="text-sm font-medium text-slate-600 hover:text-emerald-700 hidden sm:block"
           >
-            Log in
+            {t("login")}
           </Link>
           <Link href="/library">
             <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-full px-6">
-              Start Learning
+              {t("startLearning")}
             </Button>
           </Link>
         </div>

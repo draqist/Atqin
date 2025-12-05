@@ -18,38 +18,34 @@ import {
   MessageSquareQuote,
   Mic,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SidebarUserMenu } from "./sidebar-user-menu";
-
-// Duplicate nav config to keep it self-contained (or extract to a config file)
-const mainNav = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Library", href: "/library", icon: Library },
-  { name: "Reflections", href: "/reflections", icon: MessageSquareQuote },
-  { name: "My Hifdh", href: "/hifdh", icon: Mic },
-  { name: "Roadmaps", href: "/roadmaps", icon: Map },
-  { name: "Bookmarks", href: "/bookmarks", icon: Bookmark },
-];
-
-// const categories = [
-//   { name: "Tajweed & Qira'at", slug: "tajweed" },
-//   { name: "Aqeedah", slug: "aqeedah" },
-//   { name: "Hadith", slug: "hadith" },
-//   { name: "Arabic Grammar", slug: "grammar" },
-// ];
-
 import { NotificationBell } from "./notification-bell";
-
-// ...
+import { SidebarUserMenu } from "./sidebar-user-menu";
 
 /**
  * Mobile navigation component.
  * Renders a sheet with the main navigation menu and user menu for mobile devices.
  */
 export function MobileNav() {
+  const t = useTranslations("Sidebar");
   const pathname = usePathname();
+
+  // Duplicate nav config to keep it self-contained (or extract to a config file)
+  const mainNav = [
+    { name: t("nav.dashboard"), href: "/dashboard", icon: LayoutDashboard },
+    { name: t("nav.library"), href: "/library", icon: Library },
+    {
+      name: t("nav.reflections"),
+      href: "/reflections",
+      icon: MessageSquareQuote,
+    },
+    { name: t("nav.myHifdh"), href: "/hifdh", icon: Mic },
+    { name: t("nav.roadmaps"), href: "/roadmaps", icon: Map },
+    { name: t("nav.bookmarks"), href: "/bookmarks", icon: Bookmark },
+  ];
 
   return (
     <Sheet>
@@ -93,7 +89,7 @@ export function MobileNav() {
           {/* Main Menu */}
           <div>
             <h3 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Menu
+              {t("menu")}
             </h3>
             <nav className="space-y-1">
               {mainNav.map((item) => {

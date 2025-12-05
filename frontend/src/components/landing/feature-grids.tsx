@@ -11,65 +11,7 @@ import {
   Smartphone,
   Users,
 } from "lucide-react";
-
-const features = [
-  {
-    title: "Verified Library",
-    description:
-      "Access digitised classical texts with verified Tahqiq, not just scanned PDFs.",
-    icon: BookOpen,
-    color: "bg-red-50 text-red-600", // Light Red box
-  },
-  {
-    title: "AI Tasm'i",
-    description:
-      "Recite to the app. It listens, corrects mistakes, and tracks your fluency.",
-    icon: Mic,
-    color: "bg-blue-50 text-blue-600", // Light Blue box
-  },
-  {
-    title: "Smart SRS",
-    description:
-      "Spaced Repetition System that ensures you review lines right before you forget them.",
-    icon: Brain,
-    color: "bg-green-50 text-green-600", // Light Green box
-  },
-  {
-    title: "Contextual Sharh",
-    description:
-      "Click any verse to instantly see explanations from scholars like Ibn Uthaymeen.",
-    icon: ScrollText,
-    color: "bg-amber-50 text-amber-600", // Light Amber box
-  },
-  {
-    title: "Audio Sync",
-    description:
-      "Listen to world-renowned reciters synced line-by-line with the text.",
-    icon: Headphones,
-    color: "bg-purple-50 text-purple-600", // Light Purple box
-  },
-  {
-    title: "Hifdh Circles",
-    description:
-      "Join virtual circles with friends to track progress and keep each other accountable.",
-    icon: Users,
-    color: "bg-teal-50 text-teal-600", // Light Teal box
-  },
-  {
-    title: "Progress Analytics",
-    description:
-      "Visualize your memorization strength with heatmaps and retention charts.",
-    icon: BarChart3,
-    color: "bg-pink-50 text-pink-600", // Light Pink box
-  },
-  {
-    title: "Cross-Platform",
-    description:
-      "Start reading on your laptop, continue memorizing on your phone. Always synced.",
-    icon: Smartphone,
-    color: "bg-slate-50 text-slate-600", // Light Slate box
-  },
-];
+import { useTranslations } from "next-intl";
 
 const container = {
   hidden: { opacity: 0 },
@@ -91,6 +33,59 @@ const item = {
  * Uses Framer Motion for entrance animations.
  */
 export function FeaturesGrid() {
+  const t = useTranslations("Features");
+
+  const features = [
+    {
+      title: t("items.verifiedLibrary.title"),
+      description: t("items.verifiedLibrary.description"),
+      icon: BookOpen,
+      color: "bg-red-50 text-red-600", // Light Red box
+    },
+    {
+      title: t("items.aiTasmi.title"),
+      description: t("items.aiTasmi.description"),
+      icon: Mic,
+      color: "bg-blue-50 text-blue-600", // Light Blue box
+    },
+    {
+      title: t("items.smartSrs.title"),
+      description: t("items.smartSrs.description"),
+      icon: Brain,
+      color: "bg-green-50 text-green-600", // Light Green box
+    },
+    {
+      title: t("items.contextualSharh.title"),
+      description: t("items.contextualSharh.description"),
+      icon: ScrollText,
+      color: "bg-amber-50 text-amber-600", // Light Amber box
+    },
+    {
+      title: t("items.audioSync.title"),
+      description: t("items.audioSync.description"),
+      icon: Headphones,
+      color: "bg-purple-50 text-purple-600", // Light Purple box
+    },
+    {
+      title: t("items.hifdhCircles.title"),
+      description: t("items.hifdhCircles.description"),
+      icon: Users,
+      color: "bg-teal-50 text-teal-600", // Light Teal box
+    },
+    {
+      title: t("items.progressAnalytics.title"),
+      description: t("items.progressAnalytics.description"),
+      icon: BarChart3,
+      color: "bg-pink-50 text-pink-600", // Light Pink box
+    },
+    {
+      title: t("items.crossPlatform.title"),
+      description: t("items.crossPlatform.description"),
+      icon: Smartphone,
+      color: "bg-slate-50 text-slate-600", // Light Slate box
+    },
+  ];
+
   return (
     <section className="py-24 px-6 w-full bg-slate-50">
       <div className="w-full max-w-6xl mx-auto">
@@ -101,19 +96,22 @@ export function FeaturesGrid() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
-            Our Features
+            {t("badge")}
           </div>
 
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight">
-            We built this for the love of <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-500">
-              The Deen. (Preserving Knowledge)
-            </span>
+            {t.rich("title", {
+              br: () => <br />,
+              highlight: (chunks) => (
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-500">
+                  {chunks}
+                </span>
+              ),
+            })}
           </h2>
 
           <p className="text-slate-500 text-lg leading-relaxed">
-            Everything a student needs to read, memorize, and master the Mutuun.
-            Streamline your Hifdh journey with powerful, modern tools.
+            {t("description")}
           </p>
         </div>
 
@@ -150,7 +148,7 @@ export function FeaturesGrid() {
 
         {/* FOOTER NOTE */}
         <div className="text-center mt-16 text-slate-400 text-sm">
-          Iqraa offers comprehensive tools for students of all levels.
+          {t("footer")}
         </div>
       </div>
     </section>
