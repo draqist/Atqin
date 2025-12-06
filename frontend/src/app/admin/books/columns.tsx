@@ -63,7 +63,7 @@ export const columns: ColumnDef<Book>[] = [
 
       return (
         <div
-          className="flex items-center gap-4 py-1"
+          className="flex items-center gap-4 py-1 cursor-pointer"
           onClick={() => router.push(`/admin/books/${book.id}`)}
         >
           {/* Visual Cover */}
