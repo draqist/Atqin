@@ -57,7 +57,7 @@ export function MobilePlayer({
     >
       <Drawer.Portal>
         <Drawer.Title className="sr-only">Mobile Player</Drawer.Title>
-        <Drawer.Content className="fixed flex flex-col bg-white border-t border-slate-200 border-b-none rounded-t-[20px] bottom-0 left-0 right-0 h-full max-h-[97%] -mx-px shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)] z-50 focus:outline-none">
+        <Drawer.Content className="fixed flex flex-col bg-white border-t border-slate-200 border-b-none rounded-t-[20px] bottom-0 left-0 right-0 h-full max-h-full -mx-px shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)] z-50 focus:outline-none">
           {/* HANDLE BAR */}
           <div
             className="w-full flex justify-center pt-4 pb-2 cursor-pointer"
@@ -318,12 +318,12 @@ export function MobilePlayer({
               {/* TAB 2: NOTES EDITOR */}
               <div
                 className={cn(
-                  "absolute inset-0 flex flex-col bg-white",
+                  "absolute inset-0 flex flex-col h-full bg-white",
                   activeTab === "notes" ? "z-10" : "z-0 hidden"
                 )}
               >
-                <div className="flex-1 p-4 pb-24 overflow-y-auto">
-                  <div className="border rounded-xl p-1 shadow-sm bg-white h-full min-h-[108px]">
+                <div className="p-4 pb-0 md:pb-24 h-9/12">
+                  <div className="border rounded-xl p-1 shadow-sm bg-white h-full">
                     {/* Reuse the QuickNote Editor */}
                     <QuickNote bookId={bookId} />
                   </div>

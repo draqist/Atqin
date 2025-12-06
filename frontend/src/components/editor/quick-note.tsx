@@ -46,7 +46,7 @@ export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm focus:outline-none min-h-[260px] p-4 text-slate-700 text-left placeholder:text-black text-sm",
+          "prose prose-sm focus:outline-none md:min-h-[260px] p-4 text-slate-700 text-left placeholder:text-black text-sm",
       },
     },
     onUpdate: ({ editor }) => {
@@ -95,7 +95,7 @@ export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="grid grid-rows-[auto_1fr_auto] h-full w-full">
       {/* Toolbar */}
       <div className="flex items-center justify-between py-2 px-4 border-b border-slate-100 bg-white">
         <span className="text-xs text-slate-400 font-medium flex items-center gap-1">

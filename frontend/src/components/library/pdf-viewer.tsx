@@ -163,9 +163,6 @@ export function PdfViewer({
             renderTextLayer={false} // Set to true if you want selectable text
             renderAnnotationLayer={false}
             className="w-full min-w-full flex justify-center"
-            loading={<PdfSkeleton />}
-            error={<PdfError />}
-            noData={<PdfNoData />}
           />
         </Document>
       </div>
