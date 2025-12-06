@@ -14,7 +14,6 @@ import {
 import { Book } from "@/lib/types";
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  Calendar,
   ExternalLink,
   FileText,
   MoreHorizontal,
@@ -22,6 +21,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export const columns: ColumnDef<Book>[] = [
   // 1. SELECTION (Minimalist)
@@ -56,13 +56,16 @@ export const columns: ColumnDef<Book>[] = [
     header: "Book",
     cell: ({ row }) => {
       const book = row.original;
-
+      const router = useRouter();
       // Fallback Logic
       const hasImage =
         book.cover_image_url && book.cover_image_url.startsWith("http");
 
       return (
-        <div className="flex items-center gap-4 py-1">
+        <div
+          className="flex items-center gap-4 py-1"
+          onClick={() => router.push(`/admin/books/${book.id}`)}
+        >
           {/* Visual Cover */}
           <div className="h-12 w-9 rounded-[4px] overflow-hidden bg-slate-100 border border-slate-200 shadow-sm shrink-0 relative group">
             {hasImage ? (
@@ -156,6 +159,7 @@ export const columns: ColumnDef<Book>[] = [
     },
   },
 
+  // 5. DATE ADDED
   {
     accessorKey: "resource_count",
     header: "Resources",
@@ -164,20 +168,6 @@ export const columns: ColumnDef<Book>[] = [
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <FileText className="w-3 h-3" />
           {row.getValue("resource_count")}
-        </div>
-      );
-    },
-  },
-
-  // 5. DATE ADDED
-  {
-    accessorKey: "created_at",
-    header: "Added",
-    cell: ({ row }) => {
-      return (
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Calendar className="w-3 h-3" />
-          {new Date(row.getValue("created_at")).toLocaleDateString()}
         </div>
       );
     },
