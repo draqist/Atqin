@@ -33,14 +33,14 @@ type BookModel struct {
 // It returns the ID, creation time, and initial version of the newly created book.
 func (m BookModel) Insert(book *Book) error {
 	query := `
-		INSERT INTO books (title, original_author, description, cover_image_url, metadata, is_public)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO books (title, original_author, description, cover_image_url, metadata, is_public, title_ar, author_ar)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id, created_at, version`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []any{book.Title, book.OriginalAuthor, book.Description, book.CoverImageURL, book.Metadata, book.IsPublic}
+	args := []any{book.Title, book.OriginalAuthor, book.Description, book.CoverImageURL, book.Metadata, book.IsPublic, book.TitleAr, book.OriginalAuthorAr}
 
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(&book.ID, &book.CreatedAt, &book.Version)
 }
@@ -53,7 +53,7 @@ func (m BookModel) Get(id string) (*Book, error) {
 	}
 
 	query := `
-		SELECT id, title, original_author, COALESCE(description, ''), COALESCE(cover_image_url, ''), COALESCE(metadata, '{}'), is_public, created_at, version
+		SELECT id, title, original_author, COALESCE(description, ''), COALESCE(cover_image_url, ''), COALESCE(metadata, '{}'), is_public, created_at, version, title_ar, author_ar
 		FROM books
 		WHERE id = $1`
 
@@ -72,6 +72,8 @@ func (m BookModel) Get(id string) (*Book, error) {
 		&book.IsPublic,
 		&book.CreatedAt,
 		&book.Version,
+		&book.TitleAr,
+		&book.OriginalAuthorAr,
 	)
 
 	if err != nil {
@@ -88,11 +90,10 @@ func (m BookModel) Get(id string) (*Book, error) {
 // It returns a slice of Book pointers, metadata for pagination, or an error.
 func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, error) {
 	query := `
-		SELECT count(*) OVER(), id, title, original_author, COALESCE(description, ''), COALESCE(cover_image_url, ''), COALESCE(metadata, '{}'), is_public, created_at, version,
+		SELECT count(*) OVER(), id, title, original_author, COALESCE(description, ''), COALESCE(cover_image_url, ''), COALESCE(metadata, '{}'), is_public, created_at, version, title_ar, author_ar,
 		(SELECT COUNT(*) FROM resources WHERE book_id = books.id) as resource_count
 		FROM books
-		WHERE (title ILIKE '%' || $1 || '%' OR $1 = '')
-		AND (original_author ILIKE '%' || $1 || '%' OR $1 = '')
+		WHERE (title ILIKE '%' || $1 || '%' OR original_author ILIKE '%' || $1 || '%' OR title_ar ILIKE '%' || $1 || '%' OR author_ar ILIKE '%' || $1 || '%' OR $1 = '')
         AND ($4::boolean IS NULL OR is_public = $4)
 		ORDER BY id DESC
 		LIMIT $2 OFFSET $3`
@@ -121,6 +122,8 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 			&book.IsPublic,
 			&book.CreatedAt,
 			&book.Version,
+			&book.TitleAr,
+			&book.OriginalAuthorAr,
 			&book.ResourceCount,
 		)
 		if err != nil {
@@ -143,8 +146,8 @@ func (m BookModel) GetAll(title string, filters Filters) ([]*Book, Metadata, err
 func (m BookModel) Update(book *Book) error {
 	query := `
 		UPDATE books
-		SET title = $1, original_author = $2, description = $3, cover_image_url = $4, metadata = $5, is_public = $6, version = version + 1
-		WHERE id = $7
+		SET title = $1, original_author = $2, description = $3, cover_image_url = $4, metadata = $5, is_public = $6, title_ar = $7, author_ar = $8, version = version + 1
+		WHERE id = $9
 		RETURNING version`
 
 	args := []any{
@@ -154,6 +157,8 @@ func (m BookModel) Update(book *Book) error {
 		book.CoverImageURL,
 		book.Metadata,
 		book.IsPublic,
+		book.TitleAr,
+		book.OriginalAuthorAr,
 		book.ID,
 	}
 

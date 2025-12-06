@@ -13,10 +13,12 @@ import (
 // POST /v1/books
 func (app *application) createBookHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Title          string `json:"title"`
-		OriginalAuthor string `json:"original_author"`
-		Description    string `json:"description"`
-		CoverImageURL  string `json:"cover_image_url"`
+		Title          string  `json:"title"`
+		OriginalAuthor string  `json:"original_author"`
+		Description    string  `json:"description"`
+		CoverImageURL  string  `json:"cover_image_url"`
+		TitleAr        *string `json:"title_ar"`
+		OriginalAuthorAr *string `json:"author_ar"`
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&input)
@@ -32,6 +34,8 @@ func (app *application) createBookHandler(w http.ResponseWriter, r *http.Request
 		Metadata:       json.RawMessage(`{}`),
 		IsPublic:       true,
 		CoverImageURL:  input.CoverImageURL,
+		TitleAr:        input.TitleAr,
+		OriginalAuthorAr: input.OriginalAuthorAr,
 	}
 
 	err = app.models.Books.Insert(book)
@@ -115,6 +119,8 @@ func (app *application) updateBookHandler(w http.ResponseWriter, r *http.Request
 		Description    *string `json:"description"`
 		CoverImageURL  *string `json:"cover_image_url"`
 		Category       *string `json:"category"`
+		TitleAr        *string `json:"title_ar"`
+		OriginalAuthorAr *string `json:"author_ar"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -133,6 +139,12 @@ func (app *application) updateBookHandler(w http.ResponseWriter, r *http.Request
 	}
 	if input.CoverImageURL != nil {
 		book.CoverImageURL = *input.CoverImageURL
+	}
+	if input.TitleAr != nil {
+		book.TitleAr = input.TitleAr
+	}
+	if input.OriginalAuthorAr != nil {
+		book.OriginalAuthorAr = input.OriginalAuthorAr
 	}
 
 	if input.Category != nil {

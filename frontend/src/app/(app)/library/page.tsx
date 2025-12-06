@@ -20,22 +20,18 @@ export default function LibraryPage() {
   const debouncedSearch = useDebounce(searchQ, 500);
 
   // 1. Get Params
-  const searchQuery = searchParams.get("q") || "";
+
   const currentCategory = searchParams.get("category");
   const currentLevel = searchParams.get("level");
   const currentSort = searchParams.get("sort") || "newest";
 
+  // Sync local state with URL params (for Header search support)
   useEffect(() => {
-    if (debouncedSearch === searchQuery) return;
-
-    const params = new URLSearchParams(searchParams.toString());
-    if (debouncedSearch) {
-      params.set("q", debouncedSearch);
-    } else {
-      params.delete("q");
+    const urlQuery = searchParams.get("q");
+    if (urlQuery !== null && urlQuery !== searchQ) {
+      setSearchQuery(urlQuery);
     }
-    router.push(`/library?${params.toString()}`);
-  }, [debouncedSearch, searchQuery, router, searchParams]);
+  }, [searchParams, searchQ]);
 
   const {
     data,
@@ -45,7 +41,7 @@ export default function LibraryPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useBooks(searchQuery);
+  } = useBooks(debouncedSearch);
 
   const [ref, inView] = useInView();
 
@@ -92,7 +88,7 @@ export default function LibraryPage() {
 
   // Split for "Trending" section (Just takes top 4 of current filter)
   const trendingBooks =
-    !currentCategory && !currentLevel && !searchQuery
+    !currentCategory && !currentLevel && !debouncedSearch
       ? filteredBooks.slice(0, 4)
       : [];
 

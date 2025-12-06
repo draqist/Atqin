@@ -34,11 +34,7 @@ const formSchema = z.object({
   original_author: z.string().min(2, "Author is required"),
   description: z.string().optional(),
   category: z.string().min(1, "Category is required"),
-  cover_image_url: z
-    .string()
-    .url("Must be a valid URL")
-    .optional()
-    .or(z.literal("")),
+  cover_image_url: z.url("Must be a valid URL").optional().or(z.literal("")),
 });
 
 /**
