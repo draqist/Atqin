@@ -57,7 +57,7 @@ export function MobilePlayer({
     >
       <Drawer.Portal>
         <Drawer.Title className="sr-only">Mobile Player</Drawer.Title>
-        <Drawer.Content className="fixed flex flex-col bg-white border-t border-slate-200 border-b-none rounded-t-[20px] bottom-0 left-0 right-0 h-full max-h-full -mx-px shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)] z-50 focus:outline-none">
+        <Drawer.Content className="fixed flex flex-col bg-white border-t border-slate-200 border-b-none rounded-t-[20px] bottom-0 left-0 right-0 h-full max-h-[97%] -mx-px shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)] z-50 focus:outline-none">
           {/* HANDLE BAR */}
           <div
             className="w-full flex justify-center pt-4 pb-2 cursor-pointer"
