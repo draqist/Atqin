@@ -156,6 +156,19 @@ export const columns: ColumnDef<Book>[] = [
     },
   },
 
+  {
+    accessorKey: "resource_count",
+    header: "Resources",
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <FileText className="w-3 h-3" />
+          {row.getValue("resource_count")}
+        </div>
+      );
+    },
+  },
+
   // 5. DATE ADDED
   {
     accessorKey: "created_at",
