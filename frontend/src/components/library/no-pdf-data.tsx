@@ -13,7 +13,7 @@ export function PdfNoData({
   isError = false,
 }: PdfNoDataProps) {
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-[600px] bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-center p-8">
+    <div className="flex flex-col items-center justify-center w-full min-h-[600px] bg-slate-50 border-2 border-dashed border-slate-200 rounded-sm text-center p-8">
       <div
         className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
           isError ? "bg-red-50 text-red-500" : "bg-slate-100 text-slate-400"

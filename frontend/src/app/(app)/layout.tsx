@@ -15,7 +15,7 @@ export default function LibraryLayout({
         <Sidebar />
       </div>
       {/* Main Content */}
-      <div className="flex-1 flex flex-col pl-0 md:pl-20 lg:pl-64">
+      <div className="flex-1 flex flex-col pl-0 md:pl-20 xl:pl-64">
         <Header />
 
         {/* Scrollable Content Area */}

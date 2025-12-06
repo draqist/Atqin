@@ -40,7 +40,7 @@ export function Sidebar() {
 
   return (
     // CHANGE 1: Width logic (Mobile: hidden, Tablet: w-20, Desktop: w-64)
-    <div className="hidden md:flex md:w-20 lg:w-64 flex-col h-full border-r border-slate-200 bg-white text-slate-900 transition-all duration-300">
+    <div className="hidden md:flex md:w-20 xl:w-64 flex-col h-full border-r border-slate-200 bg-white text-slate-900 transition-all duration-300">
       {/* 1. APP LOGO */}
       <div className="h-16 flex items-center justify-center lg:justify-between lg:px-4 border-b border-slate-100">
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
@@ -66,7 +66,7 @@ export function Sidebar() {
       <div className="flex-1 overflow-y-auto py-6 px-2 lg:px-4 space-y-8">
         <div>
           {/* Hide labels on tablet */}
-          <h3 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-slate-400 hidden lg:block">
+          <h3 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-slate-400 hidden xl:block">
             Menu
           </h3>
           <nav className="space-y-1 flex flex-col items-center lg:items-stretch">
@@ -90,51 +90,13 @@ export function Sidebar() {
                         isActive ? "text-emerald-600" : "text-slate-400"
                       )}
                     />
-                    <span className="hidden lg:block">{item.name}</span>
+                    <span className="hidden xl:block">{item.name}</span>
                   </span>
                 </Link>
               );
             })}
           </nav>
         </div>
-
-        {/* Categories */}
-        {/* <div>
-          <h3 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-slate-400 hidden lg:block">
-            Categories
-          </h3>
-          <nav className="space-y-1 flex flex-col items-center lg:items-stretch">
-            {categories.map((cat) => {
-              const isActive = currentCategory === cat.slug;
-              return (
-                <Link
-                  key={cat.slug}
-                  href={`/library?category=${cat.slug}`}
-                  title={cat.name}
-                >
-                  <span
-                    className={cn(
-                      "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                      "justify-center lg:justify-start",
-                      isActive
-                        ? "bg-slate-100 text-slate-900"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Hash className="w-5 h-5 shrink-0 text-slate-300" />
-                      <span className="hidden lg:block">{cat.name}</span>
-                    </div>
-                    {isActive && (
-                      // Indicator dot
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 absolute lg:static right-2 top-2 lg:right-auto lg:top-auto" />
-                    )}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div> */}
       </div>
 
       {/* 3. USER FOOTER */}

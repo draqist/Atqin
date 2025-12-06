@@ -15,7 +15,7 @@ export function PdfError({
   onRetry,
 }: PdfErrorProps) {
   return (
-    <div className="flex flex-col items-center justify-center h-[600px] w-full bg-red-50/50 border border-red-100 rounded-lg text-center p-6">
+    <div className="flex flex-col items-center justify-center h-[600px] w-full bg-red-50/50 border border-red-100 rounded-sm text-center p-6">
       <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
         <AlertCircle className="w-8 h-8 text-red-500" />
       </div>

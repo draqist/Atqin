@@ -42,7 +42,7 @@ export function SidebarUserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-3 w-full py-2 rounded-lg hover:bg-slate-100 transition-colors outline-none group">
+        <button className="flex items-center gap-3 w-full py-2 rounded-lg hover:bg-slate-100 transition-colors outline-none group justify-center lg:justify-start">
           <Avatar className="h-9 w-9 rounded-lg border border-slate-200">
             <AvatarImage src={""} alt={displayName} />
             <AvatarFallback className="rounded-lg bg-emerald-100 text-emerald-700 font-bold">
@@ -50,7 +50,7 @@ export function SidebarUserMenu() {
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex-1 text-left text-sm leading-tight md:hidden lg:grid min-w-0">
+          <div className="flex-1 text-left text-sm leading-tight hidden lg:grid min-w-0">
             <span className="truncate font-semibold text-slate-900 block">
               {displayName}
             </span>
@@ -59,7 +59,7 @@ export function SidebarUserMenu() {
             </span>
           </div>
 
-          <ChevronsUpDown className="ml-auto size-4 text-slate-400 group-hover:text-slate-600" />
+          <ChevronsUpDown className="ml-auto size-4 text-slate-400 group-hover:text-slate-600 hidden lg:block" />
         </button>
       </DropdownMenuTrigger>
 
