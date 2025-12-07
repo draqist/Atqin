@@ -12,6 +12,7 @@ import (
 
 	// Import the pgx driver for Postgres
 	"github.com/draqist/iqraa/backend/internal/data"
+	"github.com/draqist/iqraa/backend/internal/mailer" // Added
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -28,6 +29,13 @@ type config struct {
 		url string
 		key string
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 // Application holds the dependencies for our HTTP handlers, helpers, and middleware.
@@ -36,6 +44,7 @@ type application struct {
 	logger *log.Logger
 	db     *sql.DB
 	models data.Models
+	mailer mailer.Mailer // Added
 }
 
 // main is the entry point of the application.
@@ -60,6 +69,13 @@ func main() {
 		cfg.db.dsn = "postgres://user:password@localhost:5432/iqraa_db?sslmode=disable"
 	}
 
+	cfg.smtp.host = os.Getenv("SMTP_HOST")
+	port, _ := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	cfg.smtp.port = port
+	cfg.smtp.username = os.Getenv("SMTP_USERNAME")
+	cfg.smtp.password = os.Getenv("SMTP_PASSWORD")
+	cfg.smtp.sender = os.Getenv("SMTP_SENDER")
+
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
 	db, err := openDB(cfg)
@@ -74,6 +90,7 @@ func main() {
 		logger: logger,
 		db:     db,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 
 	srv := &http.Server{

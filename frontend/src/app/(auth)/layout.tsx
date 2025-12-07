@@ -14,9 +14,15 @@ export default function AuthLayout({
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 font-bold text-xl text-slate-900 mb-10"
+            className="flex items-center gap-2 font-bold text-xl text-slate-900 mb-10 justify-center text-center"
           >
-            <Image src={"/iqraa.svg"} alt="Iqraa Logo" width={100} height={50} className="items-center align-middle" />
+            <Image
+              src={"/iqraa.svg"}
+              alt="Iqraa Logo"
+              width={100}
+              height={50}
+              className="items-center align-middle"
+            />
           </Link>
 
           {children}

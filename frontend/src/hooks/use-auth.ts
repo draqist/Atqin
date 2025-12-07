@@ -114,3 +114,37 @@ export const useLogout = () => {
 
   return { logout };
 };
+
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const { data } = await api.post("/users/forgot-password", { email });
+      return data;
+    },
+    onSuccess: (data: any) => {
+      toast.success(data.message || "Reset link sent");
+    },
+    onError: (error: any) => {
+      const msg = error.response?.data?.error || "Failed to send reset link";
+      toast.error(msg);
+    },
+  });
+};
+
+export const useResetPassword = () => {
+  const router = useRouter();
+  return useMutation({
+    mutationFn: async (credentials: any) => {
+      const { data } = await api.put("/users/reset-password", credentials);
+      return data;
+    },
+    onSuccess: (data: any) => {
+      toast.success(data.message || "Password updated successfully");
+      router.push("/login");
+    },
+    onError: (error: any) => {
+      const msg = error.response?.data?.error || "Failed to reset password";
+      toast.error(msg);
+    },
+  });
+};

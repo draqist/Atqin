@@ -30,6 +30,8 @@ func (app *application) routes() http.Handler {
 	// Authentication
 	mux.HandleFunc("POST /v1/users/register", app.registerUserHandler)
 	mux.HandleFunc("POST /v1/users/login", app.loginUserHandler)
+	mux.HandleFunc("POST /v1/users/forgot-password", app.forgotPasswordHandler) // Added
+	mux.HandleFunc("PUT /v1/users/reset-password", app.resetPasswordHandler)    // Added
 
 	// Roadmaps (Public Read with Optional Auth)
 	mux.HandleFunc("GET /v1/roadmaps", app.authenticateIfExists(app.listRoadmapsHandler))

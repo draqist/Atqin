@@ -1,9 +1,13 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/draqist/iqraa/backend/internal/auth"
 	"github.com/draqist/iqraa/backend/internal/data"
@@ -131,6 +135,99 @@ func (app *application) searchUsersHandler(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
+}
+
+func (app *application) forgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Email string `json:"email"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		app.errorResponse(w, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	user, err := app.models.Users.GetByEmail(input.Email)
+	if err != nil {
+		if errors.Is(err, data.ErrRecordNotFound) {
+			// Do not reveal if email exists, just return accepted
+			w.WriteHeader(http.StatusAccepted)
+			json.NewEncoder(w).Encode(map[string]string{"message": "If that email exists, we sent a reset link to it."})
+			return
+		}
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to process request")
+		return
+	}
+
+	// Generate a random token
+	tokenBytes := make([]byte, 16)
+	_, err = rand.Read(tokenBytes)
+	if err != nil {
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to generate token")
+		return
+	}
+	token := hex.EncodeToString(tokenBytes)
+
+	// Hash the token for storage
+	hash := sha256.Sum256([]byte(token))
+	hashSlice := hash[:]
+
+	expiry := time.Now().Add(1 * time.Hour) // Token valid for 1 hour
+
+	err = app.models.Users.SetPasswordResetToken(user.ID, hashSlice, expiry)
+	if err != nil {
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to store reset token")
+		return
+	}
+
+	// Send email (simulated for now)
+	err = app.mailer.SendPasswordReset(user.Email, token)
+	if err != nil {
+		app.logger.Println("Failed to send email:", err)
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(map[string]string{"message": "If that email exists, we sent a reset link to it."})
+}
+
+func (app *application) resetPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Token    string `json:"token"`
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		app.errorResponse(w, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	if len(input.Password) < 8 {
+		app.errorResponse(w, http.StatusBadRequest, "Password must be at least 8 characters")
+		return
+	}
+
+	// Hash the provided token
+	hash := sha256.Sum256([]byte(input.Token))
+	hashSlice := hash[:]
+
+	user, err := app.models.Users.GetByPasswordResetToken(hashSlice)
+	if err != nil {
+		if errors.Is(err, data.ErrRecordNotFound) {
+			app.errorResponse(w, http.StatusBadRequest, "Invalid or expired token")
+			return
+		}
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to validate token")
+		return
+	}
+
+	err = app.models.Users.UpdatePassword(user.ID, input.Password)
+	if err != nil {
+		app.errorResponse(w, http.StatusInternalServerError, "Failed to update password")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Password updated successfully"})
 }
 
 func (app *application) generateToken(userID string) (string, error) {

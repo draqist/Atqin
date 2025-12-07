@@ -21,6 +21,8 @@ type User struct {
 	Username     string    `json:"username"`
 	Password     string    `json:"-"`
 	PasswordHash []byte    `json:"-"`
+	PasswordResetTokenHash []byte `json:"-"`
+	PasswordResetExpiry    time.Time `json:"-"`
 	CreatedAt    time.Time `json:"created_at"`
 	Role         string    `json:"role"`
 }
@@ -184,4 +186,70 @@ func (m UserModel) Search(query string) ([]*User, error) {
 		users = append(users, &u)
 	}
 	return users, nil
+}
+
+// SetPasswordResetToken sets the password reset token hash and expiry for a user.
+func (m UserModel) SetPasswordResetToken(userID string, tokenHash []byte, expiry time.Time) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `
+		UPDATE users 
+		SET password_reset_token_hash = $1, password_reset_expiry = $2 
+		WHERE id = $3`
+
+	_, err := m.DB.ExecContext(ctx, query, tokenHash, expiry, userID)
+	return err
+}
+
+// GetByPasswordResetToken retrieves a user matching the given token hash, provided the token has not expired.
+func (m UserModel) GetByPasswordResetToken(tokenHash []byte) (*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `
+		SELECT id, name, email, username, password_hash, role, created_at 
+		FROM users 
+		WHERE password_reset_token_hash = $1 AND password_reset_expiry > $2`
+
+	var user User
+	var username sql.NullString
+
+	err := m.DB.QueryRowContext(ctx, query, tokenHash, time.Now()).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&username,
+		&user.PasswordHash,
+		&user.Role,
+		&user.CreatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
+		return nil, err
+	}
+	user.Username = username.String
+	return &user, nil
+}
+
+// UpdatePassword updates the user's password and clears the reset token.
+func (m UserModel) UpdatePassword(userID string, password string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `
+		UPDATE users 
+		SET password_hash = $1, password_reset_token_hash = NULL, password_reset_expiry = NULL 
+		WHERE id = $2`
+
+	_, err = m.DB.ExecContext(ctx, query, hash, userID)
+	return err
 }
