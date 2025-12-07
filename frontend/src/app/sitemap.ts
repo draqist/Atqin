@@ -4,7 +4,7 @@ import { Book, Roadmap } from '@/lib/types';
 import { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://atqin.vercel.app'; // Your real domain
+  const baseUrl = 'https://iqraa.space'; // Your real domain
 
   // 1. Fetch all dynamic data
   // (Ensure these API calls are cached or fast)
