@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin/', '/dashboard/', '/hifdh/'], // Don't index private/admin pages
     },
-    sitemap: 'https://atqin.vercel.app/sitemap.xml',
+    sitemap: 'https://iqraa.space/sitemap.xml',
   };
 }
