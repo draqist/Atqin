@@ -228,3 +228,39 @@ export interface StudentStats {
   last_book_opened?: Book;
   last_book_progress?: BookProgress;
 }
+
+export interface Discussion {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_role?: string; // 'admin' | 'student'
+  context_type: string;
+  context_id: string;
+  title?: string;
+  body: string;
+  reply_count: number;
+  last_reply_at: string;
+  created_at: string;
+}
+
+export interface Reply {
+  id: string;
+  discussion_id: string;
+  user_id: string;
+  user_name: string;
+  user_role?: string;
+  body: string;
+  created_at: string;
+}
+
+export interface CreateDiscussionPayload {
+  context_type: "roadmap" | "book" | "node";
+  context_id: string;
+  title?: string;
+  body: string;
+}
+
+export interface CreateReplyPayload {
+  discussion_id: string;
+  body: string;
+}

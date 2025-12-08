@@ -2,7 +2,10 @@ module github.com/draqist/iqraa/backend
 
 go 1.25
 
-require github.com/jackc/pgx/v5 v5.7.6
+require (
+	github.com/gorilla/websocket v1.5.3
+	github.com/jackc/pgx/v5 v5.7.6
+)
 
 require (
 	cloud.google.com/go v0.116.0 // indirect
@@ -12,7 +15,6 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/net v0.42.0 // indirect

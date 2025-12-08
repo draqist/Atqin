@@ -1,5 +1,6 @@
 "use client";
 
+import { DiscussionFeed } from "@/components/community/discussion-feed";
 import { QuickNote } from "@/components/editor/quick-note";
 import { MobilePlayer } from "@/components/library/mobile-player";
 // import { PdfViewer } from "@/components/library/pdf-viewer";
@@ -45,6 +46,7 @@ import {
   FileText,
   Globe,
   ListVideo,
+  MessageSquare,
   MessageSquareQuoteIcon,
   MoreHorizontal,
   PlayCircle,
@@ -337,12 +339,16 @@ export default function ClientStudyPage({ bookId }: { bookId: string }) {
         {/* 2. The Text (Full Height Reader) */}
         <div className="flex-1 overflow-y-auto bg-[#F3F4F6]">
           <div className="p-4">
-            <PdfViewer
-              bookId={bookId}
-              initialPage={initialPage}
-              url={pdfUrl ?? ""}
-              onClose={() => setViewMode("text")}
-            />
+            {pdfUrl ? (
+              <PdfViewer
+                bookId={bookId}
+                initialPage={initialPage}
+                url={pdfUrl}
+                onClose={() => setViewMode("text")}
+              />
+            ) : (
+              <PdfSkeleton />
+            )}
           </div>
         </div>
 
@@ -440,12 +446,16 @@ export default function ClientStudyPage({ bookId }: { bookId: string }) {
                 {/* THE PAPER SHEET */}
                 {viewMode === "pdf" ? (
                   <div className="w-full max-w-4xl pb-8">
-                    <PdfViewer
-                      url={pdfUrl ?? ""}
-                      bookId={bookId}
-                      initialPage={initialPage}
-                      onClose={() => setViewMode("text")}
-                    />
+                    {pdfUrl ? (
+                      <PdfViewer
+                        bookId={bookId}
+                        initialPage={initialPage}
+                        url={pdfUrl}
+                        onClose={() => setViewMode("text")}
+                      />
+                    ) : (
+                      <PdfSkeleton />
+                    )}
                   </div>
                 ) : (
                   <div className="w-full max-w-3xl bg-white shadow-sm border border-slate-200/60 rounded-xl min-h-[1000px] p-12 md:p-20 relative">
@@ -515,10 +525,13 @@ export default function ClientStudyPage({ bookId }: { bookId: string }) {
 
                 <TabsList className="w-full bg-slate-200/50">
                   <TabsTrigger value="media" className="flex-1">
-                    Media & Sharh
+                    Media
                   </TabsTrigger>
                   <TabsTrigger value="notes" className="flex-1">
                     Notes
+                  </TabsTrigger>
+                  <TabsTrigger value="discuss" className="flex-1 text-xs gap-1">
+                    <MessageSquare className="w-3 h-3" /> Discuss
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -541,6 +554,19 @@ export default function ClientStudyPage({ bookId }: { bookId: string }) {
                 <div className="h-full flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-100 rounded-xl p-3">
                   <QuickNote bookId={bookId} />
                 </div>
+              </TabsContent>
+              <TabsContent
+                value="discuss"
+                className="flex-1 p-0 m-0 overflow-hidden data-[state=inactive]:hidden"
+              >
+                {/* We use key={bookId} to force re-render if book changes.
+                     contextType="book" links this chat specifically to this book.
+                 */}
+                <DiscussionFeed
+                  key={bookId}
+                  contextType="book"
+                  contextId={bookId}
+                />
               </TabsContent>
             </Tabs>
           </ResizablePanel>

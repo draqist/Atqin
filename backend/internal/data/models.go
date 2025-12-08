@@ -25,6 +25,7 @@ type Models struct {
 	Waitlist      WaitlistModel
 	Notifications NotificationModel
 	Features      FeatureRequestModel
+	Community     CommunityModel
 }
 
 // NewModels initializes and returns a Models struct with all model instances
@@ -43,5 +44,6 @@ func NewModels(db *sql.DB) Models {
 		Waitlist:      WaitlistModel{DB: db},
 		Notifications: NotificationModel{DB: db},
 		Features:      FeatureRequestModel{DB: db},
+		Community:     CommunityModel{DB: db},
 	}
 }

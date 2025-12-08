@@ -88,3 +88,32 @@ func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.
 
 // envelope is a generic map for wrapping JSON responses.
 type envelope map[string]any
+
+// readJSON reads and decodes a JSON request body into the provided destination.
+func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
+	// Use http.MaxBytesReader to limit the size of the request body to 1MB.
+	maxBytes := 1_048_576
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	err := dec.Decode(dst)
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+// serverErrorResponse logs the error and sends a 500 Internal Server Error response.
+func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.logger.Println(err)
+	message := "the server encountered a problem and could not process your request"
+	app.errorResponse(w, http.StatusInternalServerError, message)
+}
+
+// badRequestResponse sends a 400 Bad Request response.
+func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.errorResponse(w, http.StatusBadRequest, err.Error())
+}

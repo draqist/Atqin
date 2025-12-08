@@ -115,6 +115,17 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("GET /v1/features", app.listFeatureRequestsHandler)
 	mux.HandleFunc("POST /v1/features", app.requireAuth(app.createFeatureRequestHandler))
 	mux.HandleFunc("POST /v1/features/{id}/vote", app.requireAuth(app.voteFeatureRequestHandler))
+	// COMMUNITY / FORUM ROUTES
+mux.HandleFunc("GET /v1/discussions", app.listDiscussionsHandler) // ?type=book&id=123
+mux.HandleFunc("POST /v1/discussions", app.requireAuth(app.createDiscussionHandler))
+
+mux.HandleFunc("GET /v1/discussions/{id}/replies", app.listRepliesHandler)
+mux.HandleFunc("POST /v1/discussions/{id}/replies", app.requireAuth(app.createReplyHandler))
+
+// Real-time Chat
+mux.HandleFunc("GET /v1/ws/chat/{id}", func(w http.ResponseWriter, r *http.Request) {
+    app.serveWs(app.hub, w, r)
+})
 
 	return app.enableCORS(mux)
 }

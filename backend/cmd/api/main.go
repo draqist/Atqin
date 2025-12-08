@@ -44,7 +44,8 @@ type application struct {
 	logger *log.Logger
 	db     *sql.DB
 	models data.Models
-	mailer mailer.Mailer // Added
+	mailer mailer.Mailer
+	hub    *Hub
 }
 
 // main is the entry point of the application.
@@ -92,6 +93,10 @@ func main() {
 		models: data.NewModels(db),
 		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
+
+	// Initialize and run WebSocket Hub
+	app.hub = newHub(app)
+	go app.hub.run()
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
