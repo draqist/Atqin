@@ -91,7 +91,7 @@ export default function ClientStudyPage({ bookId }: { bookId: string }) {
     structuredResources
   );
 
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>("");
   const [viewMode, setViewMode] = useState<"text" | "pdf">("pdf");
   useEffect(() => {
     const mainPdf =

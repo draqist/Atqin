@@ -43,6 +43,7 @@ export function PdfViewer({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const containerWidth = useResizeObserver(containerRef);
+  console.log(url);
 
   // Debounce the page number to avoid spamming the API
   const debouncedPageNumber = useDebounce(pageNumber, 1000);
