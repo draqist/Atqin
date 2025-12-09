@@ -1,6 +1,5 @@
-"use client";
-
 import { DailyActivity } from "@/lib/types";
+import { useTranslations } from "next-intl";
 import {
   Area,
   AreaChart,
@@ -12,11 +11,13 @@ import {
 } from "recharts";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
+  const t = useTranslations("Dashboard");
+  
   if (active && payload && payload.length) {
     return (
       <div className="bg-slate-900 text-white text-xs rounded-lg py-2 px-3 shadow-xl border border-slate-800">
         <p className="font-bold mb-1">{label}</p>
-        <p className="text-emerald-400">{payload[0].value} mins</p>
+        <p className="text-emerald-400">{payload[0].value} {t("activity.mins")}</p>
       </div>
     );
   }
@@ -25,7 +26,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 /**
  * Activity chart component using Recharts.
- * Visualizes daily reading activity (minutes read) over time.
+ * Visualizes daily activity (minutes read) over time.
  */
 export function ActivityChart({ data }: { data: DailyActivity[] }) {
   return (

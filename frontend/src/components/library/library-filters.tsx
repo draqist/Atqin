@@ -19,27 +19,18 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
-
-const categories = [
-  { name: "All Topics", slug: null },
-  { name: "Tajweed", slug: "tajweed" },
-  { name: "Aqeedah", slug: "aqeedah" },
-  { name: "Fiqh", slug: "fiqh" },
-  { name: "Hadith", slug: "hadith" },
-  { name: "Grammar", slug: "grammar" },
-  { name: "Tafsir", slug: "tafsir" },
-  { name: "Seerah", slug: "seerah" },
-];
-
-const levels = ["Beginner", "Intermediate", "Advanced"];
 
 /**
  * A component for filtering the library books.
  * Allows filtering by category, level, and sorting order.
  * Updates the URL search parameters to reflect the selected filters.
  */
+// ... imports
+
 export function LibraryFilters() {
+  const t = useTranslations("Library");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -60,8 +51,23 @@ export function LibraryFilters() {
 
   const hasActiveFilters = currentCategory || currentLevel || currentSort;
   const VISIBLE_COUNT = 4;
-  const visibleCategories = categories.slice(0, VISIBLE_COUNT);
-  const hiddenCategories = categories.slice(VISIBLE_COUNT);
+
+  // NOTE: We moved categories definition inside or just map over keys,
+  // but to preserve logic we can keep the array structure but use the slug for translation.
+
+  const categoryList = [
+    { slug: null, label: t("filters.allTopics") },
+    { slug: "tajweed", label: t("categories.tajweed") },
+    { slug: "aqeedah", label: t("categories.aqeedah") },
+    { slug: "fiqh", label: t("categories.fiqh") },
+    { slug: "hadith", label: t("categories.hadith") },
+    { slug: "grammar", label: t("categories.grammar") },
+    { slug: "tafsir", label: t("categories.tafsir") },
+    { slug: "seerah", label: t("categories.seerah") },
+  ];
+
+  const visibleCategories = categoryList.slice(0, VISIBLE_COUNT);
+  const hiddenCategories = categoryList.slice(VISIBLE_COUNT);
 
   // Check if the currently selected category is hidden (so we can highlight the 'More' button)
   const isHiddenActive = hiddenCategories.some(
@@ -80,7 +86,7 @@ export function LibraryFilters() {
               currentCategory === cat.slug || (!currentCategory && !cat.slug);
             return (
               <button
-                key={cat.name}
+                key={cat.slug || "all"}
                 onClick={() => updateParam("category", cat.slug)}
                 className={cn(
                   "whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-all border shrink-0",
@@ -89,7 +95,7 @@ export function LibraryFilters() {
                     : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
                 )}
               >
-                {cat.name}
+                {cat.label}
               </button>
             );
           })}
@@ -106,19 +112,20 @@ export function LibraryFilters() {
                 )}
               >
                 <MoreHorizontal />
+                {t("filters.moreTopics")}
                 <ChevronDown className="w-3.5 h-3.5 ml-1" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuLabel>More Topics</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("filters.moreTopics")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {hiddenCategories.map((cat) => (
                 <DropdownMenuCheckboxItem
-                  key={cat.name}
+                  key={cat.slug}
                   checked={currentCategory === cat.slug}
                   onCheckedChange={() => updateParam("category", cat.slug)}
                 >
-                  {cat.name}
+                  {cat.label}
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
@@ -142,7 +149,7 @@ export function LibraryFilters() {
                   )}
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5 mr-2" />
-                  <span>Level</span>
+                  <span>{t("filters.level")}</span>
                   {currentLevel && (
                     <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-200 text-[10px] font-bold">
                       1
@@ -151,12 +158,12 @@ export function LibraryFilters() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[180px]">
-                <DropdownMenuLabel>Difficulty</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("filters.difficulty")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => updateParam("level", null)}>
-                  Any Level
+                  {t("filters.anyLevel")}
                 </DropdownMenuItem>
-                {levels.map((level) => (
+                {["Beginner", "Intermediate", "Advanced"].map((level) => (
                   <DropdownMenuCheckboxItem
                     key={level}
                     checked={currentLevel === level.toLowerCase()}
@@ -164,7 +171,7 @@ export function LibraryFilters() {
                       updateParam("level", level.toLowerCase())
                     }
                   >
-                    {level}
+                    {t(`levels.${level.toLowerCase()}` as any)}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuContent>
@@ -179,11 +186,11 @@ export function LibraryFilters() {
                   className="h-8 px-2 text-slate-500 hover:text-slate-900"
                 >
                   <ArrowDownUp className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Sort</span>
+                  <span className="hidden sm:inline">{t("filters.sort")}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[180px]">
-                <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("filters.sortBy")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => updateParam("sort", null)}>
                   <span
@@ -192,7 +199,7 @@ export function LibraryFilters() {
                       !currentSort && "font-bold"
                     )}
                   >
-                    Newest First
+                    {t("filters.newest")}
                   </span>
                   {!currentSort && <Check className="w-4 h-4" />}
                 </DropdownMenuItem>
@@ -203,7 +210,7 @@ export function LibraryFilters() {
                       currentSort === "alpha" && "font-bold"
                     )}
                   >
-                    Alphabetical (A-Z)
+                    {t("filters.alpha")}
                   </span>
                   {currentSort === "alpha" && <Check className="w-4 h-4" />}
                 </DropdownMenuItem>
@@ -218,10 +225,10 @@ export function LibraryFilters() {
               size="sm"
               onClick={() => router.push("/library")}
               className="h-8 px-2 text-slate-400 hover:text-red-600 hover:bg-red-50"
-              title="Clear all filters"
+              title={t("filters.clear")}
             >
               <X className="w-4 h-4" />
-              <span className="sr-only">Clear filters</span>
+              <span className="sr-only">{t("filters.clear")}</span>
             </Button>
           )}
         </div>

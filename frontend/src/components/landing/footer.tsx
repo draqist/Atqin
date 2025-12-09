@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -7,9 +5,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { usePathname, useRouter } from "@/navigation";
 import { Globe } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { useTransition } from "react";
 
 const socialLinks = [
   { name: "Instagram", icon: InstagramIcon, href: "#" },
@@ -20,46 +21,51 @@ const socialLinks = [
   { name: "GitHub", icon: GithubIcon, href: "#" },
 ];
 
-const footerColumns = [
-  {
-    title: "Product",
-    links: [
-      { label: "Pricing", href: "#" },
-      { label: "Gift Cards", href: "#" },
-      { label: "Family Plan", href: "#" },
-    ],
-  },
-  // {
-  //   title: "Company",
-  //   links: [
-  //     { label: "Blog", href: "#" },
-  //     { label: "Careers", href: "#" },
-  //     { label: "Scholarship", href: "#" },
-  //   ],
-  // },
-  {
-    title: "Support",
-    links: [
-      { label: "Support Center", href: "/support" },
-      { label: "Feature Requests", href: "/features" },
-    ],
-  },
-  {
-    title: "Community",
-    links: [
-      { label: "Hifz Network", href: "#" },
-      { label: "Glossary", href: "#" },
-      { label: "Ramadan", href: "#" },
-      { label: "Discord", href: "#" },
-    ],
-  },
-];
-
 /**
  * The site footer component.
  * Contains links to various sections, social media icons, and copyright info.
  */
 export function Footer() {
+  const t = useTranslations("Landing.footer");
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+
+  const handleLocaleChange = () => {
+    const nextLocale = locale === "en" ? "ar" : "en";
+    startTransition(() => {
+      router.replace(pathname, { locale: nextLocale });
+    });
+  };
+
+  const footerColumns = [
+    {
+      title: t("columns.product.title"),
+      links: [
+        { label: t("columns.product.links.pricing"), href: "#" },
+        { label: t("columns.product.links.gift"), href: "#" },
+        { label: t("columns.product.links.family"), href: "#" },
+      ],
+    },
+    {
+      title: t("columns.support.title"),
+      links: [
+        { label: t("columns.support.links.center"), href: "/support" },
+        { label: t("columns.support.links.requests"), href: "/features" },
+      ],
+    },
+    {
+      title: t("columns.community.title"),
+      links: [
+        { label: t("columns.community.links.hifz"), href: "#" },
+        { label: t("columns.community.links.glossary"), href: "#" },
+        { label: t("columns.community.links.ramadan"), href: "#" },
+        { label: t("columns.community.links.discord"), href: "#" },
+      ],
+    },
+  ];
+
   return (
     <footer className="bg-white border-t border-slate-200 pt-20 pb-10 text-slate-600">
       <div className="mx-auto px-6 2xl:max-w-7xl">
@@ -72,7 +78,7 @@ export function Footer() {
               className="flex items-center gap-2 font-bold text-xl text-slate-900"
             >
               <Image
-                src={"iqraa.svg"}
+                src={"/iqraa.svg"}
                 alt="iqraa_footer_logo"
                 width={100}
                 height={30}
@@ -80,8 +86,7 @@ export function Footer() {
             </Link>
 
             <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
-              The Digital Rihal for the modern student. Preserving the legacy of
-              Islamic knowledge through technology.
+              {t("desc")}
             </p>
 
             {/* Social Icons */}
@@ -98,7 +103,7 @@ export function Footer() {
                       </span>
                     </TooltipTrigger>
                     <TooltipContent className="bg-white">
-                      <p>Coming Soon</p>
+                      <p>{t("comingSoon")}</p>
                     </TooltipContent>
                   </Tooltip>
                 ))}
@@ -133,8 +138,7 @@ export function Footer() {
         {/* BOTTOM SECTION: Copyright & Legal */}
         <div className="pt-8 border-t border-slate-100 flex flex-col-reverse md:flex-row items-center justify-between gap-6">
           <div className="text-sm text-slate-400">
-            © Copyright {new Date().getFullYear()} Iqraa Platform. All rights
-            reserved.
+            {t("copyright", { year: new Date().getFullYear() })}
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-6">
@@ -142,22 +146,24 @@ export function Footer() {
               href="#"
               className="text-sm text-slate-500 hover:text-slate-900"
             >
-              Privacy Policy
+              {t("privacy")}
             </Link>
             <Link
               href="#"
               className="text-sm text-slate-500 hover:text-slate-900"
             >
-              Terms of Service
+              {t("terms")}
             </Link>
 
             <Button
               variant="outline"
               size="sm"
               className="rounded-full h-8 gap-2 border-slate-200 text-slate-600 font-normal"
+              onClick={handleLocaleChange}
+              disabled={isPending}
             >
               <Globe className="w-3.5 h-3.5" />
-              English
+              {t("language")}
             </Button>
           </div>
         </div>

@@ -1,7 +1,22 @@
 import { Badge } from "@/components/ui/badge";
 import { Book } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { BookOpen, Star } from "lucide-react";
 import Link from "next/link";
+
+// ... imports
+import { useTranslations } from "next-intl";
+
+interface LibraryBookCardProps {
+  book: Book;
+}
+
+/**
+ * A card component representing a book in the library.
+ * Displays the book's cover image, title, author, and rating.
+ */
+// ... imports
+import { useLocale } from "next-intl";
 
 interface LibraryBookCardProps {
   book: Book;
@@ -12,6 +27,10 @@ interface LibraryBookCardProps {
  * Displays the book's cover image, title, author, and rating.
  */
 export function LibraryBookCard({ book }: LibraryBookCardProps) {
+  const t = useTranslations("Library");
+  const locale = useLocale();
+  const isArabic = locale === "ar";
+
   // Fallback image if none provided
   const coverImage =
     book.cover_image_url ||
@@ -24,7 +43,7 @@ export function LibraryBookCard({ book }: LibraryBookCardProps) {
         <div className="relative h-40 w-full overflow-hidden bg-slate-100">
           <img
             src={coverImage}
-            alt={book.title}
+            alt={isArabic ? book.title_ar || book.title : book.title}
             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105 object-center"
           />
           {/* Optional: "Matn" Badge overlay on image */}
@@ -33,7 +52,7 @@ export function LibraryBookCard({ book }: LibraryBookCardProps) {
               variant="secondary"
               className="bg-white/90 text-slate-700 backdrop-blur-sm shadow-sm border-0 hover:bg-white rounded-sm capitalize"
             >
-              {book.metadata.category}
+              {t(`categories.${book.metadata.category?.toLowerCase()}` as any)}
             </Badge>
           </div>
         </div>
@@ -47,21 +66,32 @@ export function LibraryBookCard({ book }: LibraryBookCardProps) {
               <BookOpen className="w-3 h-3" />
             </div>
             <span className="text-xs font-medium text-slate-500 truncate">
-              {book.original_author || "Unknown Author"}
+              {isArabic
+                ? book.author_ar ||
+                  book.original_author ||
+                  t("bookCard.unknownAuthor")
+                : book.original_author || t("bookCard.unknownAuthor")}
             </span>
           </div>
 
           {/* Title */}
-          <h3 className="text-base font-bold text-slate-900 mb-1 line-clamp-2 group-hover:text-emerald-700 transition-colors">
-            {book.title}
+          <h3
+            className={cn(
+              "text-base font-bold text-slate-900 mb-1 line-clamp-2 group-hover:text-emerald-700 transition-colors",
+              isArabic && "font-amiri"
+            )}
+          >
+            {isArabic ? book.title_ar || book.title : book.title}
           </h3>
 
           {/* Subtitle / Original Arabic Title */}
           {/* We use line-clamp-2 to keep cards even height */}
-          <p className="text-sm text-slate-500 mb-4 line-clamp-2 font-amiri">
-            {/* Mock Arabic title if not in DB, or description */}
-            {book.description}
-          </p>
+          {!isArabic && (
+            <p className="text-sm text-slate-500 mb-4 line-clamp-2 font-amiri">
+              {/* Mock Arabic title if not in DB, or description */}
+              {book.description}
+            </p>
+          )}
 
           {/* 3. FOOTER (Stats) */}
           <div className="mt-auto flex items-center gap-3 pt-3 border-t border-slate-100">
@@ -76,7 +106,9 @@ export function LibraryBookCard({ book }: LibraryBookCardProps) {
 
             {/* Students Count */}
             <div className="text-xs text-slate-500 capitalize">
-              {book.metadata.level} Level
+              {t(`levels.${book.metadata.level?.toLowerCase()}` as any) +
+                " " +
+                t("bookCard.level")}
             </div>
           </div>
         </div>

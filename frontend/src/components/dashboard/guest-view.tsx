@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Lock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 /**
@@ -10,6 +11,8 @@ import Link from "next/link";
  * Displays a blurred background with a locked overlay, prompting the user to sign in or register.
  */
 export function DashboardGuestView() {
+  const t = useTranslations("Dashboard");
+
   return (
     <div className="relative min-h-[80vh] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50/50">
       {/* 1. THE BLURRED BACKGROUND (Fake Content) */}
@@ -43,23 +46,23 @@ export function DashboardGuestView() {
           </div>
 
           <h2 className="text-2xl font-bold text-slate-900 mb-3">
-            Your Personal Dashboard
+            {t("guest.title")}
           </h2>
 
           <p className="text-slate-500 text-sm leading-relaxed mb-8">
-            Track your reading habits, visualize your consistency, and pick up
-            exactly where you left off.
+            {t("guest.description")}
           </p>
 
           <div className="grid gap-3">
             <Link href="/login">
               <Button className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white">
-                Sign In to View <ArrowRight className="ml-2 w-4 h-4" />
+                {t("guest.signInToView")}{" "}
+                <ArrowRight className="ml-2 w-4 h-4 rtl:flip" />
               </Button>
             </Link>
             <Link href="/register">
               <Button variant="ghost" className="w-full text-slate-600">
-                Create a free account
+                {t("guest.createAccount")}
               </Button>
             </Link>
           </div>

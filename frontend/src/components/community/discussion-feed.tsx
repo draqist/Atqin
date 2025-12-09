@@ -8,6 +8,7 @@ import { useDiscussions } from "@/lib/hooks/queries/community";
 import { Discussion } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 import { Loader2, MessageSquare, Send } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ThreadDrawer } from "./thread-drawer";
 
@@ -20,6 +21,7 @@ export function DiscussionFeed({
   contextType,
   contextId,
 }: DiscussionFeedProps) {
+  const t = useTranslations("Study");
   const [newPost, setNewPost] = useState("");
   const [activeThread, setActiveThread] = useState<Discussion | null>(null);
 
@@ -51,19 +53,19 @@ export function DiscussionFeed({
           <Textarea
             value={newPost}
             onChange={(e) => setNewPost(e.target.value)}
-            placeholder="Ask a question or share a thought..."
-            className="resize-none min-h-[80px] bg-slate-50 border-slate-200 focus-visible:ring-0 focus-visible:ring-emerald-500 pr-12 text-sm"
+            placeholder={t("discussion.placeholder")}
+            className="resize-none min-h-[80px] bg-slate-50 border-slate-200 focus-visible:ring-0 focus-visible:ring-emerald-500 pr-12 text-sm rtl:text-right"
           />
           <Button
             size="icon"
-            className="absolute bottom-3 right-3 h-8 w-8 bg-emerald-600 hover:bg-emerald-700 shadow-sm"
+            className="absolute bottom-3 right-3 h-8 w-8 bg-emerald-600 hover:bg-emerald-700 shadow-sm rtl:left-3 rtl:right-auto"
             onClick={handlePost}
             disabled={isPending || !newPost.trim()}
           >
             {isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 rtl:flip" />
             )}
           </Button>
         </div>
@@ -77,7 +79,7 @@ export function DiscussionFeed({
           </div>
         ) : discussions?.length === 0 ? (
           <div className="text-center py-10 text-slate-400 text-sm">
-            Be the first to start a discussion!
+            {t("discussion.empty")}
           </div>
         ) : (
           discussions?.map((d) => (
@@ -100,10 +102,10 @@ export function DiscussionFeed({
 
                 {/* Card Body */}
                 <div
-                  className="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm hover:border-emerald-200 cursor-pointer transition-colors"
+                  className="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm hover:border-emerald-200 cursor-pointer transition-colors rtl:rounded-tr-none rtl:rounded-tl-2xl"
                   onClick={() => setActiveThread(d)}
                 >
-                  <p className="text-sm text-slate-700 whitespace-pre-wrap">
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap rtl:text-right">
                     {d.body}
                   </p>
                 </div>
@@ -115,7 +117,9 @@ export function DiscussionFeed({
                     className="text-[10px] font-medium text-slate-500 hover:text-emerald-600 flex items-center gap-1 transition-colors"
                   >
                     <MessageSquare className="w-3 h-3" />
-                    {d.reply_count > 0 ? `${d.reply_count} replies` : "Reply"}
+                    {d.reply_count > 0
+                      ? `${d.reply_count} ${t("discussion.replies")}`
+                      : t("discussion.reply")}
                   </button>
                 </div>
               </div>

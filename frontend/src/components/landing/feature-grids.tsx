@@ -11,65 +11,7 @@ import {
   Smartphone,
   Users,
 } from "lucide-react";
-
-const features = [
-  {
-    title: "Verified Library",
-    description:
-      "Access digitised classical texts with verified Tahqiq, not just scanned PDFs.",
-    icon: BookOpen,
-    color: "bg-red-50 text-red-600", // Light Red box
-  },
-  {
-    title: "AI Tasm'i",
-    description:
-      "Recite to the app. It listens, corrects mistakes, and tracks your fluency.",
-    icon: Mic,
-    color: "bg-blue-50 text-blue-600", // Light Blue box
-  },
-  {
-    title: "Smart SRS",
-    description:
-      "Spaced Repetition System that ensures you review lines right before you forget them.",
-    icon: Brain,
-    color: "bg-green-50 text-green-600", // Light Green box
-  },
-  {
-    title: "Contextual Sharh",
-    description:
-      "Click any verse to instantly see explanations from scholars like Ibn Uthaymeen.",
-    icon: ScrollText,
-    color: "bg-amber-50 text-amber-600", // Light Amber box
-  },
-  {
-    title: "Audio Sync",
-    description:
-      "Listen to world-renowned reciters synced line-by-line with the text.",
-    icon: Headphones,
-    color: "bg-purple-50 text-purple-600", // Light Purple box
-  },
-  {
-    title: "Hifdh Circles",
-    description:
-      "Join virtual circles with friends to track progress and keep each other accountable.",
-    icon: Users,
-    color: "bg-teal-50 text-teal-600", // Light Teal box
-  },
-  {
-    title: "Progress Analytics",
-    description:
-      "Visualize your memorization strength with heatmaps and retention charts.",
-    icon: BarChart3,
-    color: "bg-pink-50 text-pink-600", // Light Pink box
-  },
-  {
-    title: "Cross-Platform",
-    description:
-      "Start reading on your laptop, continue memorizing on your phone. Always synced.",
-    icon: Smartphone,
-    color: "bg-slate-50 text-slate-600", // Light Slate box
-  },
-];
+import { useTranslations } from "next-intl";
 
 const container = {
   hidden: { opacity: 0 },
@@ -80,7 +22,7 @@ const container = {
     },
   },
 };
-
+  
 const item = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0 },
@@ -91,6 +33,51 @@ const item = {
  * Uses Framer Motion for entrance animations.
  */
 export function FeaturesGrid() {
+  const t = useTranslations("Landing.features");
+
+  const featuresList = [
+    {
+      id: "verified",
+      icon: BookOpen,
+      color: "bg-red-50 text-red-600",
+    },
+    {
+      id: "ai",
+      icon: Mic,
+      color: "bg-blue-50 text-blue-600",
+    },
+    {
+      id: "srs",
+      icon: Brain,
+      color: "bg-green-50 text-green-600",
+    },
+    {
+      id: "sharh",
+      icon: ScrollText,
+      color: "bg-amber-50 text-amber-600",
+    },
+    {
+      id: "audio",
+      icon: Headphones,
+      color: "bg-purple-50 text-purple-600",
+    },
+    {
+      id: "circles",
+      icon: Users,
+      color: "bg-teal-50 text-teal-600",
+    },
+    {
+      id: "analytics",
+      icon: BarChart3,
+      color: "bg-pink-50 text-pink-600",
+    },
+    {
+      id: "crossplatform",
+      icon: Smartphone,
+      color: "bg-slate-50 text-slate-600",
+    },
+  ];
+
   return (
     <section className="py-24 px-6 w-full bg-slate-50">
       <div className="w-full max-w-6xl mx-auto">
@@ -101,19 +88,22 @@ export function FeaturesGrid() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
-            Our Features
+            {t("label")}
           </div>
 
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight">
-            We built this for the love of <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-500">
-              The Deen. (Preserving Knowledge)
-            </span>
+            {t.rich("title", {
+              br: () => <br />,
+              gradient: (chunks: React.ReactNode) => (
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-500">
+                  {chunks}
+                </span>
+              ),
+            })}
           </h2>
 
           <p className="text-slate-500 text-lg leading-relaxed">
-            Everything a student needs to read, memorize, and master the Mutuun.
-            Streamline your Hifdh journey with powerful, modern tools.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -125,9 +115,9 @@ export function FeaturesGrid() {
           viewport={{ once: true, margin: "-100px" }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
         >
-          {features.map((feature, idx) => (
+          {featuresList.map((feature) => (
             <motion.div
-              key={idx}
+              key={feature.id}
               variants={item}
               className="p-6 rounded-2xl border border-slate-100 bg-white hover:border-emerald-100 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 group"
             >
@@ -138,11 +128,11 @@ export function FeaturesGrid() {
               </div>
 
               <h3 className="text-lg font-bold text-slate-900 mb-3">
-                {feature.title}
+                {t(`items.${feature.id}.title`)}
               </h3>
 
               <p className="text-slate-500 text-sm leading-relaxed">
-                {feature.description}
+                {t(`items.${feature.id}.desc`)}
               </p>
             </motion.div>
           ))}
@@ -150,7 +140,7 @@ export function FeaturesGrid() {
 
         {/* FOOTER NOTE */}
         <div className="text-center mt-16 text-slate-400 text-sm">
-          Iqraa offers comprehensive tools for students of all levels.
+          {t("footer")}
         </div>
       </div>
     </section>

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/lib/toast";
 import { Facebook, Link as LinkIcon, Share2, Twitter } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface ShareMenuProps {
   bookId: string;
@@ -22,6 +23,7 @@ interface ShareMenuProps {
  * Provides options to share via Twitter, WhatsApp, Facebook, or copy the link.
  */
 export function ShareMenu({ bookId, title }: ShareMenuProps) {
+  const t = useTranslations("Study");
   // In a real app, get the full URL dynamically. For now:
   const currentUrl =
     typeof window !== "undefined"
@@ -32,7 +34,7 @@ export function ShareMenu({ bookId, title }: ShareMenuProps) {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentUrl);
-    toast.success("Link copied to clipboard");
+    toast.success(t("actions.linkCopied"));
   };
 
   return (
@@ -43,12 +45,12 @@ export function ShareMenu({ bookId, title }: ShareMenuProps) {
           size="sm"
           className="md:flex gap-2 rounded-full text-slate-600 border-none md:border-slate-200 shadow-none md:shadow h-10 md:h-8 focus-visible:ring-transparent"
         >
-          <Share2 className="w-4 h-4" />{" "}
-          <span className="hidden md:inline">Share </span>
+          <Share2 className="w-4 h-4 rtl:flip" />{" "}
+          <span className="hidden md:inline">{t("actions.share")} </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 rounded-xl">
-        <DropdownMenuLabel>Share this book</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("actions.shareBook")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
         {/* Twitter / X */}
@@ -60,7 +62,8 @@ export function ShareMenu({ bookId, title }: ShareMenuProps) {
             )
           }
         >
-          <Twitter className="w-4 h-4 mr-2 text-blue-400" /> Twitter
+          <Twitter className="w-4 h-4 mr-2 text-blue-400 rtl:ml-2 rtl:mr-0" />{" "}
+          Twitter
         </DropdownMenuItem>
 
         {/* WhatsApp */}
@@ -72,7 +75,7 @@ export function ShareMenu({ bookId, title }: ShareMenuProps) {
             )
           }
         >
-          <div className="w-4 h-4 mr-2 bg-green-500 rounded-full flex items-center justify-center">
+          <div className="w-4 h-4 mr-2 bg-green-500 rounded-full flex items-center justify-center rtl:ml-2 rtl:mr-0">
             <span className="text-white text-[10px] font-bold">W</span>
           </div>
           WhatsApp
@@ -87,14 +90,16 @@ export function ShareMenu({ bookId, title }: ShareMenuProps) {
             )
           }
         >
-          <Facebook className="w-4 h-4 mr-2 text-blue-600" /> Facebook
+          <Facebook className="w-4 h-4 mr-2 text-blue-600 rtl:ml-2 rtl:mr-0" />{" "}
+          Facebook
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 
         {/* Copy Link */}
         <DropdownMenuItem onClick={handleCopy}>
-          <LinkIcon className="w-4 h-4 mr-2 text-slate-500" /> Copy Link
+          <LinkIcon className="w-4 h-4 mr-2 text-slate-500 rtl:ml-2 rtl:mr-0" />{" "}
+          {t("actions.copyLink")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
