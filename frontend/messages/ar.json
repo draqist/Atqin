@@ -6,6 +6,9 @@
       "roadmaps": "المنهجيات",
       "login": "تسجيل الدخول",
       "startLearning": "ابدأ التعلم",
+      "language": {
+        "switch": "تغيير اللغة"
+      },
       "categories": {
         "tajweed": {
           "title": "التجويد والقراءات",

@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS discussions (
     created_at TIMESTAMP(0) WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_discussions_context ON discussions(context_type, context_id);
-CREATE INDEX idx_discussions_last_reply ON discussions(last_reply_at DESC);
+CREATE INDEX IF NOT EXISTS idx_discussions_context ON discussions(context_type, context_id);
+CREATE INDEX IF NOT EXISTS idx_discussions_last_reply ON discussions(last_reply_at DESC);
 
 CREATE TABLE IF NOT EXISTS discussion_replies (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -21,4 +21,4 @@ CREATE TABLE IF NOT EXISTS discussion_replies (
     created_at TIMESTAMP(0) WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_replies_discussion_id ON discussion_replies(discussion_id);
+CREATE INDEX IF NOT EXISTS idx_replies_discussion_id ON discussion_replies(discussion_id);

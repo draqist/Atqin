@@ -6,6 +6,9 @@
       "roadmaps": "Roadmaps",
       "login": "Log in",
       "startLearning": "Start Learning",
+      "language": {
+        "switch": "Switch Language"
+      },
       "categories": {
         "tajweed": {
           "title": "Tajweed & Qira'at",

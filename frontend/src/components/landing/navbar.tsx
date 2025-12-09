@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
+import { LanguageSwitcher } from "./language-switcher";
 
 /**
  * The main navigation bar component.
@@ -121,6 +122,8 @@ export function Navbar() {
 
         {/* ACTIONS (RIGHT) */}
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+
           <Link
             href="/login"
             className="text-sm font-medium text-slate-600 hover:text-emerald-700 hidden sm:block"

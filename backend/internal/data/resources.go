@@ -21,6 +21,8 @@ type Resource struct {
 	SequenceIndex     int       `json:"sequence_index"`
 	CreatedAt         time.Time `json:"created_at"`
 	BookTitle         string    `json:"book_title,omitempty"`
+	Status            string    `json:"status"`
+	ReviewerID        *string   `json:"reviewer_id"`
 }
 
 // ResourceModel wraps the database connection pool for Resource-related operations.
@@ -32,7 +34,7 @@ type ResourceModel struct {
 // It orders them by official status, sequence index, and creation time.
 func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
 	query := `
-        SELECT id, book_id, type, title, url, media_start_seconds, media_end_seconds, is_official, created_at, parent_id, sequence_index
+        SELECT id, book_id, type, title, url, media_start_seconds, media_end_seconds, is_official, created_at, parent_id, sequence_index, status, reviewer_id
         FROM resources
         WHERE book_id = $1
         ORDER BY is_official DESC, sequence_index ASC, created_at DESC`
@@ -65,6 +67,8 @@ func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
 			&r.CreatedAt,
 			&parentID,
 			&r.SequenceIndex,
+			&r.Status,
+			&r.ReviewerID,
 		)
 		if err != nil {
 			return nil, err
@@ -93,7 +97,7 @@ func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
 // Get retrieves a single resource by its ID.
 func (m ResourceModel) Get(id string) (*Resource, error) {
 	query := `
-		SELECT id::text, book_id::text, type, title, url, media_start_seconds, media_end_seconds, is_official, parent_id::text, sequence_index, created_at
+		SELECT id::text, book_id::text, type, title, url, media_start_seconds, media_end_seconds, is_official, parent_id::text, sequence_index, created_at, status, reviewer_id::text
 		FROM resources
 		WHERE id = $1`
 
@@ -104,10 +108,15 @@ func (m ResourceModel) Get(id string) (*Resource, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
+	var reviewerID sql.NullString
 	err := m.DB.QueryRowContext(ctx, query, id).Scan(
 		&r.ID, &r.BookID, &r.Type, &r.Title, &r.URL,
-		&mediaStart, &mediaEnd, &r.IsOfficial, &parentID, &r.SequenceIndex, &r.CreatedAt,
+		&mediaStart, &mediaEnd, &r.IsOfficial, &parentID, &r.SequenceIndex, &r.CreatedAt, &r.Status, &reviewerID,
 	)
+
+	if reviewerID.Valid {
+		r.ReviewerID = &reviewerID.String
+	}
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -131,7 +140,7 @@ func (m ResourceModel) Get(id string) (*Resource, error) {
 
 // GetAll fetches all resources, joined with book titles.
 // This is primarily used for the Admin dashboard.
-func (m ResourceModel) GetAll(title string, filters Filters) ([]*Resource, Metadata, error) {
+func (m ResourceModel) GetAll(title string, filters Filters, status string) ([]*Resource, Metadata, error) {
 	query := `
         SELECT count(*) OVER(),
             r.id::text, 
@@ -141,17 +150,20 @@ func (m ResourceModel) GetAll(title string, filters Filters) ([]*Resource, Metad
             r.title, 
             r.url, 
             r.is_official, 
-            r.created_at
+            r.created_at,
+            r.status,
+            r.reviewer_id::text
         FROM resources r
         JOIN books b ON r.book_id = b.id
         WHERE (r.title ILIKE '%' || $3 || '%' OR $3 = '')
+        AND ($4 = '' OR r.status::text = $4)
         ORDER BY r.created_at DESC
         LIMIT $1 OFFSET $2`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, filters.Limit(), filters.Offset(), title)
+	rows, err := m.DB.QueryContext(ctx, query, filters.Limit(), filters.Offset(), title, status)
 	if err != nil {
 		return nil, Metadata{}, err
 	}
@@ -161,9 +173,13 @@ func (m ResourceModel) GetAll(title string, filters Filters) ([]*Resource, Metad
 	var resources []*Resource
 	for rows.Next() {
 		var r Resource
-		err := rows.Scan(&totalRecords, &r.ID, &r.BookID, &r.BookTitle, &r.Type, &r.Title, &r.URL, &r.IsOfficial, &r.CreatedAt)
+		var reviewerID sql.NullString
+		err := rows.Scan(&totalRecords, &r.ID, &r.BookID, &r.BookTitle, &r.Type, &r.Title, &r.URL, &r.IsOfficial, &r.CreatedAt, &r.Status, &reviewerID)
 		if err != nil {
 			return nil, Metadata{}, err
+		}
+		if reviewerID.Valid {
+			r.ReviewerID = &reviewerID.String
 		}
 		resources = append(resources, &r)
 	}
@@ -180,14 +196,14 @@ func (m ResourceModel) GetAll(title string, filters Filters) ([]*Resource, Metad
 // Insert adds a new resource to the database.
 func (m ResourceModel) Insert(r *Resource) error {
 	query := `
-		INSERT INTO resources (book_id, type, title, url, media_start_seconds, media_end_seconds, is_official, parent_id, sequence_index)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO resources (book_id, type, title, url, media_start_seconds, media_end_seconds, is_official, parent_id, sequence_index, status, reviewer_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id, created_at`
 
 	args := []any{
 		r.BookID, r.Type, r.Title, r.URL,
 		r.MediaStartSeconds, r.MediaEndSeconds, r.IsOfficial,
-		r.ParentID, r.SequenceIndex,
+		r.ParentID, r.SequenceIndex, r.Status, r.ReviewerID,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -200,10 +216,10 @@ func (m ResourceModel) Insert(r *Resource) error {
 func (m ResourceModel) Update(r *Resource) error {
 	query := `
 		UPDATE resources
-		SET title = $1, url = $2, type = $3, is_official = $4, sequence_index = $5, parent_id = $6
-		WHERE id = $7`
+		SET title = $1, url = $2, type = $3, is_official = $4, sequence_index = $5, parent_id = $6, status = $7, reviewer_id = $8
+		WHERE id = $9`
 
-	args := []any{r.Title, r.URL, r.Type, r.IsOfficial, r.SequenceIndex, r.ParentID, r.ID}
+	args := []any{r.Title, r.URL, r.Type, r.IsOfficial, r.SequenceIndex, r.ParentID, r.Status, r.ReviewerID, r.ID}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

@@ -27,6 +27,7 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 		ParentID      *string          `json:"parent_id"`
 		SequenceIndex int              `json:"sequence_index"`
 		Children      []*ResourceInput `json:"children"`
+		Status        *string          `json:"status"`
 	}
 
 	var input ResourceInput
@@ -50,6 +51,16 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 		return tx.QueryRow(query, res.BookID, res.Type, res.Title, res.URL, res.IsOfficial, res.ParentID, res.SequenceIndex).Scan(&res.ID, &res.CreatedAt)
 	}
 
+	// Auth & Role Check
+	userID, ok := r.Context().Value(UserContextKey).(string)
+	if !ok || userID == "" {
+		app.errorResponse(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+    // We assume requireAdmin middleware wrapped this, but we need role for status.
+    // Default to draft.
+    status := "draft"
+    
 	parent := &data.Resource{
 		BookID:        input.BookID,
 		Type:          input.Type,
@@ -58,6 +69,7 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 		IsOfficial:    input.IsOfficial,
 		ParentID:      input.ParentID,
 		SequenceIndex: input.SequenceIndex,
+        Status:        status,
 	}
 
 	if err := insertFunc(parent); err != nil {
@@ -76,6 +88,7 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 				IsOfficial:    input.IsOfficial,
 				ParentID:      &parent.ID,
 				SequenceIndex: i + 1,
+                Status:        status,
 			}
 
 			if err := insertFunc(child); err != nil {
@@ -110,13 +123,18 @@ func (app *application) listAllResourcesHandler(w http.ResponseWriter, r *http.R
 	input.Filters.Sort = app.readString(qs, "sort", "id")
 	input.Filters.SortSafeList = []string{"id", "created_at"}
     title := app.readString(qs, "q", "")
+    status := app.readString(qs, "status", "")
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	resources, metadata, err := app.models.Resources.GetAll(title, input.Filters)
+    // Admin dashboard usually has authorized user.
+    // We'll trust the caller to pass status, but could enforce role defaults if we wanted strict view control.
+    // For now, allow filtering.
+    
+	resources, metadata, err := app.models.Resources.GetAll(title, input.Filters, status)
 	if err != nil {
 		app.errorResponse(w, http.StatusInternalServerError, "Failed to fetch resources")
 		return
@@ -164,6 +182,7 @@ func (app *application) updateResourceHandler(w http.ResponseWriter, r *http.Req
 		Type          *string `json:"type"`
 		IsOfficial    *bool   `json:"is_official"`
 		SequenceIndex *int    `json:"sequence_index"`
+        Status        *string `json:"status"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -186,6 +205,24 @@ func (app *application) updateResourceHandler(w http.ResponseWriter, r *http.Req
 	if input.SequenceIndex != nil {
 		resource.SequenceIndex = *input.SequenceIndex
 	}
+    
+    if input.Status != nil {
+        userID, ok := r.Context().Value(UserContextKey).(string)
+        if ok && userID != "" {
+            u, err := app.models.Users.GetByID(userID)
+            if err == nil {
+                if u.Role == "super_admin" {
+                    resource.Status = *input.Status
+                } else if u.Role == "admin" {
+                     if *input.Status == "published" {
+                         app.errorResponse(w, http.StatusForbidden, "Admins cannot publish resources")
+                         return
+                     }
+                     resource.Status = *input.Status
+                }
+            }
+        }
+    }
 
 	err = app.models.Resources.Update(resource)
 	if err != nil {
