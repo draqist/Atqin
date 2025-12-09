@@ -24,6 +24,8 @@ export interface Book {
   created_at: string;
   version: number;
   resource_count?: number;
+  title_ar?: string;
+  author_ar?: string;
 }
 
 /**

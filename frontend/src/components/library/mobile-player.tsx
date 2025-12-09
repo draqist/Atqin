@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; // New Impor
 import { Resource } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { AlignLeft, ChevronUp, ListVideo, PlayCircle, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Drawer } from "vaul";
 
@@ -37,6 +38,7 @@ export function MobilePlayer({
   onClose,
   bookId,
 }: MobilePlayerProps) {
+  const t = useTranslations("Study");
   const [snap, setSnap] = useState<number | string | null>("140px");
   const [activeTab, setActiveTab] = useState("resources"); // Track active tab
 
@@ -84,9 +86,11 @@ export function MobilePlayer({
                     <ListVideo className="w-6 h-6 text-slate-400" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-slate-900">Resources</h4>
+                    <h4 className="font-bold text-slate-900">
+                      {t("player.resources")}
+                    </h4>
                     <p className="text-xs text-slate-500 font-medium">
-                      Tap to view {resources?.length || 0} items
+                      {t("player.viewItems", { count: resources?.length || 0 })}
                     </p>
                   </div>
                   <ChevronUp className="w-5 h-5 text-slate-400 animate-bounce" />
@@ -129,7 +133,9 @@ export function MobilePlayer({
                     onClick={toggleSnap}
                   >
                     <h4 className="font-bold text-slate-900 truncate">
-                      {activeVideo ? activeVideo.title : "Select a Resource"}
+                      {activeVideo
+                        ? activeVideo.title
+                        : t("player.selectResource")}
                     </h4>
                     <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
                       {activeVideo ? (
@@ -138,7 +144,9 @@ export function MobilePlayer({
                           Playing
                         </>
                       ) : (
-                        <span className="text-slate-400">Tap to expand</span>
+                        <span className="text-slate-400">
+                          {t("player.tapToExpand")}
+                        </span>
                       )}
                     </p>
                   </div>
@@ -171,11 +179,13 @@ export function MobilePlayer({
                     <h3 className="text-xl font-bold text-slate-900 leading-tight mb-1">
                       {activeVideo.title}
                     </h3>
-                    <p className="text-sm text-slate-500">Now Playing</p>
+                    <p className="text-sm text-slate-500">
+                      {t("player.nowPlaying")}
+                    </p>
                   </>
                 ) : (
                   <h3 className="text-xl font-bold text-slate-900">
-                    Select a Resource
+                    {t("player.selectResource")}
                   </h3>
                 )}
               </div>
@@ -199,13 +209,15 @@ export function MobilePlayer({
                       value="resources"
                       className="text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
                     >
-                      <ListVideo className="w-3.5 h-3.5 mr-2" /> Resources
+                      <ListVideo className="w-3.5 h-3.5 mr-2 rtl:ml-2 rtl:mr-0" />{" "}
+                      {t("tabs.media")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="notes"
                       className="text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
                     >
-                      <AlignLeft className="w-3.5 h-3.5 mr-2" /> My Notes
+                      <AlignLeft className="w-3.5 h-3.5 mr-2 rtl:ml-2 rtl:mr-0" />{" "}
+                      {t("tabs.notes")}
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
@@ -303,7 +315,7 @@ export function MobilePlayer({
                                 {resource.title}
                               </div>
                               <div className="text-[10px] text-slate-500">
-                                Single Video
+                                {t("player.singleVideo")}
                               </div>
                             </div>
                           </div>

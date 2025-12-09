@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 /**
@@ -10,6 +11,8 @@ import Link from "next/link";
  * Encourages users to enter the library or read the manifesto.
  */
 export function CTASection() {
+  const t = useTranslations("Landing.cta");
+
   return (
     <section className="py-24 px-6 w-full bg-white">
       {" "}
@@ -40,26 +43,28 @@ export function CTASection() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm font-medium mx-auto backdrop-blur-sm">
               <Sparkles className="w-4 h-4" />
-              <span>Free for the first book</span>
+              <span>{t("badge")}</span>
             </div>
 
             {/* Headline */}
             <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tight leading-tight">
-              Ready to preserve <br />
-              the{" "}
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-200 to-teal-200 font-lombardia italic">
-                Legacy?
-              </span>
+              {t.rich("heading", {
+                br: () => <br />,
+                legacy: (chunks) => (
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-200 to-teal-200 font-lombardia italic">
+                    {chunks}
+                  </span>
+                ),
+              })}
             </h2>
 
             {/* Subtext */}
             <p className="text-slate-200 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-              Join a global community of students preserving the legacy. Master
-              classical texts across{" "}
-              <span className="text-emerald-200 font-medium">
-                Fiqh, Hadith, and Tajweed
-              </span>{" "}
-              with intelligent tools designed for the modern learner.
+              {t.rich("subtext", {
+                highlight: (chunks) => (
+                  <span className="text-emerald-200 font-medium">{chunks}</span>
+                ),
+              })}
             </p>
 
             {/* Buttons Container */}
@@ -70,8 +75,8 @@ export function CTASection() {
                   size="lg"
                   className="bg-white text-slate-900 hover:bg-emerald-50 rounded-full px-8 h-14 text-base font-semibold shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_-5px_rgba(16,185,129,0.4)] transition-all duration-300 hover:scale-105"
                 >
-                  Enter the Library
-                  <ArrowRight className="ml-2 w-5 h-5" />
+                  {t("primary")}
+                  <ArrowRight className="ml-2 w-5 h-5 rtl:rotate-180" />
                 </Button>
               </Link>
 
@@ -80,9 +85,9 @@ export function CTASection() {
                 href="/about"
                 className="group flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium px-4 py-2"
               >
-                <span>Read our Manifesto</span>
+                <span>{t("secondary")}</span>
                 {/* The arrow is hidden (opacity-0) and slides in on hover */}
-                <ArrowRight className="w-4 h-4 text-emerald-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                <ArrowRight className="w-4 h-4 text-emerald-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 rtl:translate-x-2 rtl:group-hover:translate-x-0 transition-all duration-300 rtl:rotate-180" />
               </Link>
             </div>
           </div>

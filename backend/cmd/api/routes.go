@@ -15,7 +15,7 @@ func (app *application) routes() http.Handler {
 	// --- PUBLIC ROUTES ---
 
 	// Books
-	mux.HandleFunc("GET /v1/books", app.listBooksHandler)
+	mux.HandleFunc("GET /v1/books", app.authenticateIfExists(app.listBooksHandler))
 	mux.HandleFunc("GET /v1/books/{id}", app.showBookHandler)
 
 	// Nodes (Book Content)

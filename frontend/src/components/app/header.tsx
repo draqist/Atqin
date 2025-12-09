@@ -11,7 +11,15 @@ import { NotificationBell } from "./notification-bell";
  * Main application header component.
  * Includes global search functionality, mobile navigation trigger, and notification bell.
  */
+// ... imports
+import { useTranslations } from "next-intl";
+
+/**
+ * Main application header component.
+ * Includes global search functionality, mobile navigation trigger, and notification bell.
+ */
 export function Header() {
+  const t = useTranslations("Header");
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -61,19 +69,19 @@ export function Header() {
         </div>
         <div className="hidden md:block font-semibold text-slate-700">
           {/* Dynamic Title based on Path could go here */}
-          {pathname === "/dashboard" ? "Dashboard" : "Library"}
+          {pathname === "/dashboard" ? t("dashboard") : t("library")}
         </div>
       </div>
 
       <div className="h-16 items-center gap-4 w-full hidden md:flex md:w-auto">
         <div className="relative w-full md:w-96 lg:block">
           <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 cursor-pointer"
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 cursor-pointer rtl:left-auto rtl:right-3"
             onClick={handleSearch}
           />
           <Input
-            placeholder="Search books, authors, or topics... (Enter)"
-            className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-emerald-500 pr-10"
+            placeholder={t("searchPlaceholder")}
+            className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-emerald-500 pr-10 rtl:pr-10 rtl:pl-10"
             value={term}
             onChange={(e) => setTerm(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -82,7 +90,7 @@ export function Header() {
           {term && (
             <button
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 rtl:right-auto rtl:left-3"
             >
               <X className="h-3 w-3" />
             </button>

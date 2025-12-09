@@ -9,6 +9,7 @@ import { Placeholder } from "@tiptap/extensions";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { CheckCircle2, Loader2, Lock, Maximize2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -23,6 +24,7 @@ interface QuickNoteProps {
  * Handles loading states and authentication checks.
  */
 export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
+  const t = useTranslations("Study");
   const router = useRouter();
   const { data: user, isLoading: isUserLoading } = useUser();
 
@@ -39,14 +41,14 @@ export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: "Jot down your reflections...",
+        placeholder: t("notes.jotDown"),
       }),
     ],
     // content: initialContent || "",
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm focus:outline-none md:min-h-[260px] p-4 text-slate-700 text-left placeholder:text-black text-sm",
+          "prose prose-sm focus:outline-none md:min-h-[260px] p-4 text-slate-700 text-left placeholder:text-black text-sm rtl:text-right",
       },
     },
     onUpdate: ({ editor }) => {
@@ -79,16 +81,16 @@ export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
           <Lock className="w-5 h-5 text-slate-400" />
         </div>
         <h3 className="text-sm font-medium text-slate-900 mb-1">
-          Log in to take notes
+          {t("notes.logInTitle")}
         </h3>
         <p className="text-xs text-slate-500 mb-4 max-w-[200px]">
-          Save your reflections and access them from any device.
+          {t("notes.logInDesc")}
         </p>
         <Button
           onClick={() => router.push(`/login?next=/library/${bookId}`)}
           className="bg-slate-900 text-white hover:bg-slate-800 text-xs h-8"
         >
-          Log In
+          {t("notes.logInButton")}
         </Button>
       </div>
     );
@@ -101,14 +103,15 @@ export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
         <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
           {isSaving ? (
             <>
-              <Loader2 className="w-3 h-3 animate-spin" /> Saving...
+              <Loader2 className="w-3 h-3 animate-spin" /> {t("notes.saving")}
             </>
           ) : isSuccess ? (
             <>
-              <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Saved
+              <CheckCircle2 className="w-3 h-3 text-emerald-500" />{" "}
+              {t("notes.saved")}
             </>
           ) : (
-            "Draft"
+            t("notes.draft")
           )}
         </span>
         <Button
@@ -133,7 +136,7 @@ export function QuickNote({ bookId, initialContent }: QuickNoteProps) {
           className="w-full bg-slate-900 text-white hover:bg-slate-800"
           onClick={() => router.push(`/library/${bookId}/write`)}
         >
-          Continue to Full Editor
+          {t("notes.openFullEditor")}
         </Button>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Book, BookProgress } from "@/lib/types";
 import { PlayCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 /**
@@ -15,6 +16,8 @@ export function ContinueReadingHero({
   book?: Book;
   progress?: BookProgress;
 }) {
+  const t = useTranslations("Dashboard");
+
   if (!book) return null;
 
   return (
@@ -25,7 +28,7 @@ export function ContinueReadingHero({
 
       <div className="relative z-10">
         <span className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2 block">
-          Jump Back In
+          {t("hero.jumpBackIn")}
         </span>
         <h3 className="text-3xl font-bold mb-1 group-hover:text-emerald-200 transition-colors line-clamp-1">
           {book.title}
@@ -43,14 +46,15 @@ export function ContinueReadingHero({
               />
             </div>
             <span className="text-xs text-slate-300">
-              {progress?.percentage || 0}% Complete
+              {progress?.percentage || 0}% {t("hero.complete")}
             </span>
           </div>
         </div>
 
         <Link href={`/library/${book.id}?page=${progress?.current_page || 1}`}>
           <Button className="bg-white text-slate-900 hover:bg-emerald-50 hover:text-emerald-900 font-bold transition-all">
-            Continue <PlayCircle className="ml-2 w-4 h-4" />
+            {t("hero.continue")}{" "}
+            <PlayCircle className="ml-2 w-4 h-4 rtl:flip" />
           </Button>
         </Link>
       </div>

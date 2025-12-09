@@ -1,0 +1,460 @@
+{
+  "Landing": {
+    "nav": {
+      "library": "Library",
+      "about": "About",
+      "roadmaps": "Roadmaps",
+      "login": "Log in",
+      "startLearning": "Start Learning",
+      "language": {
+        "switch": "Switch Language"
+      },
+      "categories": {
+        "tajweed": {
+          "title": "Tajweed & Qira'at",
+          "desc": "Master pronunciation and the rules of recitation."
+        },
+        "aqeedah": {
+          "title": "Aqeedah",
+          "desc": "Texts regarding Islamic creed and theology."
+        },
+        "hadith": {
+          "title": "Hadith",
+          "desc": "Collections of prophetic traditions and narrations."
+        },
+        "grammar": {
+          "title": "Arabic Grammar",
+          "desc": "Nahw and Sarf foundations for understanding texts."
+        }
+      }
+    },
+    "hero": {
+      "version": "v1.0 Public Beta",
+      "prefix": "The",
+      "suffix": "for the Student of Knowledge.",
+      "desc": "A unified platform to read, study, and memorize <light>Classical Islamic Works</light>. From short poetry (Mutuun) to extensive volumes of Fiqh and Hadith, preserved digitally with AI-powered tools.",
+      "explore": "Explore the Library",
+      "quote": {
+        "text": "طلب العلم من المهد إلى اللحد",
+        "translation": "Seek Knowledge from the Cradle to the Grave"
+      },
+      "stats": {
+        "resources": {
+          "title": "Curated Resources",
+          "desc": "Over {count} pdfs, 50 videos, 100 playlists."
+        },
+        "works": {
+          "title": "Verified Works",
+          "desc": "Aqeedah, Fiqh, Tajweed & more."
+        }
+      }
+    },
+    "features": {
+      "label": "Our Features",
+      "title": "We built this for the love of <br></br> <gradient>The Deen. (Preserving Knowledge)</gradient>",
+      "subtitle": "Everything a student needs to read, memorize, and master the Mutuun. Streamline your Hifdh journey with powerful, modern tools.",
+      "footer": "Iqraa offers comprehensive tools for students of all levels.",
+      "items": {
+        "verified": {
+          "title": "Verified Library",
+          "desc": "Access digitised classical texts with verified Tahqiq, not just scanned PDFs."
+        },
+        "ai": {
+          "title": "AI Tasm'i",
+          "desc": "Recite to the app. It listens, corrects mistakes, and tracks your fluency."
+        },
+        "srs": {
+          "title": "Smart SRS",
+          "desc": "Spaced Repetition System that ensures you review lines right before you forget them."
+        },
+        "sharh": {
+          "title": "Contextual Sharh",
+          "desc": "Click any verse to instantly see explanations from scholars like Ibn Uthaymeen."
+        },
+        "audio": {
+          "title": "Audio Sync",
+          "desc": "Listen to world-renowned reciters synced line-by-line with the text."
+        },
+        "circles": {
+          "title": "Hifdh Circles",
+          "desc": "Join virtual circles with friends to track progress and keep each other accountable."
+        },
+        "analytics": {
+          "title": "Progress Analytics",
+          "desc": "Visualize your memorization strength with heatmaps and retention charts."
+        },
+        "crossplatform": {
+          "title": "Cross-Platform",
+          "desc": "Start reading on your laptop, continue memorizing on your phone. Always synced."
+        }
+      }
+    },
+    "cta": {
+      "badge": "Free for the first book",
+      "heading": "Ready to preserve <br ></br> the <legacy>Legacy?</legacy>",
+      "subtext": "Join a global community of students preserving the legacy. Master classical texts across <highlight>Fiqh, Hadith, and Tajweed</highlight> with intelligent tools designed for the modern learner.",
+      "primary": "Enter the Library",
+      "secondary": "Read our Manifesto"
+    },
+    "footer": {
+      "desc": "The Digital Rihal for the modern student. Preserving the legacy of Islamic knowledge through technology.",
+      "columns": {
+        "product": {
+          "title": "Product",
+          "links": {
+            "pricing": "Pricing",
+            "gift": "Gift Cards",
+            "family": "Family Plan"
+          }
+        },
+        "support": {
+          "title": "Support",
+          "links": {
+            "center": "Support Center",
+            "requests": "Feature Requests"
+          }
+        },
+        "community": {
+          "title": "Community",
+          "links": {
+            "hifz": "Hifz Network",
+            "glossary": "Glossary",
+            "ramadan": "Ramadan",
+            "discord": "Discord"
+          }
+        }
+      },
+      "copyright": "© Copyright {year} Iqraa Platform. All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "language": "English",
+      "comingSoon": "Coming Soon"
+    }
+  },
+  "About": {
+    "mission": {
+      "badge": "Our Mission",
+      "heading": "We are building the <br></br> <highlight>Digital Rihal.</highlight>",
+      "desc": "For centuries, the student of knowledge relied on the <italics>Rihal</italics> (bookstand) to support their study. In the digital age, we found our tools lacking. We are here to fix that."
+    },
+    "problem": {
+      "title": "The \"PDF Graveyard\"",
+      "desc1": "The internet is full of Islamic content, but it is <strong_text>fragmented</strong_text>. A blurry PDF here, a YouTube playlist there, an audio file on a lost server.",
+      "desc2": "The serious student (*Talib al-Ilm*) spends more time <italics_finding>finding</italics_finding> and <italics_organizing>organizing</italics_organizing> resources than actually <strong_memorizing>memorizing</strong_memorizing> them.",
+      "visual": {
+        "notFound": "404 Not Found"
+      }
+    },
+    "values": {
+      "title": "Built on Three Pillars",
+      "subtitle": "Our core philosophy drives every line of code.",
+      "preservation": {
+        "title": "Preservation (Hifdh)",
+        "desc": "We don't just display text; we treat it as data. Every verse is indexed, searchable, and linked, preserving the structure of the Matn."
+      },
+      "intelligence": {
+        "title": "Intelligence (Fahm)",
+        "desc": "We use AI not to replace the scholar, but to serve the student. Real-time recitation correction and semantic search bridge the language barrier."
+      },
+      "community": {
+        "title": "Community (Ummah)",
+        "desc": "Knowledge is not meant to be solitary. We connect students into cohorts to revive the spirit of the Halaqah digitally."
+      }
+    },
+    "methodology": {
+      "label": "Verified Knowledge",
+      "heading": "Built on the <br/> Shoulders of Giants.",
+      "desc": "In an era of misinformation, the source matters. We don't just scrape the web. Every text on Iqraa is sourced from verified <strong_text>Tahqiq</strong_text> (critical editions), reviewed against manuscripts, and structured according to the methodology of the scholars.",
+      "checks": {
+        "text": "Text verified against printed editions",
+        "audio": "Audio sourced from authorized reciters",
+        "curriculum": "Curriculum based on traditional Manhaj"
+      },
+      "card": {
+        "sourceText": "Source Text",
+        "title": "Matn Ash-Shatibiyyah",
+        "verified": "Verified",
+        "edition": "Edition (Tahqiq)",
+        "editionValue": "Dar al-Minhaj",
+        "reviewStatus": "Review Status",
+        "passed": "Passed",
+        "digitalIndexing": "Digital Indexing",
+        "verses": "1,173 Verses",
+        "signature": "Iqraa Digital Library"
+      }
+    },
+    "cta": {
+      "heading": "Ready to begin?",
+      "subtext": "The path to knowledge begins with a single word: <strong>Iqraa</strong>.",
+      "button": "Start Learning Free"
+    }
+  },
+  "Roadmap": {
+    "hero": {
+      "badge": "The Method of the Scholars",
+      "heading": "Structured Paths to <br/> <highlight>Scientific Mastery.</highlight>",
+      "desc": "Knowledge is not gathered randomly. It is built brick by brick. We have curated <strong_text>7 specialized tracks</strong_text> based on the traditional <italics>Manhaj</italics> to take you from beginner to mastery.",
+      "explore": "Explore Tracks",
+      "howItWorks": "How it works"
+    },
+    "features": {
+      "progression": {
+        "title": "Clear Progression",
+        "desc": "Stop guessing what to read next. Each track has a defined sequence: Beginner, Intermediate, and Advanced."
+      },
+      "verified": {
+        "title": "Verified Texts",
+        "desc": "Every book in the roadmap is selected for its academic weight and verified for authenticity."
+      },
+      "growth": {
+        "title": "Track Your Growth",
+        "desc": "Visualize your journey. Mark books as complete, track memorization, and earn mastery status."
+      }
+    },
+    "catalog": {
+      "title": "Available Curriculums",
+      "subtitle": "Select a science to begin your journey."
+    },
+    "cta": {
+      "title": "Not sure where to start?",
+      "desc": "Most students begin with the <strong_aqeedah>Aqeedah</strong_aqeedah> or <strong_hadith>Hadith</strong_hadith> tracks. Establish your foundation first.",
+      "button": "View Aqeedah Track"
+    }
+  },
+  "Library": {
+    "errors": {
+      "connection": {
+        "title": "Connection Interrupted",
+        "desc": "We couldn't fetch the library data. This might be a temporary network issue or the server is resting.",
+        "retry": "Try Again"
+      }
+    },
+    "empty": {
+      "title": "The Library is Empty",
+      "desc": "It looks like the shelves are bare. Try adding a book to the database.",
+      "categoryTitle": "No books found in \"{category}\"",
+      "categoryDesc": "We haven't digitized any texts in this category yet. Try checking 'Tajweed' or 'Hadith'.",
+      "filterTitle": "No books found for this filter.",
+      "viewAll": "View All Books"
+    },
+    "search": {
+      "placeholder": "Search library...",
+      "count": "{count} books available",
+      "categoryCollection": "{category} Collection"
+    },
+    "filters": {
+      "allTopics": "All Topics",
+      "moreTopics": "More Topics",
+      "level": "Level",
+      "difficulty": "Difficulty",
+      "anyLevel": "Any Level",
+      "sort": "Sort",
+      "sortBy": "Sort By",
+      "newest": "Newest First",
+      "alpha": "Alphabetical (A-Z)",
+      "clear": "Clear filters"
+    },
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "categories": {
+      "tajweed": "Tajweed",
+      "aqeedah": "Aqeedah",
+      "fiqh": "Fiqh",
+      "hadith": "Hadith",
+      "grammar": "Grammar",
+      "tafsir": "Tafsir",
+      "seerah": "Seerah"
+    },
+    "bookCard": {
+      "unknownAuthor": "Unknown Author",
+      "level": "Level"
+    }
+  },
+  "Sidebar": {
+    "menuLabel": "Menu",
+    "dashboard": "Dashboard",
+    "library": "Library",
+    "reflections": "Reflections",
+    "hifdh": "My Hifdh",
+    "roadmaps": "Roadmaps",
+    "bookmarks": "Bookmarks"
+  },
+  "Header": {
+    "dashboard": "Dashboard",
+    "library": "Library",
+    "searchPlaceholder": "Search books, authors, or topics... (Enter)"
+  },
+  "UserMenu": {
+    "guestName": "Guest Student",
+    "guestEmail": "Sign in to save",
+    "upgrade": "Upgrade to Pro",
+    "profile": "Profile",
+    "billing": "Billing",
+    "settings": "Settings",
+    "logout": "Log out",
+    "login": "Log in"
+  },
+  "Reflections": {
+    "title": "Community Reflections",
+    "subtitle": "See what others are learning.",
+    "searchPlaceholder": "Search author or book...",
+    "empty": {
+      "title": "No reflections found",
+      "description": "Try adjusting your filters or search terms.",
+      "clear": "Clear filters"
+    }
+  },
+  "RoadmapsApp": {
+    "hero": {
+      "badge": "Curriculum Tracks",
+      "title": "Structured Paths to <br></br> <highlight>Knowledge Mastery.</highlight>",
+      "description": "Don't just read randomly. Follow the methodologies laid out by scholars. From the basics of Aqeedah to the complexities of Fiqh, we guide you book-by-book."
+    },
+    "stats": {
+      "activeTracks": "Active Tracks",
+      "totalBooks": "Total Books"
+    },
+    "sectionTitle": "Available Tracks",
+    "empty": {
+      "title": "No tracks found",
+      "description": "Try adjusting your filters",
+      "clear": "Clear Filters"
+    }
+  },
+  "Auth": {
+    "common": {
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "username": "Username",
+      "fullName": "Full Name",
+      "signIn": "Sign In",
+      "signUp": "Sign Up",
+      "logIn": "Log in",
+      "createAccount": "Create Account",
+      "or": "Or",
+      "backToLogin": "Back to Login",
+      "sendResetLink": "Send Reset Link",
+      "resetPassword": "Reset Password",
+      "submit": "Submit"
+    },
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Enter your credentials to access your account.",
+      "emailLabel": "Email or Username",
+      "emailPlaceholder": "name@example.com or username",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "signUpFree": "Sign up for free"
+    },
+    "register": {
+      "title": "Create an account",
+      "subtitle": "Join the community of students.",
+      "alreadyHaveAccount": "Already have an account?",
+      "namePlaceholder": "Ibn Khaldun",
+      "usernamePlaceholder": "ibnkhaldun"
+    },
+    "forgotPassword": {
+      "title": "Forgot password?",
+      "subtitle": "Enter your email address and we'll send you a link to reset your password.",
+      "rememberPassword": "Remember your password?"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your new password below.",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password",
+      "invalidLinkTitle": "Invalid Link",
+      "invalidLinkDescription": "This password reset link is invalid or missing."
+    },
+    "quote": {
+      "text": "\"The seeking of knowledge is obligatory for every Muslim.\"",
+      "author": "— Prophet Muhammad ﷺ"
+    }
+  },
+  "Dashboard": {
+    "welcome": "Welcome back, {name} 👋",
+    "streakMessage": "You're on a {streak}-day streak. Keep it up!",
+    "sections": {
+      "learningActivity": "Learning Activity",
+      "community": "Community"
+    },
+    "stats": {
+      "currentStreak": "Current Streak",
+      "best": "Best: {days} Days",
+      "timeStudied": "Time Studied",
+      "totalLifetime": "Total lifetime",
+      "booksOpened": "Books Opened",
+      "activeReadings": "Active Readings",
+      "mastery": "Mastery",
+      "versesMemorized": "Verses Memorized",
+      "days": "Days"
+    },
+    "hero": {
+      "jumpBackIn": "Jump Back In",
+      "complete": "Complete",
+      "continue": "Continue"
+    },
+    "guest": {
+      "title": "Your Personal Dashboard",
+      "description": "Track your reading habits, visualize your consistency, and pick up exactly where you left off.",
+      "signInToView": "Sign In to View",
+      "createAccount": "Create a free account"
+    },
+    "activity": {
+      "mins": "mins",
+      "last7Days": "Last 7 Days"
+    }
+  },
+  "Study": {
+    "tabs": {
+      "media": "Media",
+      "notes": "Notes",
+      "discuss": "Discuss"
+    },
+    "actions": {
+      "share": "Share",
+      "shareBook": "Share this book",
+      "viewReflections": "View Reflections",
+      "addToStudyList": "Add to Study List",
+      "updating": "Updating...",
+      "copyLink": "Copy Link",
+      "linkCopied": "Link copied to clipboard"
+    },
+    "player": {
+      "nowPlaying": "Now Playing",
+      "selectResource": "Select a Resource",
+      "selectVideo": "Select a video to play",
+      "tapToExpand": "Tap to expand",
+      "items": "items",
+      "viewItems": "Tap to view {count} items",
+      "resources": "Resources",
+      "singleVideo": "Single Video",
+      "playlist": "Playlist",
+      "videos": "Videos"
+    },
+    "notes": {
+      "jotDown": "Jot down your reflections...",
+      "logInTitle": "Log in to take notes",
+      "logInDesc": "Save your reflections and access them from any device.",
+      "logInButton": "Log In",
+      "draft": "Draft",
+      "saving": "Saving...",
+      "saved": "Saved",
+      "openFullEditor": "Continue to Full Editor",
+      "myNotes": "My Notes"
+    },
+    "discussion": {
+      "placeholder": "Ask a question or share a thought...",
+      "empty": "Be the first to start a discussion!",
+      "reply": "Reply",
+      "replies": "replies"
+    },
+    "header": {
+      "readingView": "Reading View"
+    }
+  }
+}

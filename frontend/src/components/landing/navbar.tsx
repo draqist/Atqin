@@ -1,6 +1,5 @@
 "use client";
 
-import { BookOpen, Brain, Mic } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -15,71 +14,52 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-
-// 1. DATA: Define your Library Categories
-const libraryCategories: {
-  title: string;
-  href: string;
-  description: string;
-}[] = [
-  {
-    title: "Tajweed & Qira'at",
-    href: "/library?category=tajweed",
-    description: "Master pronunciation and the rules of recitation.",
-  },
-  {
-    title: "Aqeedah",
-    href: "/library?category=aqeedah",
-    description: "Texts regarding Islamic creed and theology.",
-  },
-  {
-    title: "Hadith",
-    href: "/library?category=hadith",
-    description: "Collections of prophetic traditions and narrations.",
-  },
-  {
-    title: "Arabic Grammar",
-    href: "/library?category=grammar",
-    description: "Nahw and Sarf foundations for understanding texts.",
-  },
-];
-
-// 2. DATA: Define your Features
-const features: {
-  title: string;
-  href: string;
-  description: string;
-  icon: React.ElementType;
-}[] = [
-  {
-    title: "AI Recitation",
-    href: "/features/ai",
-    description: "Get real-time feedback on your memorization.",
-    icon: Mic,
-  },
-  {
-    title: "Spaced Repetition",
-    href: "/features/srs",
-    description: "Never forget a verse with smart review schedules.",
-    icon: Brain,
-  },
-  {
-    title: "Digitized Texts",
-    href: "/features/library",
-    description: "Interactive texts with deep-linking, not PDFs.",
-    icon: BookOpen,
-  },
-];
+import { LanguageSwitcher } from "./language-switcher";
 
 /**
  * The main navigation bar component.
  * Includes logo, navigation menu, and action buttons.
  */
 export function Navbar() {
+  const t = useTranslations("Landing.nav");
+  const locale = useLocale();
+
+  // 1. DATA: Define your Library Categories
+  const libraryCategories: {
+    title: string;
+    href: string;
+    description: string;
+  }[] = [
+    {
+      title: t("categories.tajweed.title"),
+      href: "/library?category=tajweed",
+      description: t("categories.tajweed.desc"),
+    },
+    {
+      title: t("categories.aqeedah.title"),
+      href: "/library?category=aqeedah",
+      description: t("categories.aqeedah.desc"),
+    },
+    {
+      title: t("categories.hadith.title"),
+      href: "/library?category=hadith",
+      description: t("categories.hadith.desc"),
+    },
+    {
+      title: t("categories.grammar.title"),
+      href: "/library?category=grammar",
+      description: t("categories.grammar.desc"),
+    },
+  ];
+
   return (
     // THE CONTAINER: Adds the glass effect and border to fix "plainness"
-    <header className="fixed top-0 w-full z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md supports-backdrop-filter:bg-white/60">
+    <header
+      className="fixed top-0 w-full z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md supports-backdrop-filter:bg-white/60"
+      dir="ltr"
+    >
       <div className="mx-auto px-6 h-16 flex items-center justify-between">
         {/* LOGO */}
         <Link
@@ -95,29 +75,10 @@ export function Navbar() {
             {/* MENU 1: THE LIBRARY (Mega Menu) */}
             <NavigationMenuItem>
               <NavigationMenuTrigger className="bg-transparent text-slate-600 hover:text-emerald-700 focus:bg-emerald-50">
-                Library
+                {t("library")}
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-1 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                  {/* Featured Book Callout */}
-                  {/* <li className="row-span-3">
-                    <NavigationMenuLink asChild>
-                      <a
-                        className="flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b from-emerald-50 to-emerald-100 p-6 no-underline outline-none focus:shadow-md select-none"
-                        href="/library/shatibiyyah"
-                      >
-                        <Sparkles className="h-6 w-6 text-emerald-600 mb-2" />
-                        <div className="mb-2 mt-4 text-lg font-medium text-emerald-900">
-                          Ash-Shatibiyyah
-                        </div>
-                        <p className="text-sm leading-tight text-emerald-700/90">
-                          Start your journey with the premier text in the 7
-                          Qira'at. Available now.
-                        </p>
-                      </a>
-                    </NavigationMenuLink>
-                  </li> */}
-
                   {/* Category List */}
                   {libraryCategories.map((item) => (
                     <ListItem
@@ -141,7 +102,7 @@ export function Navbar() {
                   "bg-transparent text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/50"
                 )}
               >
-                <Link href="/about">About</Link>
+                <Link href="/about">{t("about")}</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
 
@@ -153,34 +114,25 @@ export function Navbar() {
                 )}
                 asChild
               >
-                <Link href="/roadmap">Roadmaps</Link>
+                <Link href="/roadmap">{t("roadmaps")}</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
-            {/* <NavigationMenuItem>
-              <NavigationMenuLink
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  "bg-transparent text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/50"
-                )}
-                asChild
-              >
-                <Link href="#">Pricing</Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem> */}
           </NavigationMenuList>
         </NavigationMenu>
 
         {/* ACTIONS (RIGHT) */}
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+
           <Link
             href="/login"
             className="text-sm font-medium text-slate-600 hover:text-emerald-700 hidden sm:block"
           >
-            Log in
+            {t("login")}
           </Link>
           <Link href="/library">
             <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-full px-6">
-              Start Learning
+              {t("startLearning")}
             </Button>
           </Link>
         </div>

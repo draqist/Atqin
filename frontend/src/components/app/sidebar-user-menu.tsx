@@ -28,16 +28,23 @@ import { useRouter } from "next/navigation";
  * User menu component for the sidebar.
  * Displays the current user's avatar and name, with options for profile, billing, settings, and logout.
  */
+// ... imports
+import { useTranslations } from "next-intl";
+
+/**
+ * User menu component for the sidebar.
+ * Displays the current user's avatar and name, with options for profile, billing, settings, and logout.
+ */
 export function SidebarUserMenu() {
+  const t = useTranslations("UserMenu");
   const { data: user, isLoading } = useUser();
   const { logout } = useLogout();
+  const router = useRouter();
 
   // Fallback for Guest
-  const displayName = user ? user.name : "Guest Student";
-  const displayEmail = user ? user.email : "Sign in to save";
+  const displayName = user ? user.name : t("guestName");
+  const displayEmail = user ? user.email : t("guestEmail");
   const initials = user ? user.name[0] : "G";
-  const router = useRouter();
-  // Mock User State (Replace with real auth logic later)
 
   return (
     <DropdownMenu>
@@ -91,7 +98,7 @@ export function SidebarUserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <Sparkles className="mr-2 h-4 w-4 text-emerald-600" />
-            Upgrade to Pro
+            {t("upgrade")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
@@ -100,15 +107,15 @@ export function SidebarUserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <User className="mr-2 h-4 w-4" />
-            Profile
+            {t("profile")}
           </DropdownMenuItem>
           <DropdownMenuItem>
             <CreditCard className="mr-2 h-4 w-4" />
-            Billing
+            {t("billing")}
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
-            Settings
+            {t("settings")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
@@ -120,7 +127,7 @@ export function SidebarUserMenu() {
             onClick={logout}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            Log out
+            {t("logout")}
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem
@@ -128,7 +135,7 @@ export function SidebarUserMenu() {
             onClick={() => router.push("/login")}
           >
             <LogIn className="mr-2 h-4 w-4" />
-            Log in
+            {t("login")}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
