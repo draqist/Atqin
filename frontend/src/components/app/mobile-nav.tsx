@@ -18,29 +18,12 @@ import {
   MessageSquareQuote,
   Mic,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SidebarUserMenu } from "./sidebar-user-menu";
-
-// Duplicate nav config to keep it self-contained (or extract to a config file)
-const mainNav = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Library", href: "/library", icon: Library },
-  { name: "Reflections", href: "/reflections", icon: MessageSquareQuote },
-  { name: "My Hifdh", href: "/hifdh", icon: Mic },
-  { name: "Roadmaps", href: "/roadmaps", icon: Map },
-  { name: "Bookmarks", href: "/bookmarks", icon: Bookmark },
-];
-
-// const categories = [
-//   { name: "Tajweed & Qira'at", slug: "tajweed" },
-//   { name: "Aqeedah", slug: "aqeedah" },
-//   { name: "Hadith", slug: "hadith" },
-//   { name: "Arabic Grammar", slug: "grammar" },
-// ];
-
 import { NotificationBell } from "./notification-bell";
+import { SidebarUserMenu } from "./sidebar-user-menu";
 
 // ...
 
@@ -50,11 +33,24 @@ import { NotificationBell } from "./notification-bell";
  */
 export function MobileNav() {
   const pathname = usePathname();
+  const t = useTranslations("Sidebar");
+
+  const mainNav = [
+    { name: t("dashboard"), href: "/dashboard", icon: LayoutDashboard },
+    { name: t("library"), href: "/library", icon: Library },
+    { name: t("reflections"), href: "/reflections", icon: MessageSquareQuote },
+    { name: t("hifdh"), href: "/hifdh", icon: Mic },
+    { name: t("roadmaps"), href: "/roadmaps", icon: Map },
+    { name: t("bookmarks"), href: "/bookmarks", icon: Bookmark },
+  ];
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <div className="md:hidden flex items-center justify-between w-full h-16 border-b border-slate-100 bg-white">
+        <div
+          className="md:hidden flex items-center justify-between w-full h-16 border-b border-slate-100 bg-white"
+          dir="ltr"
+        >
           <Link href="/">
             <Image
               src={"/iqr_mob.png"}
@@ -77,7 +73,7 @@ export function MobileNav() {
       </SheetTrigger>
       <SheetContent className="w-[300px] p-0 flex flex-col bg-white">
         <SheetHeader className="p-6 border-b border-slate-100 text-left">
-          <SheetTitle>
+          <SheetTitle dir="ltr">
             <Link href="/">
               <Image
                 src={"/iqraa.svg"}
@@ -93,7 +89,7 @@ export function MobileNav() {
           {/* Main Menu */}
           <div>
             <h3 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Menu
+              {t("menuLabel")}
             </h3>
             <nav className="space-y-1">
               {mainNav.map((item) => {
