@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // Waitlist represents an entry in the pre-launch waitlist.
@@ -15,7 +17,8 @@ type Waitlist struct {
 
 // WaitlistModel wraps the database connection pool for Waitlist-related operations.
 type WaitlistModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // Insert adds a new email to the waitlist.

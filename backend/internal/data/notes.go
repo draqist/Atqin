@@ -5,7 +5,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // Note represents a user's personal reflection or note on a book.
@@ -32,7 +35,8 @@ type PublicNote struct {
 
 // NoteModel wraps the database connection pool for Note-related operations.
 type NoteModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // GetDraft fetches the latest draft note for a specific book and user.
@@ -111,7 +115,13 @@ func (m NoteModel) insert(note *Note) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&note.ID, &note.CreatedAt, &note.UpdatedAt)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&note.ID, &note.CreatedAt, &note.UpdatedAt)
+	if err != nil {
+		return err
+	}
+
+	// Invalidate: This new note might be published, so invalidate book's note list
+	return m.Cache.Delete(context.Background(), fmt.Sprintf("notes:published:book:%s", note.BookID))
 }
 
 func (m NoteModel) update(note *Note) error {
@@ -128,17 +138,31 @@ func (m NoteModel) update(note *Note) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query,
+	err := m.DB.QueryRowContext(ctx, query,
 		note.Title,
 		note.Description,
 		note.Content,
 		note.IsPublished,
 		note.ID,
 	).Scan(&note.UpdatedAt)
+	if err != nil {
+		return err
+	}
+
+	// Invalidate: note specific cache and book's note list
+	m.Cache.Delete(context.Background(), fmt.Sprintf("note:public:%s", note.ID))
+	return m.Cache.Delete(context.Background(), fmt.Sprintf("notes:published:book:%s", note.BookID))
 }
 
 // GetPublished fetches all published notes associated with a specific book.
 func (m NoteModel) GetPublished(bookID string) ([]*PublicNote, error) {
+	// 1. Try Cache
+	var notes []*PublicNote
+	cacheKey := fmt.Sprintf("notes:published:book:%s", bookID)
+	if m.Cache.Get(context.Background(), cacheKey, &notes) {
+		return notes, nil
+	}
+
 	query := `
 		SELECT n.id, n.title, n.description, u.name, n.created_at
 		FROM notes n
@@ -155,7 +179,7 @@ func (m NoteModel) GetPublished(bookID string) ([]*PublicNote, error) {
 	}
 	defer rows.Close()
 
-	notes := []*PublicNote{}
+	notes = []*PublicNote{}
 	for rows.Next() {
 		var n PublicNote
 		var description sql.NullString
@@ -175,6 +199,9 @@ func (m NoteModel) GetPublished(bookID string) ([]*PublicNote, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+
+	// 2. Set Cache
+	m.Cache.Set(context.Background(), cacheKey, notes, 1*time.Hour)
 
 	return notes, nil
 }
@@ -249,6 +276,13 @@ func (m NoteModel) GetAllPublished(filters NoteFilters) ([]*GlobalNote, Metadata
 // GetPublicByID fetches a single published note by its ID.
 // It includes the full content of the note.
 func (m NoteModel) GetPublicByID(noteID string) (*GlobalNote, error) {
+	// 1. Try Cache
+	var n GlobalNote
+	cacheKey := fmt.Sprintf("note:public:%s", noteID)
+	if m.Cache.Get(context.Background(), cacheKey, &n) {
+		return &n, nil
+	}
+
 	query := `
 		SELECT n.id, n.title, n.description, u.name, b.title, b.id, n.created_at, n.content
 		FROM notes n
@@ -256,7 +290,7 @@ func (m NoteModel) GetPublicByID(noteID string) (*GlobalNote, error) {
 		JOIN books b ON n.book_id = b.id
 		WHERE n.id = $1 AND n.is_published = TRUE`
 
-	var n GlobalNote
+
 	var content []byte
 	var description sql.NullString
 
@@ -288,6 +322,9 @@ func (m NoteModel) GetPublicByID(noteID string) (*GlobalNote, error) {
 	if len(content) > 0 {
 		n.Content = json.RawMessage(content)
 	}
+
+	// 2. Set Cache
+	m.Cache.Set(context.Background(), cacheKey, &n, 1*time.Hour)
 
 	return &n, nil
 }

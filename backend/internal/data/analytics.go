@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // StudentStats aggregates statistics for a student's dashboard.
@@ -48,7 +50,8 @@ type DailyActivity struct {
 
 // AnalyticsModel wraps the database connection pool for Analytics-related operations.
 type AnalyticsModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // LogActivity records or updates the minutes spent by a user on a book for the current day.
@@ -143,14 +146,14 @@ func (m AnalyticsModel) GetStudentStats(userID string) (*StudentStats, error) {
 			FROM user_book_progress
 			WHERE user_id = $1 AND book_id = $2`
 
-		var p BookProgress
-		err = m.DB.QueryRowContext(ctx, queryProgress, userID, lastBook.ID).Scan(&p.CurrentPage, &p.TotalPages)
-		if err == nil && p.TotalPages > 0 {
-			p.Percentage = int((float64(p.CurrentPage) / float64(p.TotalPages)) * 100)
-			stats.LastBookProgress = &p
+		var prog BookProgress
+		err = m.DB.QueryRowContext(ctx, queryProgress, userID, lastBook.ID).Scan(&prog.CurrentPage, &prog.TotalPages)
+		if err == nil {
+			if prog.TotalPages > 0 {
+				prog.Percentage = (prog.CurrentPage * 100) / prog.TotalPages
+			}
+			stats.LastBookProgress = &prog
 		}
-	} else if err != sql.ErrNoRows {
-		return nil, err
 	}
 
 	return stats, nil
@@ -186,10 +189,17 @@ func (m AnalyticsModel) GetSystemStats() (*AdminStats, error) {
 
 // GetDashboardData aggregates all necessary data for the admin dashboard view.
 func (m AnalyticsModel) GetDashboardData() (*AdminDashboardData, error) {
+	// 1. Try Cache
+	var data AdminDashboardData
+	cacheKey := "admin:dashboard"
+	if m.Cache.Get(context.Background(), cacheKey, &data) {
+		return &data, nil
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	data := &AdminDashboardData{
+	data = AdminDashboardData{
 		RecentResources: []*Resource{},
 		RecentUsers:     []*User{},
 	}
@@ -291,5 +301,8 @@ func (m AnalyticsModel) GetDashboardData() (*AdminDashboardData, error) {
 		return nil, err
 	}
 
-	return data, nil
+	// 2. Set Cache
+	m.Cache.Set(context.Background(), cacheKey, &data, 5*time.Minute)
+
+	return &data, nil
 }

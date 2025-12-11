@@ -11,6 +11,7 @@ import (
 	"time"
 
 	// Import the pgx driver for Postgres
+	"github.com/draqist/iqraa/backend/internal/cache"
 	"github.com/draqist/iqraa/backend/internal/data"
 	"github.com/draqist/iqraa/backend/internal/mailer" // Added
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -62,22 +63,33 @@ func main() {
 	if err != nil {
 		cfg.port = 8080
 	}
-
-	cfg.db.dsn = os.Getenv("DB_DSN")
-	cfg.supabase.url = os.Getenv("SUPABASE_URL")
-	cfg.supabase.key = os.Getenv("SUPABASE_SERVICE_KEY")
-	if cfg.db.dsn == "" {
-		cfg.db.dsn = "postgres://user:password@localhost:5432/iqraa_db?sslmode=disable"
+	redisURL := os.Getenv("REDIS_URL")
+    if redisURL == "" {
+        // Fallback for local dev if you don't have internet
+        redisURL = "redis://localhost:6379" 
+    }
+    
+    // 2. Connect
+		cfg.db.dsn = os.Getenv("DB_DSN")
+		cfg.supabase.url = os.Getenv("SUPABASE_URL")
+		cfg.supabase.key = os.Getenv("SUPABASE_SERVICE_KEY")
+		if cfg.db.dsn == "" {
+			cfg.db.dsn = "postgres://user:password@localhost:5432/iqraa_db?sslmode=disable"
 	}
-
+	
 	cfg.smtp.host = os.Getenv("SMTP_HOST")
 	port, _ := strconv.Atoi(os.Getenv("SMTP_PORT"))
 	cfg.smtp.port = port
 	cfg.smtp.username = os.Getenv("SMTP_USERNAME")
 	cfg.smtp.password = os.Getenv("SMTP_PASSWORD")
 	cfg.smtp.sender = os.Getenv("SMTP_SENDER")
-
+	
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+
+	cacheSvc, err := cache.New(redisURL)
+	if err != nil {
+			logger.Fatal(err) // Fail fast if cache is broken
+	}
 
 	db, err := openDB(cfg)
 	if err != nil {
@@ -85,12 +97,12 @@ func main() {
 	}
 	defer db.Close()
 	logger.Println("database connection pool established")
-
+	models:= data.NewModels(db, cacheSvc)
 	app := &application{
 		config: cfg,
 		logger: logger,
 		db:     db,
-		models: data.NewModels(db),
+		models: models,
 		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 

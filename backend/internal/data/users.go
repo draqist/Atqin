@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/draqist/iqraa/backend/internal/cache"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -29,7 +30,8 @@ type User struct {
 
 // UserModel wraps the database connection pool for User-related operations.
 type UserModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // Insert adds a new user to the database.

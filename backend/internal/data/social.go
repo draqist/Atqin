@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // Cohort represents a group of students learning together on a roadmap.
@@ -25,7 +27,8 @@ type CohortMember struct {
 
 // SocialModel wraps the database connection pool for social features (Cohorts, Partners).
 type SocialModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // GetOrCreateCohort finds an existing cohort starting this week with the same pace,

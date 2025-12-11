@@ -4,11 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // BookmarkModel wraps the database connection pool for Bookmark-related operations.
 type BookmarkModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // Toggle adds a bookmark if it doesn't exist, or removes it if it does.
