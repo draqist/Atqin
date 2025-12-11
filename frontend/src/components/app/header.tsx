@@ -13,6 +13,7 @@ import { NotificationBell } from "./notification-bell";
  */
 // ... imports
 import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "../landing/language-switcher";
 import { GamificationNav } from "../layout/gamification-nav";
 
 /**
@@ -100,6 +101,7 @@ export function Header() {
         </div>
 
         <NotificationBell />
+        <LanguageSwitcher />
       </div>
     </header>
   );
