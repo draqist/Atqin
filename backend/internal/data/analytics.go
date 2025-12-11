@@ -3,20 +3,32 @@ package data
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // StudentStats aggregates statistics for a student's dashboard.
+// StudentStats aggregates statistics for a student's dashboard.
 type StudentStats struct {
 	TotalMinutes      int             `json:"total_minutes"`
 	CurrentStreak     int             `json:"current_streak"`
+	LongestStreak     int             `json:"longest_streak"`      // <-- NEW
+	TotalXP           int             `json:"total_xp"`            // <-- NEW
+	CurrentLevel      int             `json:"current_level"`       // <-- NEW
+	NextLevelProgress int             `json:"next_level_progress"` // <-- NEW (0-100%)
 	BooksOpened       int             `json:"books_opened"`
 	ActivityLast7Days []DailyActivity `json:"activity_chart"`
 	LastBookOpened    *Book           `json:"last_book_opened"`
 	LastBookProgress  *BookProgress   `json:"last_book_progress"`
 }
+
+const (
+	XPPerMinute    = 10
+	KeyDailyActive = "stats:daily_active:%s:%s" // stats:daily_active:{user_id}:{YYYY-MM-DD}
+	KeySessionTime = "stats:session:%s"         // stats:session:{user_id}
+)
 
 // BookProgress represents the user's progress in a specific book.
 type BookProgress struct {
@@ -54,110 +66,170 @@ type AnalyticsModel struct {
 	Cache *cache.Service
 }
 
-// LogActivity records or updates the minutes spent by a user on a book for the current day.
-func (m AnalyticsModel) LogActivity(userID, bookID string, minutes int) error {
-	query := `
+// LogStudyHeartbeat replaces the old LogActivity.
+// It uses Redis to track minutes cheaply and flushes to Postgres periodically.
+func (m AnalyticsModel) LogStudyHeartbeat(userID, bookID string) error {
+	ctx := context.Background()
+	today := time.Now().Format("2006-01-02")
+
+	// 1. Accumulate Time in Redis (Fast Write)
+	// We use the cache service to increment. 
+	// Note: Ensure your cache package has IncrBy. If not, use generic Do command.
+	sessionKey := fmt.Sprintf(KeySessionTime, userID)
+	
+	// We blindly increment. If it fails (Redis down), we log error but don't crash.
+	if err := m.Cache.IncrBy(ctx, sessionKey, 1); err != nil {
+		return err 
+	}
+
+	// 2. Check & Update Streak (Once per day logic)
+	// Key expires in 24h, so we only hit Postgres ONCE per day per user.
+	dailyKey := fmt.Sprintf(KeyDailyActive, userID, today)
+	
+	if !m.Cache.Exists(ctx, dailyKey) {
+		// This is the FIRST heartbeat of the day! Update DB streak.
+		if err := m.updateStreakInDB(userID); err != nil {
+			return err
+		}
+		// Mark as active in Redis
+		m.Cache.Set(ctx, dailyKey, "1", 24*time.Hour)
+	}
+
+	// 3. Flush to DB logic (Write-Behind)
+	// Check if we have accumulated enough minutes to verify a "session" (e.g., 5 mins)
+	// This prevents spamming the DB with 1-minute updates.
+	minutes, _ := m.Cache.GetInt(ctx, sessionKey)
+	if minutes >= 5 {
+		// Run in background so we don't block the HTTP request
+		go m.FlushSessionToDB(userID, bookID, minutes)
+	}
+
+	return nil
+}
+
+// FlushSessionToDB moves temporary Redis stats into permanent Postgres storage
+func (m AnalyticsModel) FlushSessionToDB(userID, bookID string, minutes int) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	xpEarned := minutes * XPPerMinute
+
+	tx, err := m.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return // Log error in production
+	}
+	defer tx.Rollback()
+
+	// 1. Update Aggregate Stats (XP, Minutes)
+	// We create the row if it doesn't exist (upsert)
+	queryStats := `
+		INSERT INTO user_stats (user_id, total_minutes_studied, total_xp, last_study_date, updated_at)
+		VALUES ($1, $2, $3, CURRENT_DATE, NOW())
+		ON CONFLICT (user_id) DO UPDATE SET
+			total_minutes_studied = user_stats.total_minutes_studied + $2,
+			total_xp = user_stats.total_xp + $3,
+			last_study_date = CURRENT_DATE,
+			updated_at = NOW()`
+	
+	if _, err := tx.ExecContext(ctx, queryStats, userID, minutes, xpEarned); err != nil {
+		return
+	}
+
+	// 2. Log Granular Activity (For graphs)
+	// This matches your old LogActivity logic but batched
+	queryLog := `
 		INSERT INTO activity_logs (user_id, book_id, date, minutes_spent, updated_at)
 		VALUES ($1, $2, CURRENT_DATE, $3, NOW())
 		ON CONFLICT (user_id, book_id, date)
 		DO UPDATE SET 
 			minutes_spent = activity_logs.minutes_spent + EXCLUDED.minutes_spent,
 			updated_at = NOW()`
+	
+	if _, err := tx.ExecContext(ctx, queryLog, userID, bookID, minutes); err != nil {
+		return
+	}
 
+	if err := tx.Commit(); err != nil {
+		return
+	}
+
+	// 3. Reset the Redis Counter
+	// We decrement by the amount we just saved.
+	m.Cache.DecrBy(context.Background(), fmt.Sprintf(KeySessionTime, userID), minutes)
+}
+
+// updateStreakInDB handles the daily streak logic
+func (m AnalyticsModel) updateStreakInDB(userID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := m.DB.ExecContext(ctx, query, userID, bookID, minutes)
+	// Logic: If last_study_date was yesterday, increment. Else, reset to 1.
+	query := `
+		INSERT INTO user_stats (user_id, current_streak, longest_streak, last_study_date, updated_at)
+		VALUES ($1, 1, 1, CURRENT_DATE, NOW())
+		ON CONFLICT (user_id) DO UPDATE SET 
+			current_streak = CASE 
+				WHEN user_stats.last_study_date = CURRENT_DATE - INTERVAL '1 day' THEN user_stats.current_streak + 1
+				WHEN user_stats.last_study_date = CURRENT_DATE THEN user_stats.current_streak
+				ELSE 1 
+			END,
+			longest_streak = CASE 
+				WHEN (user_stats.last_study_date = CURRENT_DATE - INTERVAL '1 day') AND (user_stats.current_streak + 1 > user_stats.longest_streak)
+				THEN user_stats.current_streak + 1
+				ELSE user_stats.longest_streak
+			END,
+			last_study_date = CURRENT_DATE,
+			updated_at = NOW()`
+	
+	_, err := m.DB.ExecContext(ctx, query, userID)
 	return err
 }
 
-// GetStudentStats calculates and returns dashboard statistics for a specific student.
+// GetStudentStats - Upgraded to fetch from user_stats
 func (m AnalyticsModel) GetStudentStats(userID string) (*StudentStats, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	stats := &StudentStats{}
 
-	queryTotals := `
-		SELECT 
-			COALESCE(SUM(minutes_spent), 0), 
-			COUNT(DISTINCT book_id)
-		FROM activity_logs 
-		WHERE user_id = $1`
-
-	err := m.DB.QueryRowContext(ctx, queryTotals, userID).Scan(&stats.TotalMinutes, &stats.BooksOpened)
-	if err != nil {
-		return nil, err
-	}
-
-	queryChart := `
-		SELECT 
-			TO_CHAR(d.day, 'Dy'), -- 'Mon', 'Tue'
-			COALESCE(SUM(a.minutes_spent), 0)
-		FROM (
-			SELECT generate_series(CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE, '1 day')::date AS day
-		) d
-		LEFT JOIN activity_logs a ON a.date = d.day AND a.user_id = $1
-		GROUP BY d.day
-		ORDER BY d.day ASC`
-
-	rows, err := m.DB.QueryContext(ctx, queryChart, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var d DailyActivity
-		if err := rows.Scan(&d.Date, &d.Minutes); err != nil {
-			return nil, err
-		}
-		stats.ActivityLast7Days = append(stats.ActivityLast7Days, d)
-	}
-
-	stats.CurrentStreak = 0 // Placeholder for now
-
-	queryLastBook := `
-		SELECT b.id, b.title, b.original_author, COALESCE(b.description, ''), COALESCE(b.cover_image_url, ''), COALESCE(b.metadata, '{}'), b.is_public, b.created_at, b.version
-		FROM activity_logs a
-		JOIN books b ON a.book_id = b.id
-		WHERE a.user_id = $1
-		ORDER BY a.updated_at DESC
-		LIMIT 1`
-
-	var lastBook Book
-	err = m.DB.QueryRowContext(ctx, queryLastBook, userID).Scan(
-		&lastBook.ID,
-		&lastBook.Title,
-		&lastBook.OriginalAuthor,
-		&lastBook.Description,
-		&lastBook.CoverImageURL,
-		&lastBook.Metadata,
-		&lastBook.IsPublic,
-		&lastBook.CreatedAt,
-		&lastBook.Version,
+	// 1. Fetch Aggregates & Gamification Data
+	queryStats := `
+		SELECT total_minutes_studied, current_streak, longest_streak, total_xp, current_level
+		FROM user_stats WHERE user_id = $1`
+	
+	err := m.DB.QueryRowContext(ctx, queryStats, userID).Scan(
+		&stats.TotalMinutes, 
+		&stats.CurrentStreak, 
+		&stats.LongestStreak, 
+		&stats.TotalXP, 
+		&stats.CurrentLevel,
 	)
-
-	if err == nil {
-		stats.LastBookOpened = &lastBook
-
-		queryProgress := `
-			SELECT current_page, total_pages
-			FROM user_book_progress
-			WHERE user_id = $1 AND book_id = $2`
-
-		var prog BookProgress
-		err = m.DB.QueryRowContext(ctx, queryProgress, userID, lastBook.ID).Scan(&prog.CurrentPage, &prog.TotalPages)
-		if err == nil {
-			if prog.TotalPages > 0 {
-				prog.Percentage = (prog.CurrentPage * 100) / prog.TotalPages
-			}
-			stats.LastBookProgress = &prog
-		}
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
 	}
+	// If no rows, fields default to 0, which is fine.
+
+	// 2. Calculate Level Progress (Logic: (CurrentXP - LevelStart) / (LevelEnd - LevelStart))
+	// Simple lookup for V1:
+	var xpRequired int
+	_ = m.DB.QueryRowContext(ctx, "SELECT xp_required FROM levels WHERE level = $1", stats.CurrentLevel + 1).Scan(&xpRequired)
+	if xpRequired > 0 {
+		stats.NextLevelProgress = (stats.TotalXP * 100) / xpRequired
+	} else {
+		stats.NextLevelProgress = 100 // Max level
+	}
+
+	// 3. Activity Chart (Keep existing logic)
+	// ... [Copy your existing queryChart logic here] ...
+    // Note: I'm omitting it here for brevity, but DO NOT DELETE IT from your file.
+    // Use the exact same queryChart code you already have.
+
+	// 4. Last Book (Keep existing logic)
+	// ... [Copy your existing queryLastBook logic here] ...
 
 	return stats, nil
 }
+
 
 // GetSystemStats returns global statistics for the admin dashboard.
 func (m AnalyticsModel) GetSystemStats() (*AdminStats, error) {

@@ -23,7 +23,7 @@ func (app *application) trackActivityHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	go func() {
-		app.models.Analytics.LogActivity(userID, input.BookID, input.Minutes)
+		app.models.Analytics.LogStudyHeartbeat(userID, input.BookID)
 	}()
 
 	w.WriteHeader(http.StatusOK)

@@ -64,3 +64,25 @@ func (s *Service) Delete(ctx context.Context, pattern string) error {
 	
 	return s.client.Del(ctx, keys...).Err()
 }
+// Add to backend/internal/cache/cache.go
+
+func (s *Service) IncrBy(ctx context.Context, key string, value int64) error {
+	return s.client.IncrBy(ctx, key, value).Err()
+}
+
+func (s *Service) DecrBy(ctx context.Context, key string, value int) error {
+	return s.client.DecrBy(ctx, key, int64(value)).Err()
+}
+
+func (s *Service) Exists(ctx context.Context, key string) bool {
+	val, _ := s.client.Exists(ctx, key).Result()
+	return val > 0
+}
+
+func (s *Service) GetInt(ctx context.Context, key string) (int, error) {
+	val, err := s.client.Get(ctx, key).Int()
+	if err != nil {
+		return 0, err
+	}
+	return val, nil
+}
