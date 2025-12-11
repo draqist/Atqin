@@ -257,7 +257,8 @@
     "levels": {
       "beginner": "Beginner",
       "intermediate": "Intermediate",
-      "advanced": "Advanced"
+      "advanced": "Advanced",
+      "expert": "Expert"
     },
     "categories": {
       "tajweed": "Tajweed",

@@ -13,6 +13,7 @@ import { NotificationBell } from "./notification-bell";
  */
 // ... imports
 import { useTranslations } from "next-intl";
+import { GamificationNav } from "../layout/gamification-nav";
 
 /**
  * Main application header component.
@@ -62,8 +63,8 @@ export function Header() {
   };
 
   return (
-    <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between sticky top-0 z-40">
-      <div className="flex items-center gap-3 w-full">
+    <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center sticky top-0 z-40 xl:gap-20">
+      <div className="flex items-center justify-between w-full">
         <div className="md:hidden w-full">
           <MobileNav />
         </div>
@@ -71,6 +72,7 @@ export function Header() {
           {/* Dynamic Title based on Path could go here */}
           {pathname === "/dashboard" ? t("dashboard") : t("library")}
         </div>
+        <GamificationNav />
       </div>
 
       <div className="h-16 items-center gap-4 w-full hidden md:flex md:w-auto">
