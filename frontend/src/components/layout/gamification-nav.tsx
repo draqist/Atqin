@@ -18,7 +18,7 @@ export function GamificationNav() {
   const { data: stats } = useQuery<StudentStats>({
     queryKey: ["student-stats"],
     queryFn: async () => {
-      const { data } = await api.get("/dashboard/student/stats"); // Ensure you have this endpoint wired to GetStudentStats
+      const { data } = await api.get("/analytics/stats"); // Ensure you have this endpoint wired to GetStudentStats
       return data;
     },
     refetchInterval: 60000,
