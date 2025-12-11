@@ -63,7 +63,7 @@ export function Header() {
   };
 
   return (
-    <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center sticky top-0 z-40 gap-20">
+    <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center sticky top-0 z-40 xl:gap-20">
       <div className="flex items-center justify-between w-full">
         <div className="md:hidden w-full">
           <MobileNav />

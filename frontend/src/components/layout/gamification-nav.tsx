@@ -27,7 +27,7 @@ export function GamificationNav() {
   if (!stats) return null;
 
   return (
-    <div className="flex items-center gap-3 md:gap-6 mr-4">
+    <div className="flex items-center gap-3 md:gap-6 xl:mr-4">
       {/* 1. STREAK INDICATOR */}
       <TooltipProvider>
         <Tooltip>
