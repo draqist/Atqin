@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 type FeatureRequest struct {
@@ -20,7 +22,8 @@ type FeatureRequest struct {
 }
 
 type FeatureRequestModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 func (m FeatureRequestModel) Insert(request *FeatureRequest) error {

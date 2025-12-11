@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // Discussion represents a top-level thread
@@ -33,7 +35,8 @@ type Reply struct {
 }
 
 type CommunityModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // CreateDiscussion inserts a new thread and returns its ID

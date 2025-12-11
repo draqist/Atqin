@@ -86,7 +86,12 @@ export function LibraryBookCard({ book }: LibraryBookCardProps) {
 
           {/* Subtitle / Original Arabic Title */}
           {/* We use line-clamp-2 to keep cards even height */}
-          {!isArabic && (
+          {!isArabic ? (
+            <p className="text-sm text-slate-500 mb-4 line-clamp-2 font-amiri">
+              {/* Mock Arabic title if not in DB, or description */}
+              {book.description}
+            </p>
+          ) : (
             <p className="text-sm text-slate-500 mb-4 line-clamp-2 font-amiri">
               {/* Mock Arabic title if not in DB, or description */}
               {book.description}

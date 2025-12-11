@@ -30,7 +30,7 @@ services:
     environment:
       # Note: host=db works because the service above is named 'db'
       DB_DSN: "host=db user=user password=password dbname=iqraa_db port=5432 sslmode=disable"
-      REDIS_ADDR: "redis:6379"
+      REDIS_URL: ${REDIS_URL}
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
       YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}

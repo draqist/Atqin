@@ -3,7 +3,10 @@ package data
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // ContentNode represents a single unit of text (Chapter, Section, or Bayt) within a book.
@@ -19,7 +22,8 @@ type ContentNode struct {
 
 // NodeModel wraps the database connection pool for ContentNode-related operations.
 type NodeModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // Insert adds a new content node to the database.
@@ -39,18 +43,32 @@ func (m NodeModel) Insert(node *ContentNode) error {
 		parentID.Valid = true
 	}
 
-	return m.DB.QueryRowContext(ctx, query,
+	err := m.DB.QueryRowContext(ctx, query,
 		node.BookID,
 		parentID,
 		node.NodeType,
 		node.ContentText,
 		node.SequenceIndex,
 	).Scan(&node.ID, &node.Version)
+
+	if err != nil {
+		return err
+	}
+
+	// Invalidate nodes list for this book
+	return m.Cache.Delete(context.Background(), fmt.Sprintf("nodes:book:%s", node.BookID))
 }
 
 // GetByBookID retrieves the entire content tree for a specific book.
 // It returns a slice of ContentNode pointers ordered by sequence index.
 func (m NodeModel) GetByBookID(bookID string) ([]*ContentNode, error) {
+	// 1. Try Cache
+	var nodes []*ContentNode
+	cacheKey := fmt.Sprintf("nodes:book:%s", bookID)
+	if m.Cache.Get(context.Background(), cacheKey, &nodes) {
+		return nodes, nil
+	}
+
 	query := `
 		SELECT id, book_id, parent_id, node_type, content_text, sequence_index, version
 		FROM content_nodes
@@ -66,7 +84,6 @@ func (m NodeModel) GetByBookID(bookID string) ([]*ContentNode, error) {
 	}
 	defer rows.Close()
 
-	var nodes []*ContentNode
 	for rows.Next() {
 		var node ContentNode
 		var parentID sql.NullString
@@ -89,5 +106,9 @@ func (m NodeModel) GetByBookID(bookID string) ([]*ContentNode, error) {
 		}
 		nodes = append(nodes, &node)
 	}
+
+	// 2. Set Cache (1 Hour)
+	m.Cache.Set(context.Background(), cacheKey, nodes, 1*time.Hour)
+
 	return nodes, nil
 }

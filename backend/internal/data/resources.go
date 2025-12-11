@@ -4,7 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // Resource represents an external or internal resource linked to a book.
@@ -27,12 +30,20 @@ type Resource struct {
 
 // ResourceModel wraps the database connection pool for Resource-related operations.
 type ResourceModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // GetByBookID retrieves all resources associated with a specific book.
 // It orders them by official status, sequence index, and creation time.
 func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
+	// 1. Try Cache
+	var resources []*Resource
+	cacheKey := fmt.Sprintf("resources:book:%s", bookID)
+	if m.Cache.Get(context.Background(), cacheKey, &resources) {
+		return resources, nil
+	}
+
 	query := `
         SELECT id, book_id, type, title, url, media_start_seconds, media_end_seconds, is_official, created_at, parent_id, sequence_index, status, reviewer_id
         FROM resources
@@ -48,7 +59,6 @@ func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
 	}
 	defer rows.Close()
 
-	var resources []*Resource
 	for rows.Next() {
 		var r Resource
 
@@ -91,17 +101,26 @@ func (m ResourceModel) GetByBookID(bookID string) ([]*Resource, error) {
 		return nil, err
 	}
 
+	// 2. Set Cache (1 Hour)
+	m.Cache.Set(context.Background(), cacheKey, resources, 1*time.Hour)
+
 	return resources, nil
 }
 
 // Get retrieves a single resource by its ID.
 func (m ResourceModel) Get(id string) (*Resource, error) {
+	// 1. Try Cache
+	var r Resource
+	cacheKey := fmt.Sprintf("resource:%s", id)
+	if m.Cache.Get(context.Background(), cacheKey, &r) {
+		return &r, nil
+	}
+
 	query := `
 		SELECT id::text, book_id::text, type, title, url, media_start_seconds, media_end_seconds, is_official, parent_id::text, sequence_index, created_at, status, reviewer_id::text
 		FROM resources
 		WHERE id = $1`
 
-	var r Resource
 	var parentID sql.NullString
 	var mediaStart, mediaEnd sql.NullInt32
 
@@ -134,6 +153,9 @@ func (m ResourceModel) Get(id string) (*Resource, error) {
 	if mediaEnd.Valid {
 		r.MediaEndSeconds = int(mediaEnd.Int32)
 	}
+
+	// 2. Set Cache
+	m.Cache.Set(context.Background(), cacheKey, &r, 1*time.Hour)
 
 	return &r, nil
 }
@@ -209,7 +231,13 @@ func (m ResourceModel) Insert(r *Resource) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&r.ID, &r.CreatedAt)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&r.ID, &r.CreatedAt)
+	if err != nil {
+		return err
+	}
+
+	// Invalidate resource list for book
+	return m.Cache.Delete(context.Background(), fmt.Sprintf("resources:book:%s", r.BookID))
 }
 
 // Update modifies an existing resource.
@@ -225,11 +253,23 @@ func (m ResourceModel) Update(r *Resource) error {
 	defer cancel()
 
 	_, err := m.DB.ExecContext(ctx, query, args...)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Invalidate specific resource and book's list
+	m.Cache.Delete(context.Background(), fmt.Sprintf("resource:%s", r.ID))
+	return m.Cache.Delete(context.Background(), fmt.Sprintf("resources:book:%s", r.BookID))
 }
 
 // Delete removes a resource from the database.
 func (m ResourceModel) Delete(id string) error {
+	// First get the resource to know which book it belongs to (for invalidation)
+	r, err := m.Get(id)
+	if err != nil {
+		return err
+	}
+
 	query := `DELETE FROM resources WHERE id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -247,5 +287,8 @@ func (m ResourceModel) Delete(id string) error {
 	if rows == 0 {
 		return ErrRecordNotFound
 	}
-	return nil
+
+	// Invalidate specific resource and book's list
+	m.Cache.Delete(context.Background(), fmt.Sprintf("resource:%s", id))
+	return m.Cache.Delete(context.Background(), fmt.Sprintf("resources:book:%s", r.BookID))
 }

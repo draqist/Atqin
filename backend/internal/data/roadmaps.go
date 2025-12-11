@@ -4,7 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // Roadmap represents a structured learning path.
@@ -36,13 +39,21 @@ type RoadmapNode struct {
 
 // RoadmapModel wraps the database connection pool for Roadmap-related operations.
 type RoadmapModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // GetAll fetches all available roadmaps.
 // If includeDrafts is true, it returns all roadmaps (for admins).
 // Otherwise, it returns only public roadmaps (for students).
 func (m RoadmapModel) GetAll(includeDrafts bool) ([]*Roadmap, error) {
+	// 1. Try Cache
+	var roadmaps []*Roadmap
+	cacheKey := fmt.Sprintf("roadmaps:list:%t", includeDrafts)
+	if m.Cache.Get(context.Background(), cacheKey, &roadmaps) {
+		return roadmaps, nil
+	}
+
 	var query string
 
 	if includeDrafts {
@@ -64,7 +75,6 @@ func (m RoadmapModel) GetAll(includeDrafts bool) ([]*Roadmap, error) {
 	}
 	defer rows.Close()
 
-	var roadmaps []*Roadmap
 	for rows.Next() {
 		var r Roadmap
 		err := rows.Scan(
@@ -142,16 +152,31 @@ func (m RoadmapModel) GetAll(includeDrafts bool) ([]*Roadmap, error) {
 		}
 	}
 
+	// 2. Set Cache
+	// Note: We use a shorter TTL for lists as they might change more often
+	// For now, consistent with others: 1 Hour for public, maybe less for drafts? Stick to 1h.
+	m.Cache.Set(context.Background(), cacheKey, roadmaps, 1*time.Hour)
+
 	return roadmaps, nil
 }
 
 // GetBySlug fetches a single roadmap and all its nodes.
 // If userID is provided, it also fetches the user's progress for each node.
 func (m RoadmapModel) GetBySlug(slug string, userID string) (*Roadmap, error) {
+	// 1. Try Cache (Only for public view without userID for now, or include userID in key)
+	// We include userID in key to cache personalized versions too if needed,
+	// BUT for simplicity and max hit rate, usually we cache the generic structure
+	// and fetch progress separately. Given the function signature, let's cache
+	// based on both inputs.
+	var r Roadmap
+	cacheKey := fmt.Sprintf("roadmap:slug:%s:user:%s", slug, userID)
+	if m.Cache.Get(context.Background(), cacheKey, &r) {
+		return &r, nil
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var r Roadmap
 	queryRoadmap := `
 		SELECT id, title, slug, COALESCE(description, ''), COALESCE(cover_image_url, ''), is_public, created_at 
 		FROM roadmaps 
@@ -209,6 +234,10 @@ func (m RoadmapModel) GetBySlug(slug string, userID string) (*Roadmap, error) {
 	}
 
 	r.Nodes = nodes
+
+	// 2. Set Cache (1 Hour)
+	m.Cache.Set(context.Background(), cacheKey, &r, 1*time.Hour)
+
 	return &r, nil
 }
 
@@ -245,7 +274,13 @@ func (m RoadmapModel) Insert(roadmap *Roadmap) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&roadmap.ID, &roadmap.CreatedAt)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&roadmap.ID, &roadmap.CreatedAt)
+	if err != nil {
+		return err
+	}
+
+	// Invalidate lists
+	return m.Cache.Delete(context.Background(), "roadmaps:list:*")
 }
 
 // Update modifies an existing roadmap's metadata.
@@ -261,7 +296,24 @@ func (m RoadmapModel) Update(r *Roadmap) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&r.CreatedAt)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&r.CreatedAt) // Using CreatedAt to store UpdatedAt for struct update (minor detail)
+	if err != nil {
+		return err
+	}
+
+	// Invalidate specific roadmap (slug could have changed, tricky, let's invalidate by pattern)
+	// Ideally we know the old slug, but here we don't.
+	// We can invalidate the specific user keys for this roadmap? Key structure is `roadmap:slug:{slug}:user:{userID}`
+	// Since we don't know the exact keys, we might need a `roadmap:id:{id}` key map or just invalidate all roadmap keys for now?
+	// Or just invalidate generic keys if we can.
+	// For now, let's assume `roadmap:slug:*` is what we want to nuke if slug changes.
+	// Even if slug doesn't change, content might.
+	
+	// WARNING: scan of keys is slow. `Delete` supports patterns in our Helper?
+	// Helper defines Delete(ctx, pattern) which calls Keys(pattern) then Del.
+	// So we can do:
+	m.Cache.Delete(context.Background(), "roadmap:slug:*") // Broad but safe
+	return m.Cache.Delete(context.Background(), "roadmaps:list:*")
 }
 
 // Delete removes a roadmap and all its associated nodes.
@@ -270,7 +322,13 @@ func (m RoadmapModel) Delete(id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	_, err := m.DB.ExecContext(ctx, query, id)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Invalidate everything for roadmaps
+	m.Cache.Delete(context.Background(), "roadmap:slug:*")
+	return m.Cache.Delete(context.Background(), "roadmaps:list:*")
 }
 
 // InsertNode adds a new step (book) to a roadmap.

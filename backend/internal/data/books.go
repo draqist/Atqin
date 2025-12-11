@@ -5,7 +5,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // Book represents a book or text in the library.
@@ -28,7 +31,8 @@ type Book struct {
 
 // BookModel wraps the database connection pool for Book-related operations.
 type BookModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // Insert adds a new book to the database.
@@ -47,7 +51,13 @@ func (m BookModel) Insert(book *Book) error {
 		book.Status, book.ReviewerID,
 	}
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&book.ID, &book.CreatedAt, &book.Version)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&book.ID, &book.CreatedAt, &book.Version)
+	if err != nil {
+		return err
+	}
+
+	// Invalidate list cache
+	return m.Cache.Delete(context.Background(), "books:list:*")
 }
 
 // Get retrieves a specific book by its ID.
@@ -57,12 +67,17 @@ func (m BookModel) Get(id string) (*Book, error) {
 		return nil, errors.New("invalid id")
 	}
 
+	// 1. Try Cache
+	var book Book
+	cacheKey := fmt.Sprintf("book:%s", id)
+	if m.Cache.Get(context.Background(), cacheKey, &book) {
+		return &book, nil
+	}
+
 	query := `
 		SELECT id, title, original_author, COALESCE(description, ''), COALESCE(cover_image_url, ''), COALESCE(metadata, '{}'), is_public, created_at, version, title_ar, author_ar, status, reviewer_id
 		FROM books
 		WHERE id = $1`
-
-	var book Book
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -89,6 +104,9 @@ func (m BookModel) Get(id string) (*Book, error) {
 		}
 		return nil, err
 	}
+
+	// 2. Set Cache (1 Hour)
+	m.Cache.Set(context.Background(), cacheKey, &book, 1*time.Hour)
 
 	return &book, nil
 }
@@ -177,7 +195,14 @@ func (m BookModel) Update(book *Book) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&book.Version)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&book.Version)
+	if err != nil {
+		return err
+	}
+
+	// Invalidate specific book cache and list cache
+	m.Cache.Delete(context.Background(), fmt.Sprintf("book:%s", book.ID))
+	return m.Cache.Delete(context.Background(), "books:list:*")
 }
 
 // Delete removes a book from the database by its ID.
@@ -206,7 +231,9 @@ func (m BookModel) Delete(id string) error {
 		return ErrRecordNotFound
 	}
 
-	return nil
+	// Invalidate specific book cache and list cache
+	m.Cache.Delete(context.Background(), fmt.Sprintf("book:%s", id))
+	return m.Cache.Delete(context.Background(), "books:list:*")
 }
 
 // UpdateProgress records the user's reading progress for a specific book.

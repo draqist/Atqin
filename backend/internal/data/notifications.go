@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"time"
+
+	"github.com/draqist/iqraa/backend/internal/cache"
 )
 
 // Notification represents a system notification for a user.
@@ -21,7 +23,8 @@ type Notification struct {
 
 // NotificationModel wraps the database connection pool for Notification-related operations.
 type NotificationModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Cache *cache.Service
 }
 
 // Insert adds a new notification to the database.
