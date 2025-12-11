@@ -13,6 +13,7 @@ import { NotificationBell } from "./notification-bell";
  */
 // ... imports
 import { useTranslations } from "next-intl";
+import { GamificationNav } from "../layout/gamification-nav";
 
 /**
  * Main application header component.
@@ -74,6 +75,7 @@ export function Header() {
       </div>
 
       <div className="h-16 items-center gap-4 w-full hidden md:flex md:w-auto">
+        <GamificationNav />
         <div className="relative w-full md:w-96 lg:block">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 cursor-pointer rtl:left-auto rtl:right-3"

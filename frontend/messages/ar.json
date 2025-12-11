@@ -254,7 +254,8 @@
     "levels": {
       "beginner": "مبتدئ",
       "intermediate": "متوسط",
-      "advanced": "متقدم"
+      "advanced": "متقدم",
+      "expert": "خبير"
     },
     "categories": {
       "tajweed": "التجويد",

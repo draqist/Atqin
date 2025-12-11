@@ -229,6 +229,10 @@ export interface StudentStats {
   activity_chart: DailyActivity[];
   last_book_opened?: Book;
   last_book_progress?: BookProgress;
+  longest_streak: number;
+  total_xp: number;
+  current_level: number;
+  next_level_progress: number; // 0-100
 }
 
 export interface Discussion {
