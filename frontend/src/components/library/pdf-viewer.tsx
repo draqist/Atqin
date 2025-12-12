@@ -3,9 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
-import { PdfError } from "./pdf-error";
-import { PdfSkeleton } from "./pdf-skeleton";
+import { pdfjs } from "react-pdf";
 
 // Configure the worker (Required for react-pdf)
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -18,10 +16,10 @@ import { useRef } from "react";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { useSwipeable } from "react-swipeable";
-import { PdfNoData } from "./no-pdf-data";
+import PDFReader from "./pdf-reader";
 
 interface PdfViewerProps {
-  url: string | File;
+  url: string;
   bookId?: string;
   initialPage?: number;
   onClose?: () => void;
@@ -150,7 +148,8 @@ export function PdfViewer({
         ref={containerRef}
         className="border border-slate-200 shadow-md rounded-sm overflow-auto bg-white w-full touch-pan-y"
       >
-        <Document
+        <PDFReader url={url} />
+        {/* <Document
           file={url}
           onLoadSuccess={onDocumentLoadSuccess}
           loading={<PdfSkeleton />}
@@ -165,7 +164,7 @@ export function PdfViewer({
             renderAnnotationLayer={false}
             className="w-full min-w-full flex justify-center"
           />
-        </Document>
+        </Document> */}
       </div>
     </div>
   );
