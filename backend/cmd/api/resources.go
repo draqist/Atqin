@@ -8,76 +8,164 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/draqist/iqraa/backend/internal/data"
 	"github.com/draqist/iqraa/backend/internal/validator"
 	"github.com/draqist/iqraa/backend/internal/youtube"
+	"github.com/google/uuid"
 )
 
 // createResourceHandler adds a new resource to the database.
 // It supports creating single resources or playlists with child resources.
 // POST /v1/resources
 func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Request) {
+	// 1. Identify User & Determine Status/Permissions
+	userID := r.Context().Value(UserContextKey).(string)
+	user, err := app.models.Users.GetByID(userID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// Workflow Logic: Super Admin = Published, Regular Admin = Pending
+	status := "pending_review"
+	isOfficial := true // Staff uploads are official by default
+	if user.Role == "super_admin" {
+		status = "published"
+	}
+
+	// 2. Branch Logic based on Content-Type
+	contentType := r.Header.Get("Content-Type")
+
+	if strings.HasPrefix(contentType, "multipart/form-data") {
+		// --- BRANCH A: FILE UPLOAD (R2) ---
+		app.handleFileResource(w, r, userID, status, isOfficial)
+	} else {
+		// --- BRANCH B: JSON LINK/PLAYLIST ---
+		app.handleJSONResource(w, r, userID, status, isOfficial)
+	}
+}
+
+// Helper: Handles PDF/Audio uploads to R2
+func (app *application) handleFileResource(w http.ResponseWriter, r *http.Request, userID, status string, isOfficial bool) {
+	// Limit upload size (e.g., 50MB)
+	err := r.ParseMultipartForm(50 << 20)
+	if err != nil {
+		app.badRequestResponse(w, r, fmt.Errorf("file too large or invalid form"))
+		return
+	}
+
+	// Extract Metadata
+	title := r.FormValue("title")
+	bookID := r.FormValue("book_id")
+	resType := r.FormValue("type") // 'pdf' or 'audio'
+
+	if title == "" || bookID == "" {
+		app.badRequestResponse(w, r, fmt.Errorf("title and book_id are required"))
+		return
+	}
+
+	// Get File
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		app.badRequestResponse(w, r, fmt.Errorf("missing file"))
+		return
+	}
+	defer file.Close()
+
+	// Upload to R2
+	ext := filepath.Ext(header.Filename)
+	if ext == "" {
+		ext = ".pdf" // default fallback
+	}
+	// Generate random key: uuid + extension
+	objectKey := fmt.Sprintf("%s%s", uuid.New().String(), ext)
+	mimeType := header.Header.Get("Content-Type")
+
+	publicURL, err := app.storage.UploadFile(objectKey, file, mimeType)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// Insert into DB
+	resource := &data.Resource{
+		BookID:     bookID,
+		Type:       resType,
+		Title:      title,
+		URL:        publicURL,
+		IsOfficial: isOfficial,
+		Status:     status,
+		CreatedBy:  &userID,
+	}
+
+	if err := app.models.Resources.Insert(resource); err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusCreated, envelope{"resource": resource}, nil)
+}
+
+// Helper: Handles YouTube Links/Playlists (Your original logic, updated)
+func (app *application) handleJSONResource(w http.ResponseWriter, r *http.Request, userID, status string, isOfficial bool) {
 	type ResourceInput struct {
 		BookID        string           `json:"book_id"`
 		Type          string           `json:"type"`
 		Title         string           `json:"title"`
 		URL           string           `json:"url"`
-		IsOfficial    bool             `json:"is_official"`
 		ParentID      *string          `json:"parent_id"`
 		SequenceIndex int              `json:"sequence_index"`
 		Children      []*ResourceInput `json:"children"`
-		Status        *string          `json:"status"`
 	}
 
 	var input ResourceInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		app.errorResponse(w, http.StatusBadRequest, "Invalid input")
+		app.badRequestResponse(w, r, fmt.Errorf("invalid json: %v", err))
 		return
 	}
 
 	tx, err := app.models.Resources.DB.Begin()
 	if err != nil {
-		app.errorResponse(w, http.StatusInternalServerError, "Failed to start transaction")
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 	defer tx.Rollback()
 
+	// Helper to insert within transaction
+	// Note: We added 'status' and 'created_by' columns
 	insertFunc := func(res *data.Resource) error {
 		query := `
-			INSERT INTO resources (book_id, type, title, url, is_official, parent_id, sequence_index)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)
+			INSERT INTO resources (book_id, type, title, url, is_official, parent_id, sequence_index, status, created_by)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			RETURNING id, created_at`
-		return tx.QueryRow(query, res.BookID, res.Type, res.Title, res.URL, res.IsOfficial, res.ParentID, res.SequenceIndex).Scan(&res.ID, &res.CreatedAt)
+		
+		return tx.QueryRow(
+			query, 
+			res.BookID, res.Type, res.Title, res.URL, res.IsOfficial, res.ParentID, res.SequenceIndex, 
+			status, userID, // <-- New Fields
+		).Scan(&res.ID, &res.CreatedAt)
 	}
 
-	// Auth & Role Check
-	userID, ok := r.Context().Value(UserContextKey).(string)
-	if !ok || userID == "" {
-		app.errorResponse(w, http.StatusUnauthorized, "Unauthorized")
-		return
-	}
-    // We assume requireAdmin middleware wrapped this, but we need role for status.
-    // Default to draft.
-    status := "draft"
-    
+	// 1. Create Parent
 	parent := &data.Resource{
 		BookID:        input.BookID,
 		Type:          input.Type,
 		Title:         input.Title,
 		URL:           input.URL,
-		IsOfficial:    input.IsOfficial,
+		IsOfficial:    isOfficial,
 		ParentID:      input.ParentID,
 		SequenceIndex: input.SequenceIndex,
-        Status:        status,
 	}
 
 	if err := insertFunc(parent); err != nil {
-		app.logger.Println(err)
-		app.errorResponse(w, http.StatusInternalServerError, "Failed to create parent resource")
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
+	// 2. Create Children (if Playlist)
 	if input.Type == "playlist" && len(input.Children) > 0 {
 		for i, childInput := range input.Children {
 			child := &data.Resource{
@@ -85,27 +173,26 @@ func (app *application) createResourceHandler(w http.ResponseWriter, r *http.Req
 				Type:          "youtube_video",
 				Title:         childInput.Title,
 				URL:           childInput.URL,
-				IsOfficial:    input.IsOfficial,
+				IsOfficial:    isOfficial,
 				ParentID:      &parent.ID,
 				SequenceIndex: i + 1,
-                Status:        status,
 			}
 
 			if err := insertFunc(child); err != nil {
-				app.logger.Println(err)
-				app.errorResponse(w, http.StatusInternalServerError, "Failed to create child resource")
+				app.serverErrorResponse(w, r, err)
 				return
 			}
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		app.errorResponse(w, http.StatusInternalServerError, "Failed to commit transaction")
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(parent)
+	// Attach status for response
+	parent.Status = status
+	app.writeJSON(w, http.StatusCreated, envelope{"resource": parent}, nil)
 }
 
 // listAllResourcesHandler retrieves all resources for the admin dashboard.

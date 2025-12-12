@@ -26,6 +26,7 @@ type Resource struct {
 	BookTitle         string    `json:"book_title,omitempty"`
 	Status            string    `json:"status"`
 	ReviewerID        *string   `json:"reviewer_id"`
+	CreatedBy         *string   `json:"created_by,omitempty"`
 }
 
 // ResourceModel wraps the database connection pool for Resource-related operations.
