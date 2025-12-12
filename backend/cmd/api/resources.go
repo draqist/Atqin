@@ -298,9 +298,10 @@ func (app *application) updateResourceHandler(w http.ResponseWriter, r *http.Req
         if ok && userID != "" {
             u, err := app.models.Users.GetByID(userID)
             if err == nil {
-                if u.Role == "super_admin" {
+                switch u.Role {
+                case "super_admin":
                     resource.Status = *input.Status
-                } else if u.Role == "admin" {
+                case "admin":
                      if *input.Status == "published" {
                          app.errorResponse(w, http.StatusForbidden, "Admins cannot publish resources")
                          return
