@@ -27,13 +27,14 @@ export function Header() {
   const pathname = usePathname();
 
   // Initialize with URL param ONLY if we are on the library page
-  const initialQuery =
-    pathname === "/library" ? searchParams.get("q") || "" : "";
+  const initialQuery = pathname.endsWith("/library")
+    ? searchParams.get("q") || ""
+    : "";
   const [term, setTerm] = useState(initialQuery);
 
   // Sync input if URL changes externally (e.g. back button)
   useEffect(() => {
-    if (pathname === "/library") {
+    if (pathname.endsWith("/library")) {
       setTerm(searchParams.get("q") || "");
     }
   }, [searchParams, pathname]);
@@ -56,7 +57,7 @@ export function Header() {
 
   const clearSearch = () => {
     setTerm("");
-    if (pathname === "/library") {
+    if (pathname.endsWith("/library")) {
       const params = new URLSearchParams(searchParams.toString());
       params.delete("q");
       router.push(`/library?${params.toString()}`);

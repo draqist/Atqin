@@ -11,9 +11,14 @@ import (
 	"time"
 
 	// Import the pgx driver for Postgres
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/draqist/iqraa/backend/internal/cache"
 	"github.com/draqist/iqraa/backend/internal/data"
 	"github.com/draqist/iqraa/backend/internal/mailer" // Added
+	"github.com/draqist/iqraa/backend/internal/storage"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -47,6 +52,7 @@ type application struct {
 	models data.Models
 	mailer mailer.Mailer
 	hub    *Hub
+	storage *storage.R2Service
 }
 
 // main is the entry point of the application.
@@ -54,11 +60,38 @@ type application struct {
 func main() {
 	var cfg config
 
+	r2AccountID := os.Getenv("R2_ACCOUNT_ID")
+  r2AccessKey := os.Getenv("R2_ACCESS_KEY_ID")
+  r2SecretKey := os.Getenv("R2_SECRET_ACCESS_KEY")
+  r2Bucket := "iqraa-assets" // Or os.Getenv("R2_BUCKET")
+  r2Domain := "https://assets.iqraa.space"
+
+	// Load AWS config with credentials
+	awsCfg, err := awsconfig.LoadDefaultConfig(context.TODO(),
+		awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(r2AccessKey, r2SecretKey, "")),
+		awsconfig.WithRegion("auto"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create S3 Client for R2 with BaseEndpoint
+	s3Client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(fmt.Sprintf("https://%s.r2.cloudflarestorage.com", r2AccountID))
+	})
+
+	// Initialize R2Service
+	r2Service := &storage.R2Service{
+		Client:       s3Client,
+		Bucket:       r2Bucket,
+		PublicDomain: r2Domain,
+	}
+
 	portStr := os.Getenv("PORT")
 	if portStr == "" {
 		portStr = "8080"
 	}
-	var err error
+
 	cfg.port, err = strconv.Atoi(portStr)
 	if err != nil {
 		cfg.port = 8080
@@ -104,6 +137,7 @@ func main() {
 		db:     db,
 		models: models,
 		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
+		storage: r2Service,
 	}
 
 	// Initialize and run WebSocket Hub

@@ -17,7 +17,6 @@ import { useResizeObserver } from "@/lib/hooks/use-resize-observer";
 import { useRef } from "react";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { useSwipeable } from "react-swipeable";
 import { PdfNoData } from "./no-pdf-data";
 
 interface PdfViewerProps {
@@ -43,7 +42,6 @@ export function PdfViewer({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const containerWidth = useResizeObserver(containerRef);
-  console.log(url);
 
   // Debounce the page number to avoid spamming the API
   const debouncedPageNumber = useDebounce(pageNumber, 1000);
@@ -70,23 +68,6 @@ export function PdfViewer({
         .catch(console.error);
     }
   }, [debouncedPageNumber, bookId, numPages]);
-
-  const handlers = useSwipeable({
-    onSwipedLeft: () => {
-      // Swipe Left = Go to Next Page (like turning a physical page)
-      if (numPages && pageNumber < numPages) {
-        setPageNumber((prev) => prev + 1);
-      }
-    },
-    onSwipedRight: () => {
-      // Swipe Right = Go to Previous Page
-      if (pageNumber > 1) {
-        setPageNumber((prev) => prev - 1);
-      }
-    },
-    preventScrollOnSwipe: true, // Prevents scrolling the page while swiping
-    trackMouse: true, // Listen to mouse events for desktop testing
-  });
 
   return (
     <div className="flex flex-col items-center w-full">
@@ -146,10 +127,10 @@ export function PdfViewer({
 
       {/* The Document */}
       <div
-        {...handlers}
         ref={containerRef}
         className="border border-slate-200 shadow-md rounded-sm overflow-auto bg-white w-full touch-pan-y"
       >
+        {/* <PDFReader url={url} /> */}
         <Document
           file={url}
           onLoadSuccess={onDocumentLoadSuccess}

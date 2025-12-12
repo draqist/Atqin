@@ -7,6 +7,9 @@ import { Almarai, Geist, Geist_Mono, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "../globals.css";
 import Providers from "./providers";
+// Import the styles provided by the react-pdf-viewer packages
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 
 const inter = Inter({
   subsets: ["latin"],
