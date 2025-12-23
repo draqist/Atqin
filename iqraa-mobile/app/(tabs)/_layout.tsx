@@ -47,6 +47,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="search"
         options={{
+          href: null, // Hidden - search is available on Library page
           tabBarIcon: ({ focused }) => (
             <CircleTabIcon Icon={MagnifyingGlassIcon} focused={focused} />
           ),

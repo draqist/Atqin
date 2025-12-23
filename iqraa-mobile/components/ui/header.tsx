@@ -8,7 +8,7 @@ export function Header() {
       {/* Left: Logo */}
       <View>
         <Image
-          source={require("../../assets/images/icon.png")} // Fallback or use a placeholder if file missing
+          source={require("../../assets/images/iqraa-green.png")} // Fallback or use a placeholder if file missing
           style={{ width: 32, height: 32 }}
           contentFit="contain"
           // If real logo not available, we can mock it or use an Icon

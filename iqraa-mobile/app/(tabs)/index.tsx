@@ -1,16 +1,15 @@
+import { BookCard } from "@/components/library/book-card";
 import { LibraryFilters } from "@/components/library/library-filters";
 import { Header } from "@/components/ui/header";
 import { COLORS } from "@/constants/theme";
 import { useBooks } from "@/lib/hooks/queries/books";
 import { Book } from "@/lib/types";
 import { FlashList } from "@shopify/flash-list";
-import { Image } from "expo-image";
 import { MagnifyingGlassIcon } from "phosphor-react-native";
 import { useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
-  Pressable,
   Text,
   TextInput,
   View,
@@ -18,28 +17,26 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
-const COLUMN_WIDTH = width / 2 - 24; // Calculate exact width for 2 columns
+const HORIZONTAL_PADDING = 16;
+const GAP = 8;
+const CARD_WIDTH = (width - HORIZONTAL_PADDING * 2 - GAP) / 2;
 
 export default function LibraryScreen() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string | null>(null);
 
-  // Note: We might want to debounce search in a real app,
-  // currently we pass it directly which triggers refetch on typing.
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useBooks(search);
 
-  // In a real app we'd filter by category in useBooks hook too.
-  // For now we just showing the UI state.
-
   const books = (data?.pages.flatMap((page) => page.books) ?? []) as Book[];
 
+  // Filter by category if selected
+  const filteredBooks = category
+    ? books.filter((book) => book.metadata?.category === category)
+    : books;
+
   return (
-    <SafeAreaView
-      className="flex-1 bg-[#F8FAFC]"
-      style={{ flex: 1, backgroundColor: "#F8FAFC" }}
-      edges={["top"]}
-    >
+    <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
       <Header />
 
       <LibraryFilters
@@ -48,93 +45,86 @@ export default function LibraryScreen() {
       />
 
       <FlashList<Book>
-        style={{ flex: 1 }}
-        data={books}
+        data={filteredBooks}
         numColumns={2}
-        {...({ estimatedItemSize: 250 } as any)}
+        // estimatedItemSize={220}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: HORIZONTAL_PADDING,
+          paddingBottom: 100,
+        }}
         onEndReached={() => {
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          isFetchingNextPage ? (
-            <ActivityIndicator className="py-4" color={COLORS.primary} />
-          ) : null
-        }
         ListHeaderComponent={
-          <View className="px-5 mb-4">
-            {/* Search Bar - Moved here to look like sub-header */}
-            <View className="flex-row items-center bg-white border border-slate-200 rounded-lg h-11 px-3 shadow-sm">
-              <MagnifyingGlassIcon size={18} color="#94A3B8" />
+          <View className="py-4">
+            {/* Search Bar */}
+            <View className="flex-row items-center bg-white border border-slate-200 rounded-xl h-12 px-4 shadow-sm">
+              <MagnifyingGlassIcon size={20} color="#94A3B8" />
               <TextInput
                 placeholder="Search library..."
                 placeholderTextColor="#94A3B8"
-                className="flex-1 ml-2 text-sm text-slate-800 font-medium"
+                className="flex-1 ml-3 text-sm text-slate-800 font-medium"
                 value={search}
                 onChangeText={setSearch}
               />
             </View>
 
-            {/* Optional Result count or Title */}
+            {/* Category Title (when filtered) */}
             {category && (
-              <View className="mt-6 mb-2">
-                <Text className="text-xl font-bold text-slate-900 capitalize">
+              <View className="mt-4">
+                <Text className="text-lg font-bold text-slate-900 capitalize">
                   {category}
+                </Text>
+                <Text className="text-xs text-slate-500 mt-0.5">
+                  {filteredBooks.length} books found
                 </Text>
               </View>
             )}
           </View>
         }
-        renderItem={({ item }) => <BookGridItem book={item} />}
+        renderItem={({ item, index }) => (
+          <View
+            style={{
+              width: CARD_WIDTH,
+              marginRight: index % 2 === 0 ? GAP : 0,
+              marginBottom: GAP,
+            }}
+          >
+            <BookCard book={item} />
+          </View>
+        )}
+        ListFooterComponent={
+          isFetchingNextPage ? (
+            <View className="py-6 items-center">
+              <ActivityIndicator color={COLORS.primary} />
+            </View>
+          ) : null
+        }
         ListEmptyComponent={
-          !isLoading ? (
-            <View className="flex-1 items-center justify-center pt-20">
-              <MagnifyingGlassIcon size={48} color="#CBD5E1" />
-              <Text className="text-slate-500 mt-4 font-medium">
-                No books found
-              </Text>
-            </View>
-          ) : (
-            <View className="flex-1 items-center justify-center pt-20">
-              <ActivityIndicator size="large" color={COLORS.primary} />
-            </View>
-          )
+          <View className="flex-1 items-center justify-center py-20">
+            {isLoading ? (
+              <>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text className="text-slate-500 mt-4 font-medium">
+                  Loading library...
+                </Text>
+              </>
+            ) : (
+              <>
+                <MagnifyingGlassIcon size={48} color="#CBD5E1" />
+                <Text className="text-slate-500 mt-4 font-medium">
+                  No books found
+                </Text>
+                <Text className="text-slate-400 text-sm mt-1">
+                  Try adjusting your search or filters
+                </Text>
+              </>
+            )}
+          </View>
         }
       />
     </SafeAreaView>
   );
 }
-
-const BookGridItem = ({ book }: { book: Book }) => (
-  <Pressable
-    className="mb-6 mx-2 bg-transparent active:opacity-90 active:scale-95 transition-all"
-    style={{ width: COLUMN_WIDTH }}
-  >
-    {/* Cover Image */}
-    <View
-      className="w-full rounded-xl overflow-hidden bg-slate-200 shadow-sm mb-3 relative border border-slate-100"
-      style={{ aspectRatio: 2 / 3 }}
-    >
-      <Image
-        source={{ uri: book.cover_image_url }}
-        style={{ width: "100%", height: "100%" }}
-        contentFit="cover"
-        transition={600}
-      />
-      <View className="absolute inset-0 bg-black/5" />
-    </View>
-
-    {/* Metadata */}
-    <Text
-      numberOfLines={1}
-      className="text-base font-bold text-slate-900 leading-tight"
-    >
-      {book.title}
-    </Text>
-    <Text numberOfLines={1} className="text-xs text-slate-500 font-medium mt-1">
-      {book.original_author}
-    </Text>
-  </Pressable>
-);
