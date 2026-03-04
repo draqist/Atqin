@@ -40,7 +40,7 @@ services:
       # Set your production domain here
       - DOMAIN=api.iqraa.space
     # We define the Caddyfile configuration inline
-    command: caddy reverse-proxy --from https://${DOMAIN} --to http://api:8080
+    command: caddy reverse-proxy --from https://api.iqraa.space --to http://api:8080
     volumes:
       - caddy_data:/data
       - caddy_config:/config
