@@ -1,0 +1,59 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: iqraa-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Force Gin into release mode (removes debug logging)
+      - GIN_MODE=release
+      # Use the local Redis container by default
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - iqraa_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: iqraa-redis
+    restart: unless-stopped
+    # Add authentication in a real production environment or make sure it's not exposed
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - iqraa_net
+
+  # Caddy acts as a reverse proxy giving you free, automatic SSL certs via Let's Encrypt
+  caddy:
+    image: caddy:2-alpine
+    container_name: iqraa-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Set your production domain here
+      - DOMAIN=api.iqraa.space
+    # We define the Caddyfile configuration inline
+    command: caddy reverse-proxy --from https://${DOMAIN} --to http://api:8080
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    networks:
+      - iqraa_net
+
+volumes:
+  redis_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  iqraa_net:
+    driver: bridge

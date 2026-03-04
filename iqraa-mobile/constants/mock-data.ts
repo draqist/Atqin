@@ -1,0 +1,50 @@
+export const BOOKS = [
+  {
+    id: "1",
+    title: "Al-Waraqat",
+    author: "Imam Al-Juwayni",
+    cover: "https://i.pinimg.com/564x/44/e3/26/44e326372ebbe5240f66679502690d79.jpg",
+    progress: 45, // % completed
+    category: "Fiqh",
+  },
+  {
+    id: "2",
+    title: "The Sealed Nectar",
+    author: "Safiur Rahman",
+    cover: "https://m.media-amazon.com/images/I/71p780c3e+L._AC_UF1000,1000_QL80_.jpg",
+    progress: 12,
+    category: "Seerah",
+  },
+  {
+    id: "3",
+    title: "Kitab At-Tawheed",
+    author: "Ibn Abdul Wahhab",
+    cover: "https://m.media-amazon.com/images/I/81h2N3K-mIL._AC_UF1000,1000_QL80_.jpg",
+    progress: 0,
+    category: "Aqeedah",
+  },
+  {
+    id: "4",
+    title: "Riyad as-Salihin",
+    author: "Imam An-Nawawi",
+    cover: "https://images-na.ssl-images-amazon.com/images/I/91t8gY1g2iL.jpg",
+    progress: 0,
+    category: "Hadith",
+  },
+  {
+    id: "5",
+    title: "Purification of the Heart",
+    author: "Hamza Yusuf",
+    cover: "https://m.media-amazon.com/images/I/61N+f2-f+IL._AC_UF1000,1000_QL80_.jpg",
+    progress: 0,
+    category: "Tazkiyah",
+  },
+  {
+    id: "6",
+    title: "40 Hadith",
+    author: "Imam An-Nawawi",
+    cover: "https://m.media-amazon.com/images/I/51wXkY+J+EL._AC_UF1000,1000_QL80_.jpg",
+    progress: 0,
+    category: "Hadith",
+  },
+];
