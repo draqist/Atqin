@@ -1,26 +1,33 @@
-# 1. Use the Debian Bookworm image (Stable & "Batteries Included")
-# Using 'latest' ensures you have Go 1.25+ to satisfy Air's requirements
-FROM golang:latest
+# Build stage
+FROM golang:1.25 AS build
 
-# 2. Set working directory
 WORKDIR /app
 
-# 3. Install Git (Debian uses apt-get, not apk)
-# We run update to ensure package lists are fresh
-RUN apt-get update && apt-get install -y git
-
-# 4. Install Air
-# Since we are on the latest Go, we can safely use @latest
-RUN go install github.com/air-verse/air@latest
-
-# 5. Copy dependency files
+# Cache dependencies
 COPY go.mod go.sum ./
-
-# 6. Download dependencies
 RUN go mod download
 
-# 7. Copy the source code
+# Copy the source code
 COPY . .
 
-# 8. Run Air
-CMD ["air"]
+# Build the Go application as a static binary
+# CGO_ENABLED=0 ensures it doesn't need C libraries on the final scratch image
+RUN CGO_ENABLED=0 GOOS=linux go build -v -ldflags="-w -s" -o main ./cmd/api
+
+# Final stage: minimal image
+FROM scratch
+
+# Copy CA certificates for HTTPS requests (e.g., AWS S3, Supabase)
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Copy timezone data
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+
+# Copy the compiled binary
+COPY --from=build /app/main /main
+
+# Expose port (internal)
+EXPOSE 8080
+
+# Run the binary
+ENTRYPOINT ["/main"]
