@@ -1,5 +1,9 @@
 # Build stage
-FROM golang:1.25 AS build
+FROM golang:1.23-alpine AS build
+
+# Install CA certificates and timezone data at build stage
+# These will be copied into the final scratch image
+RUN apk add --no-cache ca-certificates tzdata
 
 WORKDIR /app
 

@@ -79,6 +79,9 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 	)
 
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
 		return nil, err
 	}
 	user.Username = username.String
