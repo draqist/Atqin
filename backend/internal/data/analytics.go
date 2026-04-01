@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/draqist/iqraa/backend/internal/cache"
@@ -100,8 +101,16 @@ func (m AnalyticsModel) LogStudyHeartbeat(userID, bookID string) error {
 	// This prevents spamming the DB with 1-minute updates.
 	minutes, _ := m.Cache.GetInt(ctx, sessionKey)
 	if minutes >= 5 {
-		// Run in background so we don't block the HTTP request
-		go m.FlushSessionToDB(userID, bookID, minutes)
+		// Run in background so we don't block the HTTP request.
+		// Panic recovery ensures a bug here doesn't crash the whole server.
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Printf("panic in FlushSessionToDB: %v", r)
+				}
+			}()
+			m.FlushSessionToDB(userID, bookID, minutes)
+		}()
 	}
 
 	return nil
@@ -219,13 +228,50 @@ func (m AnalyticsModel) GetStudentStats(userID string) (*StudentStats, error) {
 		stats.NextLevelProgress = 100 // Max level
 	}
 
-	// 3. Activity Chart (Keep existing logic)
-	// ... [Copy your existing queryChart logic here] ...
-    // Note: I'm omitting it here for brevity, but DO NOT DELETE IT from your file.
-    // Use the exact same queryChart code you already have.
+	// 3. Activity Chart (last 7 days)
+	queryChart := `
+		SELECT TO_CHAR(d::date, 'Dy'), COALESCE(SUM(al.minutes_spent), 0)
+		FROM generate_series(CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE, '1 day') AS d
+		LEFT JOIN activity_logs al ON al.date = d::date AND al.user_id = $1
+		GROUP BY d ORDER BY d ASC`
 
-	// 4. Last Book (Keep existing logic)
-	// ... [Copy your existing queryLastBook logic here] ...
+	rowsChart, errChart := m.DB.QueryContext(ctx, queryChart, userID)
+	if errChart == nil {
+		defer rowsChart.Close()
+		for rowsChart.Next() {
+			var da DailyActivity
+			if scanErr := rowsChart.Scan(&da.Date, &da.Minutes); scanErr == nil {
+				stats.ActivityLast7Days = append(stats.ActivityLast7Days, da)
+			}
+		}
+	}
+	if stats.ActivityLast7Days == nil {
+		stats.ActivityLast7Days = []DailyActivity{}
+	}
+
+	// 4. Last Book Opened
+	queryLastBook := `
+		SELECT al.book_id, b.title, COALESCE(b.cover_image_url, ''),
+		       COALESCE(ubp.current_page, 0), COALESCE(ubp.total_pages, 0)
+		FROM activity_logs al
+		JOIN books b ON al.book_id = b.id
+		LEFT JOIN user_book_progress ubp ON ubp.book_id = al.book_id AND ubp.user_id = al.user_id
+		WHERE al.user_id = $1
+		ORDER BY al.updated_at DESC LIMIT 1`
+
+	var lastBookID, lastBookTitle, lastBookCover string
+	var curPage, totPages int
+	errLB := m.DB.QueryRowContext(ctx, queryLastBook, userID).Scan(
+		&lastBookID, &lastBookTitle, &lastBookCover, &curPage, &totPages,
+	)
+	if errLB == nil {
+		pct := 0
+		if totPages > 0 {
+			pct = (curPage * 100) / totPages
+		}
+		stats.LastBookOpened = &Book{ID: lastBookID, Title: lastBookTitle, CoverImageURL: lastBookCover}
+		stats.LastBookProgress = &BookProgress{CurrentPage: curPage, TotalPages: totPages, Percentage: pct}
+	}
 
 	return stats, nil
 }

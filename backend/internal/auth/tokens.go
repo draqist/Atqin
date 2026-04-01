@@ -2,14 +2,23 @@
 package auth
 
 import (
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 // jwtSecret is the secret key used for signing JWT tokens.
-// TODO: Move this to environment variables for security.
-var jwtSecret = []byte("your-very-secret-key-change-this")
+// Loaded from the JWT_SECRET environment variable at startup.
+var jwtSecret []byte
+
+func init() {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		panic("JWT_SECRET environment variable must be set")
+	}
+	jwtSecret = []byte(secret)
+}
 
 // Claims represents the custom JWT claims, including the user ID.
 type Claims struct {

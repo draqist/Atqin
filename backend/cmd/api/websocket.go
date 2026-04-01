@@ -116,7 +116,7 @@ func (h *Hub) run() {
 			h.mu.Unlock()
 
 		case reply := <-h.broadcast:
-			h.mu.RLock()
+			h.mu.Lock()
 			// Broadcast only to clients in the same room
 			if room, ok := h.rooms[reply.DiscussionID]; ok {
 				for client := range room {
@@ -131,7 +131,7 @@ func (h *Hub) run() {
 					}
 				}
 			}
-			h.mu.RUnlock()
+			h.mu.Unlock()
 		}
 	}
 }

@@ -31,8 +31,12 @@ func New(connectionString string) (*Service, error) {
 	return &Service{client: client}, nil
 }
 
-// Get fetches a key and unmarshals it
+// Get fetches a key and unmarshals it.
+// A nil receiver is safe and always returns false (cache miss).
 func (s *Service) Get(ctx context.Context, key string, dest interface{}) bool {
+	if s == nil {
+		return false
+	}
 	val, err := s.client.Get(ctx, key).Result()
 	if err == redis.Nil || err != nil {
 		return false // Cache Miss
@@ -41,12 +45,16 @@ func (s *Service) Get(ctx context.Context, key string, dest interface{}) bool {
 	if err := json.Unmarshal([]byte(val), dest); err != nil {
 		return false // Corrupt data
 	}
-	
+
 	return true // Cache Hit
 }
 
-// Set marshals value and saves it with TTL
+// Set marshals value and saves it with TTL.
+// A nil receiver is safe and is a no-op.
 func (s *Service) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error {
+	if s == nil {
+		return nil
+	}
 	data, err := json.Marshal(value)
 	if err != nil {
 		return err
@@ -54,32 +62,66 @@ func (s *Service) Set(ctx context.Context, key string, value interface{}, ttl ti
 	return s.client.Set(ctx, key, data, ttl).Err()
 }
 
-// Delete removes keys (supports patterns like "books:*")
+// Delete removes keys matching a pattern using SCAN (non-blocking, safe for production).
+// Using SCAN instead of KEYS avoids blocking Redis on large datasets.
+// A nil receiver is safe and is a no-op.
 func (s *Service) Delete(ctx context.Context, pattern string) error {
-	// Check if keys exist first to avoid errors
-	keys, err := s.client.Keys(ctx, pattern).Result()
-	if err != nil || len(keys) == 0 {
+	if s == nil {
 		return nil
 	}
-	
-	return s.client.Del(ctx, keys...).Err()
+	var cursor uint64
+	for {
+		keys, nextCursor, err := s.client.Scan(ctx, cursor, pattern, 100).Result()
+		if err != nil {
+			return err
+		}
+		if len(keys) > 0 {
+			if err := s.client.Del(ctx, keys...).Err(); err != nil {
+				return err
+			}
+		}
+		cursor = nextCursor
+		if cursor == 0 {
+			break
+		}
+	}
+	return nil
 }
-// Add to backend/internal/cache/cache.go
 
+// IncrBy increments a key by value.
+// A nil receiver is safe and is a no-op.
 func (s *Service) IncrBy(ctx context.Context, key string, value int64) error {
+	if s == nil {
+		return nil
+	}
 	return s.client.IncrBy(ctx, key, value).Err()
 }
 
+// DecrBy decrements a key by value.
+// A nil receiver is safe and is a no-op.
 func (s *Service) DecrBy(ctx context.Context, key string, value int) error {
+	if s == nil {
+		return nil
+	}
 	return s.client.DecrBy(ctx, key, int64(value)).Err()
 }
 
+// Exists returns true if the key exists in Redis.
+// A nil receiver is safe and always returns false.
 func (s *Service) Exists(ctx context.Context, key string) bool {
+	if s == nil {
+		return false
+	}
 	val, _ := s.client.Exists(ctx, key).Result()
 	return val > 0
 }
 
+// GetInt returns an integer value from Redis.
+// A nil receiver returns 0, redis.Nil.
 func (s *Service) GetInt(ctx context.Context, key string) (int, error) {
+	if s == nil {
+		return 0, redis.Nil
+	}
 	val, err := s.client.Get(ctx, key).Int()
 	if err != nil {
 		return 0, err
