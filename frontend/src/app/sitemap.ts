@@ -14,8 +14,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let roadmaps: Roadmap[] = [];
 
   try {
-    books = await fetchBooks();
-    roadmaps = await fetchRoadmaps();
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Sitemap dynamic data fetch timed out')), 10000)
+    );
+
+    const [fetchedBooks, fetchedRoadmaps] = (await Promise.race([
+      Promise.all([fetchBooks(), fetchRoadmaps()]),
+      timeoutPromise,
+    ])) as [{ books: Book[]; metadata: any }, Roadmap[]];
+
+    books = fetchedBooks;
+    roadmaps = fetchedRoadmaps;
   } catch (error) {
     console.warn('Failed to fetch dynamic data for sitemap:', error);
     // Proceed with empty arrays if fetch fails (e.g. during build without backend)
