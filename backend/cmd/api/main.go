@@ -66,7 +66,7 @@ func main() {
 	r2AccessKey := os.Getenv("R2_ACCESS_KEY_ID")
 	r2SecretKey := os.Getenv("R2_SECRET_ACCESS_KEY")
 	r2Bucket := "iqraa-assets"
-	r2Domain := "https://assets.iqraa.space"
+	r2Domain := "https://media.iqraa.space"
 
 	// Load AWS config with credentials
 	awsCfg, err := awsconfig.LoadDefaultConfig(context.TODO(),

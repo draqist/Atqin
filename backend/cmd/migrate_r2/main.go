@@ -21,7 +21,7 @@ import (
 // CONFIGURATION
 const (
 	R2BucketName   = "iqraa-assets"
-	R2PublicDomain = "https://assets.iqraa.space" // Verify this matches your R2 settings
+	R2PublicDomain = "https://media.iqraa.space" // Verify this matches your R2 settings
 )
 
 func main() {
