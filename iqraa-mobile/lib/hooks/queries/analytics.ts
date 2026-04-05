@@ -12,6 +12,7 @@ export interface StudentStats {
   activity_chart: { date: string; minutes: number }[];
   last_book_opened: Book;
   last_book_progress: BookProgress;
+  longest_streak?: number;
 }
 
 /**

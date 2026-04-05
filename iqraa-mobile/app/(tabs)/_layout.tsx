@@ -5,7 +5,9 @@ import { Platform, StyleSheet, View } from "react-native";
 // Import the premium icons
 import {
   BooksIcon,
+  HouseIcon,
   MagnifyingGlassIcon,
+  MapTrifoldIcon,
   UserCircleIcon,
   UsersIcon,
 } from "phosphor-react-native";
@@ -40,7 +42,23 @@ export default function TabLayout() {
         name="index"
         options={{
           tabBarIcon: ({ focused }) => (
+            <CircleTabIcon Icon={HouseIcon} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="library"
+        options={{
+          tabBarIcon: ({ focused }) => (
             <CircleTabIcon Icon={BooksIcon} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="roadmaps"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <CircleTabIcon Icon={MapTrifoldIcon} focused={focused} />
           ),
         }}
       />

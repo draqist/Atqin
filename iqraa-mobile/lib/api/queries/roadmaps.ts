@@ -22,3 +22,11 @@ export const fetchRoadmaps = async (): Promise<Roadmap[]> => {
   return data;
 };
 
+/**
+ * Fetches a single roadmap by its slug.
+ */
+export const fetchRoadmapBySlug = async (slug: string): Promise<Roadmap> => {
+  const { data } = await api.get<Roadmap>(`/roadmaps/${slug}`);
+  return data;
+};
+

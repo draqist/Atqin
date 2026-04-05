@@ -1,5 +1,5 @@
 // src/hooks/queries/useRoadmaps.ts
-import { fetchRoadmaps } from "@/lib/api/queries/roadmaps";
+import { fetchRoadmapBySlug, fetchRoadmaps } from "@/lib/api/queries/roadmaps";
 import { useQuery } from "@tanstack/react-query";
 
 /**
@@ -9,7 +9,18 @@ import { useQuery } from "@tanstack/react-query";
  */
 export const useRoadmaps = () => {
   return useQuery({
-    queryKey: ["admin", "roadmaps"],
+    queryKey: ["roadmaps", "list"],
     queryFn: fetchRoadmaps,
+  });
+};
+
+/**
+ * Hook to fetch a single roadmap by slug.
+ */
+export const useRoadmapBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ["roadmaps", "detail", slug],
+    queryFn: () => fetchRoadmapBySlug(slug),
+    enabled: !!slug,
   });
 };
