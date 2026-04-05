@@ -1,130 +1,108 @@
-import { BookCard } from "@/components/library/book-card";
-import { LibraryFilters } from "@/components/library/library-filters";
+import { ActivityChart } from "@/components/dashboard/activity-chart";
+import { ContinueReadingCard } from "@/components/dashboard/continue-reading-card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import { Header } from "@/components/ui/header";
 import { COLORS } from "@/constants/theme";
-import { useBooks } from "@/lib/hooks/queries/books";
-import { Book } from "@/lib/types";
-import { FlashList } from "@shopify/flash-list";
-import { MagnifyingGlassIcon } from "phosphor-react-native";
-import { useState } from "react";
+import { useStudentStats } from "@/lib/hooks/queries/analytics";
+import { useUser } from "@/lib/hooks/queries/auth";
 import {
-  ActivityIndicator,
-  Dimensions,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+  BookOpenIcon,
+  ClockIcon,
+  FireIcon,
+  TrophyIcon,
+} from "phosphor-react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const { width } = Dimensions.get("window");
-const HORIZONTAL_PADDING = 16;
-const GAP = 8;
-const CARD_WIDTH = (width - HORIZONTAL_PADDING * 2 - GAP) / 2;
+export default function DashboardScreen() {
+  const { data: user, isLoading: isLoadingUser } = useUser();
+  const { data: stats, isLoading: isLoadingStats } = useStudentStats();
 
-export default function LibraryScreen() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<string | null>(null);
-
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useBooks(search);
-
-  const books = (data?.pages.flatMap((page) => page.books) ?? []) as Book[];
-
-  // Filter by category if selected
-  const filteredBooks = category
-    ? books.filter((book) => book.metadata?.category === category)
-    : books;
+  if (isLoadingUser || isLoadingStats) {
+    return (
+      <SafeAreaView className="flex-1 bg-slate-50 items-center justify-center">
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
       <Header />
-
-      <LibraryFilters
-        currentCategory={category}
-        onSelectCategory={setCategory}
-      />
-
-      <FlashList<Book>
-        data={filteredBooks}
-        numColumns={2}
-        // estimatedItemSize={220}
+      <ScrollView
+        className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: HORIZONTAL_PADDING,
-          paddingBottom: 100,
-        }}
-        onEndReached={() => {
-          if (hasNextPage) fetchNextPage();
-        }}
-        onEndReachedThreshold={0.5}
-        ListHeaderComponent={
-          <View className="py-4">
-            {/* Search Bar */}
-            <View className="flex-row items-center bg-white border border-slate-200 rounded-xl h-12 px-4 shadow-sm">
-              <MagnifyingGlassIcon size={20} color="#94A3B8" />
-              <TextInput
-                placeholder="Search library..."
-                placeholderTextColor="#94A3B8"
-                className="flex-1 ml-3 text-sm text-slate-800 font-medium"
-                value={search}
-                onChangeText={setSearch}
-              />
-            </View>
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        <View className="p-4 flex-col gap-6">
+          {/* Welcome Section */}
+          <View>
+            <Text className="text-2xl font-bold text-slate-900">
+              Assalamu Alaikum{user?.name ? `, ${user.name}` : ""}
+            </Text>
+            <Text className="text-slate-500 text-sm mt-1">
+              You are on a {stats?.current_streak || 0}-day learning streak!
+            </Text>
+          </View>
 
-            {/* Category Title (when filtered) */}
-            {category && (
-              <View className="mt-4">
-                <Text className="text-lg font-bold text-slate-900 capitalize">
-                  {category}
-                </Text>
-                <Text className="text-xs text-slate-500 mt-0.5">
-                  {filteredBooks.length} books found
-                </Text>
-              </View>
-            )}
+          {/* Stats Row 1 */}
+          <View className="flex-row gap-4">
+            <StatCard
+              title="Day Streak"
+              value={stats?.current_streak?.toString() || "0"}
+              subtitle={`Best: ${stats?.longest_streak || 0}`}
+              icon={<FireIcon size={20} color="#F97316" weight="fill" />}
+              bgColor="#FFF7ED"
+            />
+            <StatCard
+              title="Study Time"
+              value={`${Math.floor((stats?.total_minutes || 0) / 60)}h ${(stats?.total_minutes || 0) % 60}m`}
+              subtitle="Total lifetime"
+              icon={<ClockIcon size={20} color="#3B82F6" weight="fill" />}
+              bgColor="#EFF6FF"
+            />
           </View>
-        }
-        renderItem={({ item, index }) => (
-          <View
-            style={{
-              width: CARD_WIDTH,
-              marginRight: index % 2 === 0 ? GAP : 0,
-              marginBottom: GAP,
-            }}
-          >
-            <BookCard book={item} />
+
+          {/* Stats Row 2 */}
+          <View className="flex-row gap-4">
+            <StatCard
+              title="Books Opened"
+              value={stats?.books_opened?.toString() || "0"}
+              subtitle="Active readings"
+              icon={<BookOpenIcon size={20} color={COLORS.primary} weight="fill" />}
+              bgColor="#ECFDF5"
+            />
+            <StatCard
+              title="Mastery"
+              value="0"
+              subtitle="Points earned"
+              icon={<TrophyIcon size={20} color="#EAB308" weight="fill" />}
+              bgColor="#FEFCE8"
+            />
           </View>
-        )}
-        ListFooterComponent={
-          isFetchingNextPage ? (
-            <View className="py-6 items-center">
-              <ActivityIndicator color={COLORS.primary} />
+
+          {/* Continue Reading */}
+          <View>
+            <ContinueReadingCard
+              book={stats?.last_book_opened}
+              progress={stats?.last_book_progress}
+            />
+          </View>
+
+          {/* Learning Activity */}
+          <View className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+            <View className="flex-row items-center justify-between mb-6">
+              <Text className="font-bold text-slate-900 text-base">
+                Learning Activity
+              </Text>
+              <Text className="text-xs text-slate-500 font-medium">
+                Last 7 Days
+              </Text>
             </View>
-          ) : null
-        }
-        ListEmptyComponent={
-          <View className="flex-1 items-center justify-center py-20">
-            {isLoading ? (
-              <>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text className="text-slate-500 mt-4 font-medium">
-                  Loading library...
-                </Text>
-              </>
-            ) : (
-              <>
-                <MagnifyingGlassIcon size={48} color="#CBD5E1" />
-                <Text className="text-slate-500 mt-4 font-medium">
-                  No books found
-                </Text>
-                <Text className="text-slate-400 text-sm mt-1">
-                  Try adjusting your search or filters
-                </Text>
-              </>
-            )}
+            <ActivityChart data={stats?.activity_chart || []} />
           </View>
-        }
-      />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
